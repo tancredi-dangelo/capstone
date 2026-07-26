@@ -130,4 +130,6 @@ public class Notification {
                 ", isRead=" + isRead +
                 ", timestamp=" + timestamp +
                 '}';
+
+    }
 }
