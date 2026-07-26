@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tancredidangelo.capstone.entities.persona.account.Account;
+import tancredidangelo.capstone.entities.person.account.Account;
 
 import java.time.LocalDateTime;
 

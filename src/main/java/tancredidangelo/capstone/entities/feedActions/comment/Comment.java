@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tancredidangelo.capstone.entities.persona.account.Account;
+import tancredidangelo.capstone.entities.person.account.Account;
 import tancredidangelo.capstone.entities.feedActions.like.Like;
 import tancredidangelo.capstone.entities.post.Post;
 

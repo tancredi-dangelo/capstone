@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.persona.account;
+package tancredidangelo.capstone.entities.person.account;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -10,7 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import tancredidangelo.capstone.entities.feedActions.follow.Follow;
-import tancredidangelo.capstone.entities.persona.user.User;
+import tancredidangelo.capstone.entities.person.user.User;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.SavedPost;
 
