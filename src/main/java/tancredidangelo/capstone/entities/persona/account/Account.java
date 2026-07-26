@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.account;
+package tancredidangelo.capstone.entities.persona.account;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -9,7 +9,8 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import tancredidangelo.capstone.entities.user.User;
+import tancredidangelo.capstone.entities.feedActions.follow.Follow;
+import tancredidangelo.capstone.entities.persona.user.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,6 +31,10 @@ public class Account implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -55,9 +60,15 @@ public class Account implements UserDetails {
     @Column(name = "date_of_registration")
     private LocalDateTime dateOfRegistration;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter(AccessLevel.NONE)
+    private List<Follow> followers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter(AccessLevel.NONE)
+    private List<Follow> following = new ArrayList<>();
+
+
 
 
     /// constructor
