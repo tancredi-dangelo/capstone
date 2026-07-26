@@ -1,0 +1,71 @@
+package tancredidangelo.capstone.entities.user;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+@Getter
+@Setter
+@NoArgsConstructor
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    /// attributes
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter(AccessLevel.NONE)
+    private UUID id;
+
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private LocalDate birthdate;
+
+    @Column(name = "country_code", nullable = false, length = 2)
+    private String country;
+
+    @Column(name = "is_flagged", nullable = false)
+    private boolean isFlagged;
+
+
+
+    /// constructor
+    public User(String firstName, String lastName, String email, LocalDate birthdate, String country) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.birthdate = birthdate;
+        this.country = country;
+        this.isFlagged = false;
+    }
+
+
+
+    /// to string
+    @Override
+    public String toString() {
+        return "User{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", birthdate=" + birthdate +
+                ", country='" + country + '\'' +
+                ", isFlagged=" + isFlagged +
+                '}';
+    }
+}
