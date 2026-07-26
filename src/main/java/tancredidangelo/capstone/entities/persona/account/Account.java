@@ -11,6 +11,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import tancredidangelo.capstone.entities.feedActions.follow.Follow;
 import tancredidangelo.capstone.entities.persona.user.User;
+import tancredidangelo.capstone.entities.post.Post;
+import tancredidangelo.capstone.entities.post.SavedPost;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ public class Account implements UserDetails {
     @Setter(AccessLevel.NONE)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -53,12 +55,15 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     private AccountRoles role;
 
-    @Column
     @ElementCollection
+    @CollectionTable(name = "account_tags", joinColumns = @JoinColumn(name = "account_id"))
     private List<String> tags = new ArrayList<>();
 
     @Column(name = "date_of_registration")
     private LocalDateTime dateOfRegistration;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
     @Setter(AccessLevel.NONE)
@@ -68,11 +73,16 @@ public class Account implements UserDetails {
     @Setter(AccessLevel.NONE)
     private List<Follow> following = new ArrayList<>();
 
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter(AccessLevel.NONE)
+    private List<SavedPost> savedPosts = new ArrayList<>();
+
 
 
 
     /// constructor
-    public Account(String username, String password, List<String> tags) {
+    public Account(User user, String username, String password, List<String> tags) {
+        this.user = user;
         this.username = username;
         this.password = password;
         this.profilePicUrl = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
@@ -110,7 +120,6 @@ public class Account implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 
 
 
