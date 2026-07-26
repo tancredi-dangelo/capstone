@@ -47,6 +47,23 @@ public abstract class Post {
     private List<Comment> comments = new ArrayList<>();
 
 
+    /// constructor
+
+    public Post(Account author, String caption) {
+        this.author = author;
+        this.caption = caption;
+        this.timestamp = LocalDateTime.now();
+        this.likes = List.of();
+        this.comments = List.of();
+    }
+
+    public Post(Account author) {
+        this.author = author;
+        this.timestamp = LocalDateTime.now();
+        this.likes = List.of();
+        this.comments = List.of();
+    }
+
     /// helper methods LIKE
 
     public void addLike(Like like) {
@@ -73,4 +90,17 @@ public abstract class Post {
     }
 
 
+    /// to string
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", author=" + author +
+                ", caption='" + (caption != null ? caption : null) + '\'' +
+                ", timestamp=" + timestamp +
+                ", likes=" + likes.size() +
+                ", comments=" + comments.size() +
+                '}';
+    }
 }

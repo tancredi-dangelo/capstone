@@ -14,38 +14,39 @@ import tancredidangelo.capstone.entities.post.Post;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "videos")
+@Table(name = "photos")
 
-public class Video extends Post {
+public class Photo extends Post {
 
     /// attributes
 
-    @Column(name = "video_url", nullable = false)
-    private String videoUrl;
+    @Column(name = "photo_url", nullable = false)
+    private String photoUrl;
 
-    @Column(name = "duration_seconds", nullable = false)
-    private int durationSeconds;
 
 
     /// constructor
-    public Video(Account author, String caption, String videoUrl, int durationSeconds) {
+
+    public Photo(Account author, String caption, String photoUrl) {
         super(author, caption);
-        this.videoUrl = videoUrl;
-        this.durationSeconds = durationSeconds;
+        this.photoUrl = photoUrl;
     }
 
+
+
     /// to string
+
     @Override
     public String toString() {
-        return "Video{" +
+        return "Photo{" +
                 "id=" + getId() +
                 ", author=" + getAuthor() +
                 ", caption='" + (getCaption() != null ? getCaption() : null) + '\'' +
                 ", likes=" + getLikes().size() +
                 ", comments=" + getComments().size() +
-                ", videoUrl='" + videoUrl + '\'' +
-                ", durationSeconds=" + durationSeconds +
+                ", photoUrl='" + photoUrl + '\'' +
                 ", timestamp=" + getTimestamp() +
                 '}';
     }
+
 }
