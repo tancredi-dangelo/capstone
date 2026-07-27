@@ -34,7 +34,7 @@ public class Comment {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @OneToMany(mappedBy = "comment_id")
+    @OneToMany(mappedBy = "comment")
     @Setter(AccessLevel.NONE)
     private List<Like> likes;
 

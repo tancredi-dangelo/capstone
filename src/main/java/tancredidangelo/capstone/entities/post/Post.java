@@ -38,11 +38,11 @@ public abstract class Post {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
-    @OneToMany(mappedBy = "post_id")
+    @OneToMany(mappedBy = "post")
     @Setter(AccessLevel.NONE)
     private List<Like> likes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post_id")
+    @OneToMany(mappedBy = "post")
     @Setter(AccessLevel.NONE)
     private List<Comment> comments = new ArrayList<>();
 
