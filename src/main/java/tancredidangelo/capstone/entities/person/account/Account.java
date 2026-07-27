@@ -79,7 +79,6 @@ public class Account implements UserDetails {
 
 
 
-
     /// constructor
     public Account(User user, String username, String password, List<String> tags) {
         this.user = user;
