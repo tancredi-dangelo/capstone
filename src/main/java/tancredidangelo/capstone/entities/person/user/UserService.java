@@ -4,12 +4,17 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import tancredidangelo.capstone.entities.person.account.Account;
 import tancredidangelo.capstone.entities.person.user.userDTOs.*;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
+import tancredidangelo.capstone.specifications.AccountSpecification;
+import tancredidangelo.capstone.specifications.UserSpecification;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Slf4j
@@ -78,6 +83,8 @@ public class UserService {
             }
         }
 
+        // TODO: SEND CONFIRMATION EMAIL TO NEW EMAIL ADDRESS
+
         found.setEmail(payload.email());
         log.info("Email updated");
 
@@ -90,9 +97,22 @@ public class UserService {
     /// ------------ ADMIN / IT METHODS ----------------------------------------------------------------
 
 
-    /// FIND BY ID -> ADMIN, IT
+    /// SEARCH AND FILTER ALL USERS -> ONLY ADMIN
+    public Page<User> searchUsers(Boolean isFlagged, String emailMatch, String country, LocalDate birthdate, Pageable pageable) {
+        Specification<User> spec = UserSpecification.filterUsers(country, emailMatch, birthdate, isFlagged);
+        return this.userRepository.findAll(spec, pageable);
+    }
+
+
+    /// FIND USER BY ID -> ADMIN, IT
     public User findById(UUID id) {
         return this.userRepository.findById(id).orElseThrow(()-> new NotFoundException("User not found."));
+    }
+
+
+    /// FIND USER BY EMAIL -> ADMIN
+    public User findByEmail(String email) {
+        return this.userRepository.findByEmail(email).orElseThrow(()-> new NotFoundException("User not found."));
     }
 
 
@@ -102,13 +122,8 @@ public class UserService {
     }
 
 
-    /// CHECK IF USER IS FLAGGED -> ONLY ADMIN
-    public boolean existsByEmailAndIsFlaggedTrue(String email) {
-        return this.userRepository.existsByEmailAndIsFlaggedTrue(email);
-    }
-
-
     /// FLAG USER
+    @Transactional
     public UUID flagUserById(UUID id) {
         User found = findById(id);
         if (found.isFlagged()) {
@@ -122,6 +137,7 @@ public class UserService {
 
 
     /// UNFLAG USER
+    @Transactional
     public UUID unflagUserById(UUID id) {
         User found = findById(id);
         if (!found.isFlagged()) {
@@ -132,24 +148,6 @@ public class UserService {
             return found.getId();
         }
 
-    }
-
-
-    /// FIND USER BY EMAIL -> IT
-    public User findByEmail(String email) {
-        return this.userRepository.findByEmail(email).orElseThrow(()-> new NotFoundException("User not found."));
-    }
-
-
-    /// FIND FLAGGED USERS -> ONLY ADMIN
-    public Page<User> findByIsFlaggedTrue(Pageable pageable) {
-        return this.userRepository.findByIsFlaggedTrue(pageable);
-    }
-
-
-    /// FIND FLAGGED USERS BY COUNTRY
-    public Page<User> findByCountryAndIsFlaggedTrue(String country, Pageable pageable) {
-        return this.userRepository.findByCountryAndIsFlaggedTrue(country, pageable);
     }
 
 
