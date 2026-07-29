@@ -19,5 +19,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Page<User> findByIsFlaggedTrue(Pageable pageable);
 
+    Page<User> findByCountryAndIsFlaggedTrue(String country, Pageable pageable);
+
 
 }
