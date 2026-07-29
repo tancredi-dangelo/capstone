@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.feedActions.report;
+package tancredidangelo.capstone.entities.adminActions;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.user.User;
 
 import java.time.LocalDateTime;
 
@@ -14,56 +15,49 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "reports")
-public class Report {
+@Table(name = "flagged_users")
+public class Flag {
 
     /// attributes
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Setter(AccessLevel.NONE)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    private Account author;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reported_account_id", nullable = false)
-    private Account reportedAccount;
-
-    @Column(name = "reason", nullable = false)
-    private String reason;
+    @JoinColumn(name = "admin_id", nullable = false)
+    private Account admin;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
-    private ReportStatus status;
+    private String reason;
 
 
 
     /// constructor
-
-    public Report(Account author, Account reportedAccount, String reason) {
-        this.author = author;
-        this.reportedAccount = reportedAccount;
+    public Flag(User user, Account admin, LocalDateTime timestamp, String reason) {
+        this.user = user;
+        this.admin = admin;
+        this.timestamp = timestamp;
         this.reason = reason;
-        this.timestamp = LocalDateTime.now();
-        this.status = ReportStatus.PENDING;
     }
 
 
     /// to string
-
     @Override
     public String toString() {
-        return "Report{" +
+        return "Flag{" +
                 "id=" + id +
-                ", author=" + author +
-                ", reportedAccount=" + reportedAccount +
-                ", reason='" + reason + '\'' +
+                ", userId=" + (user != null ? user.getId() : null) +
+                ", adminId=" + (admin != null ? admin.getId() : null) +
                 ", timestamp=" + timestamp +
+                ", reason='" + reason + '\'' +
                 '}';
     }
 }
