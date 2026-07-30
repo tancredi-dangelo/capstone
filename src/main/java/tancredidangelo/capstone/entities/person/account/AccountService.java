@@ -43,6 +43,12 @@ public class AccountService {
     }
 
 
+    /// FIND BY USERNAME -> ADMIN, IT
+    public Account findByUsername(String username) {
+        return this.accountRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Account not found."));
+    }
+
+
     /// FIND ACTIVE ACCOUNTS -> USER (+ADMIN)
     public Page<Account> searchActiveAccounts(String country, String usernameMatch, List<String> tags, Pageable pageable) {
         Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags);
@@ -100,6 +106,11 @@ public class AccountService {
         return this.accountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account not found."));
     }
 
+
+    /// EXISTS BY USERNAME -> IT, ADMIN
+    public boolean existsByUsername(String username) {
+        return this.accountRepository.existsByUsername(username);
+    }
 
     /// FIND BANNED ACCOUNTS -> ADMIN
     public Page<Account> searchBannedAccounts(String country, String usernameMatch, Boolean isBanned, Pageable pageable) {

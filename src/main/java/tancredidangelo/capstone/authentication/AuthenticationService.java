@@ -1,0 +1,41 @@
+package tancredidangelo.capstone.authentication;
+
+import org.springframework.stereotype.Service;
+import tancredidangelo.capstone.authentication.AuthenticationDTO.AuthenticationRequestDTO;
+import tancredidangelo.capstone.authentication.AuthenticationDTO.AuthenticationResponseDTO;
+import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.account.AccountService;
+import tancredidangelo.capstone.exceptions.UnauthorizedException;
+import tancredidangelo.capstone.security.JWTTools;
+
+@Service
+public class AuthenticationService {
+
+    /// dependency injection
+    private final JWTTools jwtTools;
+    private final AccountService accountService;
+
+    public AuthenticationService(JWTTools jwtTools, AccountService accountService) {
+        this.jwtTools = jwtTools;
+        this.accountService = accountService;
+    }
+
+
+    /// -------------- methods -----------------------------------------------------------------------------------
+
+    public AuthenticationResponseDTO checkCredentialsAndVerifyToken(AuthenticationRequestDTO payload) {
+
+        if(this.accountService.existsByUsername(payload.username())) {
+            Account found = this.accountService.findByUsername(payload.username());
+
+            if (found.getPassword().equals(payload.password())) {
+                String token = this.jwtTools.generateToken(found);
+                return new AuthenticationResponseDTO(token);
+            }
+        }
+
+        throw new UnauthorizedException("Wrong credentials. Try again.");
+    }
+
+
+}
