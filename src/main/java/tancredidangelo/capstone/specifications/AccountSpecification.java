@@ -20,10 +20,14 @@ public class AccountSpecification {
     }
 
 
-    /// FILTER ONLY BANNED ACCOUNTS
-    public static Specification<Account> isBanned() {
-        return (root, query, cb) ->
-                cb.isTrue(root.get("isBanned"));
+    /// FILTER ACCOUNTS BY BANNED OR NOT (ADMIN)
+    public static Specification<Account> isBanned(Boolean banned) {
+        return (root, query, cb) -> {
+            if (banned == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("isBanned"), banned);
+        };
     }
 
 
@@ -96,9 +100,9 @@ public class AccountSpecification {
 
     /// ------------ FINAL COMBINATION METHOD (ADMIN)-------------------------------------------------------
 
-    public static Specification<Account> filterBannedAccounts(String country, String usernameMatch) {
+    public static Specification<Account> filterAccounts(String country, String usernameMatch, Boolean isBanned) {
         return Specification
-                .where(isBanned())
+                .where(isBanned(isBanned))
                 .and(hasCountry(country))
                 .and(usernameMatches(usernameMatch))
                 ;

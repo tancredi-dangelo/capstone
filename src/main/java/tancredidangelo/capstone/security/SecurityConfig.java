@@ -1,4 +1,4 @@
-/*
+
 package tancredidangelo.capstone.security;
 
 import org.springframework.context.annotation.Bean;
@@ -60,5 +60,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(12);
     }
 }
-
-*/

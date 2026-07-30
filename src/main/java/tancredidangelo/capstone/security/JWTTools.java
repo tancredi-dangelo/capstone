@@ -1,4 +1,4 @@
-/*
+
 package tancredidangelo.capstone.security;
 
 import io.jsonwebtoken.Jwts;
@@ -32,8 +32,15 @@ public class JWTTools {
     }
 
 
-    public UUID extractId(String token) {
-        return UUID.fromString(Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secret.getBytes())).build().parseSignedClaims(token).getPayload().getSubject());
+        public Long extractId(String token) {
+        return Long.parseLong(
+                Jwts.parser()
+                        .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                        .build()
+                        .parseSignedClaims(token)
+                        .getPayload()
+                        .getSubject()
+        );
     }
 
 
@@ -45,4 +52,3 @@ public class JWTTools {
         }
     }
 }
-*/
