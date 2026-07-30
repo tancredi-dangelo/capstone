@@ -28,18 +28,17 @@ public class UserController {
 
     // ------------------------ ENDPOINTS ---------------------------------------------------------------------------------
 
-
-    /// CREATE NEW USER -> GET "[...](http://localhost:PORT/users)" -> 201 CREATED
+    /// USER + ADMIN
+    /// REGISTER NEW USER -> GET "[...](http://localhost:PORT/users)" -> 201 CREATED
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    public NewUserResponseDTO registerNewUser(@RequestBody NewUserRequestDTO payload) {
+    public NewUserResponseDTO registerNewUser(@RequestBody @Valid NewUserRequestDTO payload) {
         return this.userService.save(payload);
     }
 
 
 
-
+    /// ADMIN
     /// GET ALL USERS -> GET "[...](http://localhost:PORT/users/search)" -> 200 OK
     @GetMapping("/search")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
@@ -64,37 +63,49 @@ public class UserController {
     }
 
 
-
+    /// ADMIN
     /// GET USER BY ID -> GET "[...](http://localhost:PORT/users/{id})" -> 200 OK
     @GetMapping("{id}")
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public UserResponseDTO getUserById(@RequestParam UUID id) {
+    public UserResponseDTO getUserById(@PathVariable UUID id) {
         User found = this.userService.findById(id);
         return new UserResponseDTO(found.getId(), found.getFirstName(), found.getLastName(), found.getEmail(),  found.getBirthdate(), found.getCountry(), found.isFlagged());
     }
 
 
 
-
-    /// UPDATE USER BY ID -> GET "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
+    /// USER + ADMIN
+    /// UPDATE USER BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
     @PutMapping("{id}")
-    @PreAuthorize("hasAnyAuthority('USER')")
-    public UpdateUserResponseDTO updateUserById(@RequestParam UUID id, @RequestBody @Valid UpdateUserRequestDTO payload) {
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    public UpdateUserResponseDTO updateUserById(@PathVariable UUID id, @RequestBody @Valid UpdateUserRequestDTO payload) {
         return this.userService.updateById(id, payload);
     }
 
 
-    /// UPDATE USER EMAIL BY ID -> GET "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
-    @PutMapping("{id}")
-    @PreAuthorize("hasAnyAuthority('USER')")
-    public UpdateEmailResponseDTO updateUserById(@RequestParam UUID id, @RequestBody @Valid UpdateEmailRequestDTO payload) {
+
+    /// USER + ADMIN
+    /// UPDATE USER EMAIL BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
+    @PutMapping("{id}/email")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    public UpdateEmailResponseDTO updateUserById(@PathVariable UUID id, @RequestBody @Valid UpdateEmailRequestDTO payload) {
         return this.userService.updateEmailById(id, payload);
     }
 
 
-    ///
 
+    /// ADMIN
+    /// UPDATE USER FLAG BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
+    @PutMapping("{id}/flag")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public UpdateFlagResponseDTO setUserFlag(@PathVariable UUID id, @RequestBody @Valid UpdateFlagRequestDTO payload) {
+        return this.userService.setFlagById(id, payload.flagValue());
+    }
+
+
+
+    /// USER + ADMIN
+    /// DELETE USER BY ID
 
 
 }

@@ -50,6 +50,18 @@ public class AccountService {
     }
 
 
+    /// UPDATE ACCOUNT -> USER (+ADMIN)
+    public UpdateAccountResponseDTO updateById(Long id, UpdateAccountRequestDTO payload) {
+        Account found = findById(id);
+
+        found.setUsername(payload.username());
+        found.setTags(payload.tags());
+
+        Account saved = this.accountRepository.save(found);
+        return new UpdateAccountResponseDTO(saved.getId());
+    }
+
+
     /// UPDATE PASSWORD -> ONLY USER
     @Transactional
     public UpdatePasswordResponseDTO updatePasswordById(Long id, UpdatePasswordRequestDTO payload) {
@@ -90,8 +102,8 @@ public class AccountService {
 
 
     /// FIND BANNED ACCOUNTS -> ADMIN
-    public Page<Account> searchBannedAccounts(String country, String usernameMatch, Pageable pageable) {
-        Specification<Account> spec = AccountSpecification.filterBannedAccounts(country, usernameMatch);
+    public Page<Account> searchBannedAccounts(String country, String usernameMatch, Boolean isBanned, Pageable pageable) {
+        Specification<Account> spec = AccountSpecification.filterAccounts(country, usernameMatch, isBanned);
         return this.accountRepository.findAll(spec, pageable);
     }
 

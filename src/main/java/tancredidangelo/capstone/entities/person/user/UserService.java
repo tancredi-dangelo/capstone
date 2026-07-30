@@ -48,6 +48,7 @@ public class UserService {
         newUser.setCountry(payload.country());
 
         User saved = this.userRepository.save(newUser);
+        log.info("User saved. User_Id : {}", saved.getId());
         return new NewUserResponseDTO(saved.getId());
     }
 
@@ -124,31 +125,22 @@ public class UserService {
 
     /// FLAG USER
     @Transactional
-    public UUID flagUserById(UUID id) {
-        User found = findById(id);
-        if (found.isFlagged()) {
-            throw new RuntimeException("This user is already flagged.");
-        } else {
-            found.setFlagged(true);
-            this.userRepository.save(found);
-            return found.getId();
-        }
-    }
+    public UpdateFlagResponseDTO setFlagById(UUID id, boolean flagValue) {
 
-
-    /// UNFLAG USER
-    @Transactional
-    public UUID unflagUserById(UUID id) {
         User found = findById(id);
-        if (!found.isFlagged()) {
+
+        if (found.isFlagged() && flagValue) {
             throw new RuntimeException("This user is already flagged.");
-        } else {
-            found.setFlagged(false);
-            this.userRepository.save(found);
-            return found.getId();
+        } else if (!found.isFlagged() && !flagValue) {
+            throw new RuntimeException("This user is already unflagged.");
         }
 
+        found.setFlagged(flagValue);
+        this.userRepository.save(found);
+        return new UpdateFlagResponseDTO(found.getId());
+
     }
+
 
 
     /// DELETE USER BY ID -> ONLY ADMIN
