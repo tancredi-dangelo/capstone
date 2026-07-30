@@ -28,15 +28,6 @@ public class UserController {
 
     // ------------------------ ENDPOINTS ---------------------------------------------------------------------------------
 
-    /// USER + ADMIN
-    /// REGISTER NEW USER -> GET "[...](http://localhost:PORT/users)" -> 201 CREATED
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public NewUserResponseDTO registerNewUser(@RequestBody @Valid NewUserRequestDTO payload) {
-        return this.userService.save(payload);
-    }
-
-
 
     /// ADMIN
     /// GET ALL USERS -> GET "[...](http://localhost:PORT/users/search)" -> 200 OK
