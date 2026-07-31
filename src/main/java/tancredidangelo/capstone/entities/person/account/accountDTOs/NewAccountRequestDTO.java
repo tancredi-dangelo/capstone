@@ -1,19 +1,19 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs;
 
-import jakarta.validation.Valid;
+
 import jakarta.validation.constraints.*;
-import tancredidangelo.capstone.entities.person.user.User;
 
 import java.util.List;
 
 public record NewAccountRequestDTO(
 
-        @NotNull(message = "User data are mandatory.")
-        @Valid User user,
-
         @NotBlank(message = "Username is required.")
         @Size(min = 6, max = 20)
         String username,
+
+        String profilePicUrl,
+
+        @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,
 
         @NotBlank(message = "Password is required. ")
         @Pattern(

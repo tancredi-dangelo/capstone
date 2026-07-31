@@ -5,14 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.*;
+import tancredidangelo.capstone.entities.person.user.User;
+import tancredidangelo.capstone.entities.person.user.UserService;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.specifications.AccountSpecification;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -20,47 +24,62 @@ public class AccountService {
 
     /// dependency injection
     private final AccountRepository accountRepository;
+    private  final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
-    /// -------------------------- USER METHODS -------------------------------------------------------------------------
+    // -------------------------- USER METHODS -------------------------------------------------------------------------
 
 
-    /// REGISTER NEW ACCOUNT -> ONLY USER
-    @Transactional
-    public Long save(NewAccountRequestDTO payload) {
+    /// CREATE NEW ACCOUNT
+    public NewAccountResponseDTO save(UUID user_id, NewAccountRequestDTO payload) {
+
         if (this.accountRepository.existsByUsername(payload.username())) {
             throw new AlreadyExistsException("This username is already being used. Please choose another username.");
         }
 
-        Account newAccount = new Account(payload.user(), payload.username(), payload.password(), payload.tags());
+        Account newAccount = new Account();
+        User userFound = this.userService.findById(user_id);
+
+        newAccount.setUser(userFound);
+        newAccount.setUsername(payload.username());
+        newAccount.setProfilePicUrl(payload.profilePicUrl());
+        newAccount.setBio(payload.bio());
+        newAccount.setPassword(passwordEncoder.encode(payload.password()));
+        newAccount.setTags(payload.tags());
+
         Account saved = this.accountRepository.save(newAccount);
-        log.info("Account registered with ID: {}.", saved.getId());
-        return saved.getId();
+
+        return new NewAccountResponseDTO(saved.getId());
     }
 
 
-    /// FIND BY USERNAME -> ADMIN, IT
+    /// FIND BY USERNAME -> USER, ADMIN, IT
     public Account findByUsername(String username) {
         return this.accountRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Account not found."));
     }
 
 
-    /// FIND ACTIVE ACCOUNTS -> USER (+ADMIN)
+    /// FIND ACTIVE ACCOUNTS -> USER, ADMIN
     public Page<Account> searchActiveAccounts(String country, String usernameMatch, List<String> tags, Pageable pageable) {
         Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags);
         return this.accountRepository.findAll(spec, pageable);
     }
 
 
-    /// UPDATE ACCOUNT -> USER (+ADMIN)
+    /// UPDATE ACCOUNT -> OWNER
+    @Transactional
     public UpdateAccountResponseDTO updateById(Long id, UpdateAccountRequestDTO payload) {
         Account found = findById(id);
 
         found.setUsername(payload.username());
+        found.setProfilePicUrl(payload.profilePicUrl());
         found.setTags(payload.tags());
 
         Account saved = this.accountRepository.save(found);
@@ -68,21 +87,22 @@ public class AccountService {
     }
 
 
-    /// UPDATE PASSWORD -> ONLY USER
+    /// UPDATE PASSWORD -> OWNER
     @Transactional
     public UpdatePasswordResponseDTO updatePasswordById(Long id, UpdatePasswordRequestDTO payload) {
 
         Account found = findById(id);
 
-        if (!payload.oldPassword().equals(found.getPassword())) {
+        if (!this.passwordEncoder.matches(payload.oldPassword(), found.getPassword())) {
             throw new ValidationException("Old password is not matching. Please try again.");
         }
 
-        if (payload.newPassword().equals(found.getPassword())) {
+        if (this.passwordEncoder.matches(payload.newPassword(), found.getPassword())) {
             throw new ValidationException("New password must be different from the old one!");
         }
 
-        found.setPassword(payload.newPassword());
+        found.setPassword(passwordEncoder.encode(payload.newPassword()));
+
         Account updated = this.accountRepository.save(found);
         log.info("Password successfully updated");
 
@@ -90,7 +110,7 @@ public class AccountService {
     }
 
 
-    /// DELETE ACCOUNT -> ONLY USER
+    /// DELETE ACCOUNT -> OWNER
     @Transactional
     public void deleteById(Long id) {
         Account found = findById(id);
@@ -99,7 +119,8 @@ public class AccountService {
 
 
 
-    /// ------------------------------- ADMIN METHODS --------------------------------------------------------------
+    // ------------------------------- ADMIN METHODS --------------------------------------------------------------
+
 
     /// FIND ACCOUNT BY ID -> IT, ADMIN
     public Account findById(Long id) {
@@ -107,10 +128,17 @@ public class AccountService {
     }
 
 
+    /// FIND ACCOUNTS BY USER ID
+    public List<Account> findByUserId(UUID userId) {
+        return this.accountRepository.findByUserId(userId);
+    }
+
+
     /// EXISTS BY USERNAME -> IT, ADMIN
     public boolean existsByUsername(String username) {
         return this.accountRepository.existsByUsername(username);
     }
+
 
     /// FIND BANNED ACCOUNTS -> ADMIN
     public Page<Account> searchBannedAccounts(String country, String usernameMatch, Boolean isBanned, Pageable pageable) {
@@ -121,10 +149,11 @@ public class AccountService {
 
     /// BAN ACCOUNT
     @Transactional
-    public Long setBanStatusById(Long id, boolean isBanned) {
+    public SetAccountBanResponseDTO setBanStatusById(Long id, SetAccountBanRequestDTO payload) {
         Account found = findById(id);
-        found.setBanned(isBanned);
-        return found.getId();
+        found.setBanned(payload.value());
+        this.accountRepository.save(found);
+        return new SetAccountBanResponseDTO(found.getId());
     }
 
 

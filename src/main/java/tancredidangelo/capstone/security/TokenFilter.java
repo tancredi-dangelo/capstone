@@ -52,6 +52,7 @@ public class TokenFilter extends OncePerRequestFilter {
 
         } catch (Exception ex) {
             resolver.resolveException(request, response, null, ex);
+            return;
         }
 
         filterChain.doFilter(request, response);

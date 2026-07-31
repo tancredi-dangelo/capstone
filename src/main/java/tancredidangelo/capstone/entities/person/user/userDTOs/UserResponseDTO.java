@@ -1,11 +1,6 @@
 package tancredidangelo.capstone.entities.person.user.userDTOs;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.Setter;
+
 
 import java.time.LocalDate;
 import java.util.UUID;

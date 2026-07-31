@@ -11,6 +11,8 @@ public record UpdateAccountRequestDTO(
         @Size(min = 6, max = 20)
         String username,
 
+        String profilePicUrl,
+
         List<String> tags
 ) {
 }

@@ -7,9 +7,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import tancredidangelo.capstone.entities.person.user.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpecificationExecutor<Account> {
@@ -20,6 +22,10 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     /// FIND BY USERNAME
     Optional<Account> findByUsername(String username);
+
+
+    /// FIND BY USER ID
+    List<Account> findByUserId(UUID userId);
 
 
     /// FIND BY MATCH USERNAME results STARTING BY typed characters are displayed first, IS BANNED = FALSE

@@ -36,7 +36,6 @@ public class ErrorHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDTO handleValidationExceptions(ValidationException ex) {
-        ex.printStackTrace();
         return new ErrorDTO(ex.getMessage(), LocalDateTime.now(), ex.getErrorsList());
     }
 
@@ -44,7 +43,6 @@ public class ErrorHandler {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDTO handleBadRequest(BadRequestException ex) {
-        ex.printStackTrace();
         return new ErrorDTO(ex.getMessage(), LocalDateTime.now());
     }
 
@@ -52,7 +50,6 @@ public class ErrorHandler {
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorDTO handleUnauthorized(UnauthorizedException ex) {
-        ex.printStackTrace();
         return new ErrorDTO(ex.getMessage(), LocalDateTime.now());
     }
 
@@ -60,7 +57,6 @@ public class ErrorHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorDTO handleNotFound(NotFoundException ex) {
-        ex.printStackTrace();
         return new ErrorDTO(ex.getMessage(), LocalDateTime.now());
     }
 
@@ -68,7 +64,7 @@ public class ErrorHandler {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorDTO handleAccessDenied(AccessDeniedException ex) {
-        ex.printStackTrace();
+        log.warn("Access Denied: You don't have permissions to access this resource.");
         return new ErrorDTO("Authorization Failed.", LocalDateTime.now());
     }
 
@@ -83,7 +79,6 @@ public class ErrorHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorDTO handleGenericError(Exception ex) {
-        ex.printStackTrace();
         return new ErrorDTO("Internal Server Error: Something went wrong, try again later.", LocalDateTime.now());
     }
 }

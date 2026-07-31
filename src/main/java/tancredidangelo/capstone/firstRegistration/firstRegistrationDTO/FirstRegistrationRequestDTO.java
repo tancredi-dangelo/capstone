@@ -1,10 +1,13 @@
-package tancredidangelo.capstone.entities.person.user.userDTOs;
+package tancredidangelo.capstone.firstRegistration.firstRegistrationDTO;
 
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
-public record NewUserRequestDTO(
+/// The creation of a new USEser comes with the creation of a first account in the same instance
+
+public record FirstRegistrationRequestDTO(
         @NotBlank(message = "First Name is required.")
         @Size(min = 2, max = 50, message = "It has to be 2 to 50 characters long.")
         String firstName,
@@ -23,5 +26,20 @@ public record NewUserRequestDTO(
 
         @NotBlank(message = "Country is required.")
         @Size(min = 2, max = 100, message = "It has to be 2 to 100 characters long.")
-        String country) {
+        String country,
+
+        @NotBlank(message = "Username is required.")
+        @Size(min = 6, max = 20)
+        String username,
+
+        @NotBlank(message = "Password is required. ")
+        @Pattern(
+                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,24}$",
+                message = "Your password must be 8-24 characters and must contain at least: one lower case, one upper case, a number and a special character (@$!%*?&)."
+        )
+        String password,
+
+        String profilePicUrl,
+
+        List<String> tags) {
 }

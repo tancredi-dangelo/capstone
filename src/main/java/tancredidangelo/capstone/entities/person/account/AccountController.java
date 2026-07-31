@@ -7,11 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.*;
 
 
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/accounts")
@@ -29,19 +32,68 @@ public class AccountController {
     // -------------------------  ENDPOINTS  ---------------------------------------------------------------
 
 
-    /// USER AND ADMIN
-    /// CREATE NEW ACCOUNT -> POST "[...](http://localhost:PORT/accounts)" {+payload}
-    @PutMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    // *******  PUBLIC METHODS *******
+
+    /// USER + ADMIN
+    /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "[...](http://localhost:PORT/accounts)" + {params}
+    @GetMapping("/browse")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    public NewAccountResponseDTO registerNewAccount(@RequestBody @Valid NewAccountRequestDTO payload) {
-        return new NewAccountResponseDTO(this.accountService.save(payload));
+    public Page<Account> getActiveAccountsAndFilter(
+            @RequestParam(required = false) String usernameMatch,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return this.accountService.searchActiveAccounts(country, usernameMatch, tags, pageable);
     }
+
+
+
+
+
+    // *******  OWNER METHODS *******
+
+
+    /// OWNER -> AUTHENTICATED ACCOUNT REGISTERS NEW ACCOUNT
+    /// POST "[...](http://localhost:PORT/accounts)" + {payload}
+    @PostMapping
+    @PreAuthorize("isAuthenticated()")
+    @ResponseStatus(HttpStatus.CREATED)
+    public NewAccountResponseDTO createNewAccount(@RequestBody @Valid NewAccountRequestDTO payload, Authentication authentication) {
+        UUID user_id = ((Account) Objects.requireNonNull(authentication.getPrincipal())).getUser().getId();
+        return this.accountService.save(user_id, payload);
+    }
+
+
+    /// OWNER
+    /// UPDATE ACCOUNT BY ID -> PUT "[...](http://localhost:PORT/accounts/{id})" + {payload}
+    @PutMapping("/{id}")
+    @PreAuthorize("@authConfig.isOwner(#id, authentication)")
+    public UpdateAccountResponseDTO updateAccountById(@PathVariable Long id, @RequestBody @Valid UpdateAccountRequestDTO payload) {
+        return this.accountService.updateById(id, payload);
+    }
+
+
+    /// OWNER
+    /// UPDATE PASSWORD BY ID -> PUT "[...](http://localhost:PORT/accounts/{id}/password)" + {payload}
+    @PutMapping("/{id}/password")
+    @PreAuthorize("@authConfig.isOwner(#id, authentication)")
+    public UpdatePasswordResponseDTO updatePasswordById(@PathVariable Long id, @RequestBody @Valid UpdatePasswordRequestDTO payload) {
+        return this.accountService.updatePasswordById(id, payload);
+    }
+
+
+
+    // ******* ADMIN METHODS *******
+
 
     /// ADMIN
     /// FIND ACCOUNT BY ID -> GET "[...](http://localhost:PORT/accounts/{id})"
-    @GetMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping("/{id}")
+    @PreAuthorize("@authConfig.isAdmin(authentication)")
     public Account getAccountById(@PathVariable Long id) {
         return this.accountService.findById(id);
     }
@@ -50,7 +102,7 @@ public class AccountController {
     /// ADMIN
     /// SEARCH ACCOUNT WITH FILTERS -> GET "[...](http://localhost:PORT/accounts)" + {params}
     @GetMapping("/search")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("@authConfig.isAdmin(authentication)")
     public Page<Account> getAllAccountsAndFilter(
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String usernameMatch,
@@ -72,40 +124,33 @@ public class AccountController {
 
 
 
-    /// USER + ADMIN
-    /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "[...](http://localhost:PORT/accounts)" + {params}
-    @GetMapping("/search")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    public Page<Account> getActiveAccountsAndFilter(
-            @RequestParam(required = false) String usernameMatch,
-            @RequestParam(required = false) String country,
-            @RequestParam(required = false) List<String> tags,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        return this.accountService.searchActiveAccounts(country, usernameMatch, tags, pageable);
+    /// ADMIN
+    /// SET ACCOUNT BAN -> PUT "[...](http://localhost:PORT/accounts/{id})" + {payload}
+    @PutMapping("/{id}/ban")
+    @PreAuthorize("@authConfig.isAdmin(authentication)")
+    public SetAccountBanResponseDTO setAccountBan(@PathVariable Long id, @RequestBody @Valid SetAccountBanRequestDTO payload) {
+        return this.accountService.setBanStatusById(id, payload);
     }
 
 
 
-    /// USER + ADMIN
-    /// UPDATE ACCOUNT BY ID -> PUT "[...](http://localhost:PORT/accounts/{id})" + {payload}
-    @PutMapping("{id}")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    public UpdateAccountResponseDTO updateAccountById(@PathVariable Long id, @RequestBody @Valid UpdateAccountRequestDTO payload) {
-        return this.accountService.updateById(id, payload);
+
+    // ****** OWNER OR ADMIN ******
+
+    /// OWNER
+    /// DELETE ACCOUNT BY ID -> PUT "[...](http://localhost:PORT/accounts/{id}/password)" + {payload}
+    @DeleteMapping("/{id}")
+    @PreAuthorize("@authConfig.isOwnerOrAdmin(#id, authentication)")
+    public void deleteAccountById(@PathVariable Long id) {
+        this.accountService.deleteById(id);
     }
 
 
-    /// USER + ADMIN
-    /// UPDATE PASSWORD BY ID -> PUT "[...](http://localhost:PORT/accounts/{id}/password)" + {payload}
-    @PutMapping("{id}/password")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    public UpdatePasswordResponseDTO updatePasswordById(@PathVariable Long id, @RequestBody @Valid UpdatePasswordRequestDTO payload) {
-        return this.accountService.updatePasswordById(id, payload);
-    }
+
+
+
+
+
 
 
 

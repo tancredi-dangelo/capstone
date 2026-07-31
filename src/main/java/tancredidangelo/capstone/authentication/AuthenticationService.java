@@ -1,5 +1,6 @@
 package tancredidangelo.capstone.authentication;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.authentication.AuthenticationDTO.AuthenticationRequestDTO;
 import tancredidangelo.capstone.authentication.AuthenticationDTO.AuthenticationResponseDTO;
@@ -14,10 +15,12 @@ public class AuthenticationService {
     /// dependency injection
     private final JWTTools jwtTools;
     private final AccountService accountService;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationService(JWTTools jwtTools, AccountService accountService) {
+    public AuthenticationService(JWTTools jwtTools, AccountService accountService, PasswordEncoder passwordEncoder) {
         this.jwtTools = jwtTools;
         this.accountService = accountService;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -28,7 +31,7 @@ public class AuthenticationService {
         if(this.accountService.existsByUsername(payload.username())) {
             Account found = this.accountService.findByUsername(payload.username());
 
-            if (found.getPassword().equals(payload.password())) {
+            if (this.passwordEncoder.matches(payload.password(), found.getPassword())) {
                 String token = this.jwtTools.generateToken(found);
                 return new AuthenticationResponseDTO(token);
             }

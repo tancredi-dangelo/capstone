@@ -11,6 +11,7 @@ import tancredidangelo.capstone.entities.person.account.Account;
 import tancredidangelo.capstone.entities.person.user.userDTOs.*;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
+import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.specifications.AccountSpecification;
 import tancredidangelo.capstone.specifications.UserSpecification;
 
@@ -30,28 +31,7 @@ public class UserService {
     }
 
 
-    /// ------------- USER METHODS --------------------------------------------------
-
-    /// REGISTER NEW USER -> ONLY USER
-    @Transactional
-    public NewUserResponseDTO save(NewUserRequestDTO payload) {
-
-        if (this.userRepository.existsByEmail(payload.email())) {
-            throw new AlreadyExistsException("An account with this email already exists.");
-        }
-
-        User newUser = new User();
-        newUser.setFirstName(payload.firstName());
-        newUser.setLastName(payload.lastName());
-        newUser.setEmail(payload.email());
-        newUser.setBirthdate(payload.birthdate());
-        newUser.setCountry(payload.country());
-
-        User saved = this.userRepository.save(newUser);
-        log.info("User saved. User_Id : {}", saved.getId());
-        return new NewUserResponseDTO(saved.getId());
-    }
-
+    // ------------- USER METHODS --------------------------------------------------
 
     /// UPDATE USER DETAILS -> ONLY USER
     @Transactional
@@ -95,7 +75,7 @@ public class UserService {
 
 
 
-    /// ------------ ADMIN / IT METHODS ----------------------------------------------------------------
+    // ------------ ADMIN / IT METHODS ----------------------------------------------------------------
 
 
     /// SEARCH AND FILTER ALL USERS -> ONLY ADMIN
@@ -130,9 +110,9 @@ public class UserService {
         User found = findById(id);
 
         if (found.isFlagged() && flagValue) {
-            throw new RuntimeException("This user is already flagged.");
+            throw new ValidationException("This user is already flagged.");
         } else if (!found.isFlagged() && !flagValue) {
-            throw new RuntimeException("This user is already unflagged.");
+            throw new ValidationException("This user is already unflagged.");
         }
 
         found.setFlagged(flagValue);
