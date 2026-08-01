@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tancredidangelo.capstone.emailSender.EmailSender;
 import tancredidangelo.capstone.entities.person.account.Account;
 import tancredidangelo.capstone.entities.person.account.AccountRepository;
 import tancredidangelo.capstone.entities.person.user.User;
@@ -13,6 +14,7 @@ import tancredidangelo.capstone.authentication.registration.registrationUser.Use
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.helpers.CountryCodeConverter;
 import tancredidangelo.capstone.security.JWTTools;
+import tancredidangelo.capstone.emailSender.EmailSender.*;
 
 /// REGISTRATION USER + FIRST ACCOUNT
 
@@ -25,12 +27,14 @@ public class UserRegistrationService {
     private final AccountRepository accountRepository;
     private final JWTTools jwtTools;
     private final PasswordEncoder passwordEncoder;
+    private final EmailSender emailSender;
 
-    public UserRegistrationService(UserRepository userRepository, AccountRepository accountRepository, JWTTools jwtTools, PasswordEncoder passwordEncoder) {
+    public UserRegistrationService(UserRepository userRepository, AccountRepository accountRepository, JWTTools jwtTools, PasswordEncoder passwordEncoder, EmailSender emailSender) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.jwtTools = jwtTools;
         this.passwordEncoder = passwordEncoder;
+        this.emailSender = emailSender;
     }
 
 
@@ -61,7 +65,7 @@ public class UserRegistrationService {
 
         User savedUser = this.userRepository.save(newUser);
 
-        log.info("User saved. User_Id : {}", savedUser);
+        log.info("User saved. User_Id : {}", savedUser.getId());
 
 
         // ** ACCOUNT **
@@ -79,8 +83,11 @@ public class UserRegistrationService {
         log.info("Account registered with ID: {}.", savedAccount.getId());
 
 
-        // ** GENERATE TOKEN **
+        // send registration email
+        this.emailSender.sendRegistrationEmail(savedUser);
 
+
+        // ** GENERATE TOKEN **
         String token = this.jwtTools.generateToken(savedAccount);
 
 
