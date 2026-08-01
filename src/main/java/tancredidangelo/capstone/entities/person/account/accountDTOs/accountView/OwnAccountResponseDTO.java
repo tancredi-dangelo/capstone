@@ -1,4 +1,6 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs.accountView;
 
-public record OwnAccountResponseDTO() {
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+
+public record OwnAccountResponseDTO(Account ownAccount) {
 }

@@ -84,6 +84,7 @@ public class AccountService {
 
         found.setUsername(payload.username());
         found.setProfilePicUrl(payload.profilePicUrl());
+        found.setBio(payload.bio());
         found.setTags(payload.tags());
 
         Account saved = this.accountRepository.save(found);

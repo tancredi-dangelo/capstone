@@ -13,6 +13,8 @@ public record UpdateAccountRequestDTO(
 
         String profilePicUrl,
 
+        String bio,
+
         List<String> tags
 ) {
 }
