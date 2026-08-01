@@ -9,7 +9,6 @@ import tancredidangelo.capstone.entities.person.account.Account;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
 
 import java.util.Date;
-import java.util.UUID;
 
 @Component
 public class JWTTools {

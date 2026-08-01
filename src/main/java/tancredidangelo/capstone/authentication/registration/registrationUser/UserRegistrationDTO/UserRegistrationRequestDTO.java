@@ -1,13 +1,15 @@
-package tancredidangelo.capstone.firstRegistration.firstRegistrationDTO;
+package tancredidangelo.capstone.authentication.registration.registrationUser.UserRegistrationDTO;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
+import tancredidangelo.capstone.helpers.ForbiddenUsernamesList;
 
 import java.time.LocalDate;
 import java.util.List;
 
-/// The creation of a new USEser comes with the creation of a first account in the same instance
+/// The creation of a new USER comes with the creation of a first account in the same instance
 
-public record FirstRegistrationRequestDTO(
+public record UserRegistrationRequestDTO(
         @NotBlank(message = "First Name is required.")
         @Size(min = 2, max = 50, message = "It has to be 2 to 50 characters long.")
         String firstName,
@@ -32,14 +34,25 @@ public record FirstRegistrationRequestDTO(
         @Size(min = 6, max = 20)
         String username,
 
-        @NotBlank(message = "Password is required. ")
+        @NotBlank(message = "Password is required.")
         @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,24}$",
-                message = "Your password must be 8-24 characters and must contain at least: one lower case, one upper case, a number and a special character (@$!%*?&)."
+                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_-])[A-Za-z\\d@$!%*?&_-]{8,24}$",
+                message = "Your password must be 8-24 characters and must contain at least: one lower case, one upper case, a number and a special character."
         )
         String password,
 
         String profilePicUrl,
 
+        @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,
+
         List<String> tags) {
+
+
+        // Check if username is in Forbidden List
+        @JsonIgnore
+        @AssertTrue(message = "This username is reserved and can't be used. Choose another one.")
+        public boolean isValidUsername() {
+                return !ForbiddenUsernamesList.isReserved(this.username);
+        }
 }
+

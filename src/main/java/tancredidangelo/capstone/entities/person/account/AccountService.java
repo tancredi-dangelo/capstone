@@ -38,21 +38,23 @@ public class AccountService {
 
 
     /// CREATE NEW ACCOUNT
+    @Transactional
     public NewAccountResponseDTO save(UUID user_id, NewAccountRequestDTO payload) {
 
         if (this.accountRepository.existsByUsername(payload.username())) {
             throw new AlreadyExistsException("This username is already being used. Please choose another username.");
         }
 
-        Account newAccount = new Account();
         User userFound = this.userService.findById(user_id);
 
-        newAccount.setUser(userFound);
-        newAccount.setUsername(payload.username());
-        newAccount.setProfilePicUrl(payload.profilePicUrl());
-        newAccount.setBio(payload.bio());
-        newAccount.setPassword(passwordEncoder.encode(payload.password()));
-        newAccount.setTags(payload.tags());
+        Account newAccount = new Account(
+                userFound,
+                payload.username(),
+                passwordEncoder.encode(payload.password()),
+                payload.profilePicUrl(),
+                payload.bio(),
+                payload.tags()
+                );
 
         Account saved = this.accountRepository.save(newAccount);
 

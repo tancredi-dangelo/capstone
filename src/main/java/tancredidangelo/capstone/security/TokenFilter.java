@@ -5,9 +5,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -18,6 +20,7 @@ import tancredidangelo.capstone.exceptions.UnauthorizedException;
 import java.io.IOException;
 import java.util.UUID;
 
+@Component
 public class TokenFilter extends OncePerRequestFilter {
 
     /// dependency injection
@@ -25,7 +28,7 @@ public class TokenFilter extends OncePerRequestFilter {
     private final AccountService accountService;
     private final HandlerExceptionResolver resolver;
 
-    public TokenFilter(JWTTools jwtTools, AccountService accountService, HandlerExceptionResolver resolver) {
+    public TokenFilter(JWTTools jwtTools, AccountService accountService, @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
         this.jwtTools = jwtTools;
         this.accountService = accountService;
         this.resolver = resolver;
@@ -48,9 +51,13 @@ public class TokenFilter extends OncePerRequestFilter {
             // add id to AuthenticationPrincipal
             Account authUser = this.accountService.findById(accountId);
             Authentication authentication = new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
+
+            System.out.println("DEBUG: Setting authentication for account " + authUser.getUsername() + " with authorities " + authUser.getAuthorities());
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception ex) {
+
             resolver.resolveException(request, response, null, ex);
             return;
         }

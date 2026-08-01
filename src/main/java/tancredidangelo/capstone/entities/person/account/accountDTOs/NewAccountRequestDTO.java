@@ -15,10 +15,10 @@ public record NewAccountRequestDTO(
 
         @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,
 
-        @NotBlank(message = "Password is required. ")
+        @NotBlank(message = "Password is required.")
         @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,24}$",
-                message = "Your password must be 8-24 characters and must contain at least: one lower case, one upper case, a number and a special character (@$!%*?&)."
+                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_-])[A-Za-z\\d@$!%*?&_-]{8,24}$",
+                message = "Your password must be 8-24 characters and must contain at least: one lower case, one upper case, a number and a special character."
         )
         String password,
 

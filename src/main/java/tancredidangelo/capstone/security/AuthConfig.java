@@ -13,17 +13,20 @@ public class AuthConfig {
         if (authentication == null || !(authentication.getPrincipal() instanceof Account principal)) {
             return false;
         }
+        System.out.println("DEBUG Authorities: " + authentication.getAuthorities());
         return principal.getId() != null && principal.getId().equals(id);
     }
 
 
     public boolean isAdmin(Authentication authentication) {
         if (authentication == null) { return false; }
-        return authentication.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN"));
+        System.out.println("DEBUG Authorities: " + authentication.getAuthorities());
+        return authentication.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ROLE_ADMIN"));
     }
 
 
     public boolean isOwnerOrAdmin(Long id, Authentication authentication) {
+        System.out.println("DEBUG Authorities: " + authentication.getAuthorities());
         return isAdmin(authentication) || isOwner(id, authentication);
     }
 }

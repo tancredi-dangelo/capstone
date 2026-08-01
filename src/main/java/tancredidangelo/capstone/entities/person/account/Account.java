@@ -56,7 +56,7 @@ public class Account implements UserDetails {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private AccountRoles role;
+    private AccountRoles role = AccountRoles.USER;
 
     @ElementCollection
     @CollectionTable(name = "account_tags", joinColumns = @JoinColumn(name = "account_id"))
@@ -83,24 +83,40 @@ public class Account implements UserDetails {
 
 
     /// constructor
-    public Account(String username, String password, String profilePicUrl, String bio, List<String> tags) {
+    public Account(User user, String username, String password, String profilePicUrl, String bio, List<String> tags) {
+        this.user = user;
         this.username = username;
         this.password = password;
         this.profilePicUrl = profilePicUrl == null ? "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" : profilePicUrl;
         this.bio = bio;
         this.isBanned = false;
-        this.role = AccountRoles.USER;
-        this.tags = tags;
+        this.tags = (tags == null) ? new ArrayList<>() : tags;
         this.dateOfRegistration = LocalDateTime.now();
     }
 
 
+    /// admin constructor
+    public Account(User user, String username, String password) {
+        this.user = user;
+        this.username = username;
+        this.password = password;
+        this.profilePicUrl = null;
+        this.bio = null;
+        this.isBanned = false;
+        this.role = AccountRoles.ADMIN;
+        this.tags = null;
+        this.dateOfRegistration = LocalDateTime.now();
+        this.posts = null;
+        this.followers = null;
+        this.following = null;
+        this.savedPosts = null;
+    }
 
     /// authorities and details
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
     @Override

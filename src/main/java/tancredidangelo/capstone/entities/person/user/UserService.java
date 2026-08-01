@@ -5,14 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.parameters.P;
+
 import org.springframework.stereotype.Service;
-import tancredidangelo.capstone.entities.person.account.Account;
+
 import tancredidangelo.capstone.entities.person.user.userDTOs.*;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
-import tancredidangelo.capstone.specifications.AccountSpecification;
+import tancredidangelo.capstone.helpers.CountryCodeConverter;
+import tancredidangelo.capstone.helpers.CountryCodeConverter.*;
 import tancredidangelo.capstone.specifications.UserSpecification;
 
 import java.time.LocalDate;
@@ -33,6 +34,14 @@ public class UserService {
 
     // ------------- USER METHODS --------------------------------------------------
 
+
+    /// SAVE NEW USER
+    @Transactional
+    public User save(User user) {
+        return this.userRepository.save(user);
+    }
+
+
     /// UPDATE USER DETAILS -> ONLY USER
     @Transactional
     public UpdateUserResponseDTO updateById(UUID id, UpdateUserRequestDTO payload) {
@@ -41,7 +50,7 @@ public class UserService {
         found.setFirstName(payload.firstName());
         found.setLastName(payload.lastName());
         found.setBirthdate(payload.birthdate());
-        found.setCountry(payload.country());
+        found.setCountry(CountryCodeConverter.toIsoCode(payload.country()));
 
         User updated = this.userRepository.save(found);
         log.info("User updated.");

@@ -1,23 +1,23 @@
-package tancredidangelo.capstone.authentication;
+package tancredidangelo.capstone.authentication.login;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import tancredidangelo.capstone.authentication.AuthenticationDTO.AuthenticationRequestDTO;
-import tancredidangelo.capstone.authentication.AuthenticationDTO.AuthenticationResponseDTO;
+import tancredidangelo.capstone.authentication.login.LoginDTO.LoginRequestDTO;
+import tancredidangelo.capstone.authentication.login.LoginDTO.LoginResponseDTO;
 import tancredidangelo.capstone.entities.person.account.Account;
 import tancredidangelo.capstone.entities.person.account.AccountService;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
 import tancredidangelo.capstone.security.JWTTools;
 
 @Service
-public class AuthenticationService {
+public class LoginService {
 
     /// dependency injection
     private final JWTTools jwtTools;
     private final AccountService accountService;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationService(JWTTools jwtTools, AccountService accountService, PasswordEncoder passwordEncoder) {
+    public LoginService(JWTTools jwtTools, AccountService accountService, PasswordEncoder passwordEncoder) {
         this.jwtTools = jwtTools;
         this.accountService = accountService;
         this.passwordEncoder = passwordEncoder;
@@ -26,14 +26,14 @@ public class AuthenticationService {
 
     /// -------------- methods -----------------------------------------------------------------------------------
 
-    public AuthenticationResponseDTO checkCredentialsAndVerifyToken(AuthenticationRequestDTO payload) {
+    public LoginResponseDTO checkCredentialsAndVerifyToken(LoginRequestDTO payload) {
 
-        if(this.accountService.existsByUsername(payload.username())) {
+        if (this.accountService.existsByUsername(payload.username())) {
             Account found = this.accountService.findByUsername(payload.username());
 
             if (this.passwordEncoder.matches(payload.password(), found.getPassword())) {
                 String token = this.jwtTools.generateToken(found);
-                return new AuthenticationResponseDTO(token);
+                return new LoginResponseDTO(token);
             }
         }
 

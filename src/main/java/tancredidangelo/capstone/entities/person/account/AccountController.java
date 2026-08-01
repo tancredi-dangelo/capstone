@@ -37,7 +37,7 @@ public class AccountController {
     /// USER + ADMIN
     /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "[...](http://localhost:PORT/accounts)" + {params}
     @GetMapping("/browse")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public Page<Account> getActiveAccountsAndFilter(
             @RequestParam(required = false) String usernameMatch,
             @RequestParam(required = false) String country,
@@ -59,7 +59,7 @@ public class AccountController {
 
     /// OWNER -> AUTHENTICATED ACCOUNT REGISTERS NEW ACCOUNT
     /// POST "[...](http://localhost:PORT/accounts)" + {payload}
-    @PostMapping
+    @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.CREATED)
     public NewAccountResponseDTO createNewAccount(@RequestBody @Valid NewAccountRequestDTO payload, Authentication authentication) {
@@ -88,15 +88,6 @@ public class AccountController {
 
 
     // ******* ADMIN METHODS *******
-
-
-    /// ADMIN
-    /// FIND ACCOUNT BY ID -> GET "[...](http://localhost:PORT/accounts/{id})"
-    @GetMapping("/{id}")
-    @PreAuthorize("@authConfig.isAdmin(authentication)")
-    public Account getAccountById(@PathVariable Long id) {
-        return this.accountService.findById(id);
-    }
 
 
     /// ADMIN
@@ -137,7 +128,6 @@ public class AccountController {
 
     // ****** OWNER OR ADMIN ******
 
-    /// OWNER
     /// DELETE ACCOUNT BY ID -> PUT "[...](http://localhost:PORT/accounts/{id}/password)" + {payload}
     @DeleteMapping("/{id}")
     @PreAuthorize("@authConfig.isOwnerOrAdmin(#id, authentication)")
@@ -146,8 +136,12 @@ public class AccountController {
     }
 
 
-
-
+    /// FIND OWN ACCOUNT / FIND ACCOUNT BY ID -> GET "[...](http://localhost:PORT/accounts/{id})"
+    @GetMapping("/{id}")
+    @PreAuthorize("@authConfig.isOwnerOrAdmin(authentication)")
+    public Account getAccountById(@PathVariable Long id) {
+        return this.accountService.findById(id);
+    }
 
 
 
