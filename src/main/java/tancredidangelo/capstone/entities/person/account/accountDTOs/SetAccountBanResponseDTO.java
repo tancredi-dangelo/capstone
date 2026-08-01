@@ -1,4 +1,6 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs;
 
-public record SetAccountBanResponseDTO(Long id) {
+import jakarta.validation.constraints.NotBlank;
+
+public record SetAccountBanResponseDTO(@NotBlank Long id) {
 }

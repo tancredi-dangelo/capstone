@@ -138,7 +138,7 @@ public class AccountController {
 
     /// FIND OWN ACCOUNT / FIND ACCOUNT BY ID -> GET "[...](http://localhost:PORT/accounts/{id})"
     @GetMapping("/{id}")
-    @PreAuthorize("@authConfig.isOwnerOrAdmin(authentication)")
+    @PreAuthorize("@authConfig.isOwnerOrAdmin(#id, authentication)")
     public Account getAccountById(@PathVariable Long id) {
         return this.accountService.findById(id);
     }
