@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import tancredidangelo.capstone.entities.person.user.User;
+import tancredidangelo.capstone.entities.person.user.stack.User;
 
 
 @Slf4j

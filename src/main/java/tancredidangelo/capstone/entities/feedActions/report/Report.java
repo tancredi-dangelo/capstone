@@ -5,7 +5,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.post.Post;
 
 import java.time.LocalDateTime;
 
@@ -31,6 +32,10 @@ public class Report {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_account_id", nullable = false)
     private Account reportedAccount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reported_post_id")
+    private Post reportedPost;
 
     @Column(name = "reason", nullable = false)
     private String reason;

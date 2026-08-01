@@ -13,12 +13,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import tancredidangelo.capstone.entities.person.account.Account;
-import tancredidangelo.capstone.entities.person.account.AccountService;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 public class TokenFilter extends OncePerRequestFilter {

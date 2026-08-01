@@ -2,7 +2,7 @@ package tancredidangelo.capstone.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 
 import java.util.Objects;
 

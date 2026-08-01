@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.person.account;
+package tancredidangelo.capstone.entities.person.account.stack;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import tancredidangelo.capstone.entities.person.user.User;
 
 import java.util.List;
 import java.util.Optional;

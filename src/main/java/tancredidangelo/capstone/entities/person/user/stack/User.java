@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.person.user;
+package tancredidangelo.capstone.entities.person.user.stack;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

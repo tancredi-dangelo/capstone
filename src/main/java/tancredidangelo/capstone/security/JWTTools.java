@@ -5,7 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
 
 import java.util.Date;

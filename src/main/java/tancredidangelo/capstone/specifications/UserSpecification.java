@@ -1,7 +1,7 @@
 package tancredidangelo.capstone.specifications;
 
 import org.springframework.data.jpa.domain.Specification;
-import tancredidangelo.capstone.entities.person.user.User;
+import tancredidangelo.capstone.entities.person.user.stack.User;
 import java.time.LocalDate;
 
 

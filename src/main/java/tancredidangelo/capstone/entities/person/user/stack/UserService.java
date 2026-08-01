@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.person.user;
+package tancredidangelo.capstone.entities.person.user.stack;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -8,12 +8,11 @@ import org.springframework.data.jpa.domain.Specification;
 
 import org.springframework.stereotype.Service;
 
-import tancredidangelo.capstone.entities.person.user.userDTOs.*;
+import tancredidangelo.capstone.entities.person.user.userDTOs.updateUser.*;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.helpers.CountryCodeConverter;
-import tancredidangelo.capstone.helpers.CountryCodeConverter.*;
 import tancredidangelo.capstone.specifications.UserSpecification;
 
 import java.time.LocalDate;

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.post.Post;
 
 import java.util.ArrayList;

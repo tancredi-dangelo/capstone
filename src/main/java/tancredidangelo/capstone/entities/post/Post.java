@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.feedActions.comment.Comment;
 import tancredidangelo.capstone.entities.feedActions.like.Like;
 
@@ -20,6 +20,7 @@ import java.util.List;
 @Entity
 @Table(name = "posts")
 @Inheritance(strategy = InheritanceType.JOINED)
+
 public abstract class Post {
 
     /// attributes
@@ -53,15 +54,11 @@ public abstract class Post {
         this.author = author;
         this.caption = caption;
         this.timestamp = LocalDateTime.now();
-        this.likes = List.of();
-        this.comments = List.of();
     }
 
     public Post(Account author) {
         this.author = author;
         this.timestamp = LocalDateTime.now();
-        this.likes = List.of();
-        this.comments = List.of();
     }
 
     /// helper methods LIKE
@@ -96,8 +93,8 @@ public abstract class Post {
     public String toString() {
         return "Post{" +
                 "id=" + id +
-                ", author=" + author +
-                ", caption='" + (caption != null ? caption : null) + '\'' +
+                ", author=" + author.getId() +
+                ", caption='" + caption +
                 ", timestamp=" + timestamp +
                 ", likes=" + likes.size() +
                 ", comments=" + comments.size() +

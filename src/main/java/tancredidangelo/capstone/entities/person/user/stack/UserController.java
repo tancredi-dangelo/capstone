@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.person.user;
+package tancredidangelo.capstone.entities.person.user.stack;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -8,8 +8,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import tancredidangelo.capstone.entities.person.account.Account;
 import tancredidangelo.capstone.entities.person.user.userDTOs.*;
+import tancredidangelo.capstone.entities.person.user.userDTOs.updateUser.*;
 
 import java.time.LocalDate;
 import java.util.UUID;

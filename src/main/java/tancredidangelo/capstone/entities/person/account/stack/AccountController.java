@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.person.account;
+package tancredidangelo.capstone.entities.person.account.stack;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import tancredidangelo.capstone.entities.person.account.accountDTOs.*;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.newAccount.NewAccountRequestDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.newAccount.NewAccountResponseDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.updateAccount.*;
 
 
 import java.util.List;
@@ -33,6 +35,17 @@ public class AccountController {
 
 
     // *******  PUBLIC METHODS *******
+
+    /// PUBLIC VS OWNER
+    /// FIND ACCOUNT BY ID -> GET "[...](http://localhost:PORT/accounts/{id})"
+    @GetMapping("/{id}")
+    @PreAuthorize("@authConfig.isOwnerOrAdmin(#id, authentication)")
+    public Account getAccountById(@PathVariable Long id) {
+        return this.accountService.findById(id);
+    }
+
+
+
 
     /// USER + ADMIN
     /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "[...](http://localhost:PORT/accounts)" + {params}
@@ -136,12 +149,6 @@ public class AccountController {
     }
 
 
-    /// FIND OWN ACCOUNT / FIND ACCOUNT BY ID -> GET "[...](http://localhost:PORT/accounts/{id})"
-    @GetMapping("/{id}")
-    @PreAuthorize("@authConfig.isOwnerOrAdmin(#id, authentication)")
-    public Account getAccountById(@PathVariable Long id) {
-        return this.accountService.findById(id);
-    }
 
 
 

@@ -1,10 +1,11 @@
-package tancredidangelo.capstone.entities.post;
+package tancredidangelo.capstone.entities.savedPost;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.post.Post;
 
 import java.time.LocalDateTime;
 

@@ -4,8 +4,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.authentication.login.LoginDTO.LoginRequestDTO;
 import tancredidangelo.capstone.authentication.login.LoginDTO.LoginResponseDTO;
-import tancredidangelo.capstone.entities.person.account.Account;
-import tancredidangelo.capstone.entities.person.account.AccountService;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
 import tancredidangelo.capstone.security.JWTTools;
 

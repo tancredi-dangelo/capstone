@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tancredidangelo.capstone.entities.feedActions.comment.Comment;
 import tancredidangelo.capstone.entities.feedActions.follow.Follow;
-import tancredidangelo.capstone.entities.person.account.Account;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.post.Post;
 
 import java.time.LocalDateTime;

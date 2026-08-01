@@ -5,16 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.emailSender.EmailSender;
-import tancredidangelo.capstone.entities.person.account.Account;
-import tancredidangelo.capstone.entities.person.account.AccountRepository;
-import tancredidangelo.capstone.entities.person.user.User;
-import tancredidangelo.capstone.entities.person.user.UserRepository;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.account.stack.AccountRepository;
+import tancredidangelo.capstone.entities.person.user.stack.User;
+import tancredidangelo.capstone.entities.person.user.stack.UserRepository;
 import tancredidangelo.capstone.authentication.registration.registrationUser.UserRegistrationDTO.UserRegistrationRequestDTO;
 import tancredidangelo.capstone.authentication.registration.registrationUser.UserRegistrationDTO.UserRegistrationResponseDTO;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.helpers.CountryCodeConverter;
 import tancredidangelo.capstone.security.JWTTools;
-import tancredidangelo.capstone.emailSender.EmailSender.*;
 
 /// REGISTRATION USER + FIRST ACCOUNT
 

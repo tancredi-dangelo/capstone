@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.person.account;
+package tancredidangelo.capstone.entities.person.account.stack;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -7,9 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import tancredidangelo.capstone.entities.person.account.accountDTOs.*;
-import tancredidangelo.capstone.entities.person.user.User;
-import tancredidangelo.capstone.entities.person.user.UserService;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.newAccount.NewAccountRequestDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.newAccount.NewAccountResponseDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.updateAccount.*;
+import tancredidangelo.capstone.entities.person.user.stack.User;
+import tancredidangelo.capstone.entities.person.user.stack.UserService;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;

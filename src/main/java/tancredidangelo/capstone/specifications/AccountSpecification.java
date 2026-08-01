@@ -6,8 +6,8 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
-import tancredidangelo.capstone.entities.person.account.Account;
-import tancredidangelo.capstone.entities.person.user.User;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.user.stack.User;
 
 import java.util.List;
 

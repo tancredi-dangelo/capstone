@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tancredidangelo.capstone.entities.person.account.Account;
-import tancredidangelo.capstone.entities.person.user.User;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.user.stack.User;
 
 import java.time.LocalDateTime;
 
