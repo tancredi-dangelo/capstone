@@ -2,6 +2,7 @@ package tancredidangelo.capstone.entities.person.user.stack;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -42,8 +43,9 @@ public class UserService {
 
     /// SAVE NEW USER
     @Transactional
-    public User save(User user) {
-        return this.userRepository.save(user);
+    public UserResponseDTO save(User user) {
+        User saved = this.userRepository.save(user);
+        return UserResponseDTO.fromEntity(saved);
     }
 
 
@@ -105,18 +107,6 @@ public class UserService {
     /// FIND USER BY ID -> ADMIN, IT
     public User findById(UUID id) {
         return this.userRepository.findById(id).orElseThrow(()-> new NotFoundException("User not found."));
-    }
-
-
-    /// FIND USER BY EMAIL -> ADMIN
-    public User findByEmail(String email) {
-        return this.userRepository.findByEmail(email).orElseThrow(()-> new NotFoundException("User not found."));
-    }
-
-
-    /// CHECK IF USER EXISTS BY EMAIL -> IT
-    public boolean existsByEmail(String email) {
-        return this.userRepository.existsByEmail(email);
     }
 
 

@@ -1,8 +1,10 @@
 package tancredidangelo.capstone.entities.person.user.userDTOs.responses;
 
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.user.stack.User;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public record UserResponseDTO(
@@ -11,7 +13,9 @@ public record UserResponseDTO(
         String lastName,
         String email,
         LocalDate birthdate,
-        String country
+        String country,
+        List<Long> userAccounts,
+        boolean isFlagged
 ) {
 
     public static UserResponseDTO fromEntity(User user) {
@@ -21,7 +25,9 @@ public record UserResponseDTO(
                 user.getLastName(),
                 user.getEmail(),
                 user.getBirthdate(),
-                user.getCountry()
+                user.getCountry(),
+                user.getUserAccounts().stream().map(Account::getId).toList(),
+                user.isFlagged()
         );
     }
 }

@@ -15,6 +15,7 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.Ow
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.user.stack.User;
 import tancredidangelo.capstone.entities.person.user.stack.UserService;
+import tancredidangelo.capstone.entities.person.user.userDTOs.responses.UserResponseDTO;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
@@ -62,6 +63,8 @@ public class AccountService {
         );
 
         Account saved = this.accountRepository.save(newAccount);
+
+        this.userService.save(userFound);
 
         return OwnAccountResponseDTO.fromEntity(saved);
     }

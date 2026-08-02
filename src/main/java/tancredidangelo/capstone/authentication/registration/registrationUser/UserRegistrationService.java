@@ -15,6 +15,8 @@ import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.helpers.CountryCodeConverter;
 import tancredidangelo.capstone.security.JWTTools;
 
+import java.util.List;
+
 /// REGISTRATION USER + FIRST ACCOUNT
 
 @Service
@@ -80,6 +82,7 @@ public class UserRegistrationService {
 
         Account savedAccount = this.accountRepository.save(newAccount);
         log.info("Account registered with ID: {}.", savedAccount.getId());
+
 
 
         // send registration email

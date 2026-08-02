@@ -51,8 +51,6 @@ public class TokenFilter extends OncePerRequestFilter {
             Account authUser = this.accountService.findById(accountId);
             Authentication authentication = new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
 
-            System.out.println("DEBUG: Setting authentication for account " + authUser.getUsername() + " with authorities " + authUser.getAuthorities());
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception ex) {

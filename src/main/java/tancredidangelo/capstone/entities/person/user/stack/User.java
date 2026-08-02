@@ -5,8 +5,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -41,6 +44,9 @@ public class User {
 
     @Column(name = "is_flagged", nullable = false)
     private boolean isFlagged;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> userAccounts = new ArrayList<>();
 
 
 

@@ -27,7 +27,6 @@ public class AuthConfig {
         if (authentication == null || !(authentication.getPrincipal() instanceof Account principal)) {
             return false;
         }
-        System.out.println("DEBUG Authorities: " + authentication.getAuthorities());
         return principal.getId() != null && principal.getId().equals(id);
     }
 
