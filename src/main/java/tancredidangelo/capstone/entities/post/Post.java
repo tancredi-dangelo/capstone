@@ -60,6 +60,8 @@ public abstract class Post {
         this.isUpdated = false;
     }
 
+
+    // no caption
     public Post(Account author) {
         this.author = author;
         this.timestamp = LocalDateTime.now();
@@ -106,6 +108,7 @@ public abstract class Post {
                 ", likes=" + likes.size() +
                 ", comments=" + comments.size() +
                 ", isUpdated=" + isUpdated +
+
                 '}';
     }
 }

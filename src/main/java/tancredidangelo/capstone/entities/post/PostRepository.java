@@ -11,6 +11,9 @@ import tancredidangelo.capstone.entities.person.account.stack.Account;
 
 import java.time.LocalDateTime;
 
+
+/// UNIQUE REPOSITORY FOR ALL POST SUBCLASSES
+
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
 
