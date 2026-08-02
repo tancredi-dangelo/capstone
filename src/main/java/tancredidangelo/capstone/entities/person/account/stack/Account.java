@@ -84,6 +84,7 @@ public class Account implements UserDetails {
 
 
     /// constructor
+
     public Account(User user, String username, String password, String profilePicUrl, String bio, List<String> tags) {
         this.user = user;
         this.username = username;
@@ -97,6 +98,7 @@ public class Account implements UserDetails {
 
 
     /// admin constructor
+
     public Account(User user, String username, String password) {
         this.user = user;
         this.username = username;
@@ -113,6 +115,8 @@ public class Account implements UserDetails {
         this.savedPosts = null;
     }
 
+
+
     /// authorities and details
 
     @Override
@@ -120,24 +124,10 @@ public class Account implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
 
     @Override
     public boolean isAccountNonLocked() {
         return !this.isBanned;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 
 

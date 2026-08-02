@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.person.account.accountDTOs.newAccount;
+package tancredidangelo.capstone.entities.person.account.accountDTOs.requests;
 
 
 import jakarta.validation.constraints.*;

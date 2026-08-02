@@ -8,8 +8,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import tancredidangelo.capstone.entities.person.user.userDTOs.*;
-import tancredidangelo.capstone.entities.person.user.userDTOs.updateUser.*;
+import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateEmailRequestDTO;
+import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateFlagRequestDTO;
+import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateUserRequestDTO;
+import tancredidangelo.capstone.entities.person.user.userDTOs.responses.UserResponseDTO;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -35,7 +37,7 @@ public class UserController {
     /// UPDATE USER BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
     @PutMapping("{id}")
     @PreAuthorize("@authConfig.isOwner(#id, authentication)")
-    public UpdateUserResponseDTO updateUserById(@PathVariable UUID id, @RequestBody @Valid UpdateUserRequestDTO payload) {
+    public UserResponseDTO updateUserById(@PathVariable UUID id, @RequestBody @Valid UpdateUserRequestDTO payload) {
         return this.userService.updateById(id, payload);
     }
 
@@ -43,7 +45,7 @@ public class UserController {
     /// UPDATE USER EMAIL BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
     @PutMapping("{id}/email")
     @PreAuthorize("@authConfig.isOwner(#id, authentication)")
-    public UpdateEmailResponseDTO updateEmailById(@PathVariable UUID id, @RequestBody @Valid UpdateEmailRequestDTO payload) {
+    public UserResponseDTO updateEmailById(@PathVariable UUID id, @RequestBody @Valid UpdateEmailRequestDTO payload) {
         return this.userService.updateEmailById(id, payload);
     }
 
@@ -55,7 +57,7 @@ public class UserController {
     /// GET ALL USERS -> GET "[...](http://localhost:PORT/users/search)" -> 200 OK
     @GetMapping("/search")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
-    public Page<User> getAllUsersAndFilter(
+    public Page<UserResponseDTO> getAllUsersAndFilter(
             @RequestParam(required = false) Boolean isFlagged,
             @RequestParam(required = false) String emailMatch,
             @RequestParam(required = false) String country,
@@ -82,7 +84,7 @@ public class UserController {
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public UserResponseDTO getUserById(@PathVariable UUID id) {
         User found = this.userService.findById(id);
-        return new UserResponseDTO(found.getId(), found.getFirstName(), found.getLastName(), found.getEmail(),  found.getBirthdate(), found.getCountry(), found.isFlagged());
+        return UserResponseDTO.fromEntity(found);
     }
 
 
@@ -91,8 +93,8 @@ public class UserController {
     /// UPDATE USER FLAG BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
     @PutMapping("{id}/flag")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
-    public UpdateFlagResponseDTO setUserFlag(@PathVariable UUID id, @RequestBody @Valid UpdateFlagRequestDTO payload) {
-        return this.userService.setFlagById(id, payload.flagValue());
+    public UserResponseDTO setUserFlag(@PathVariable UUID id, @RequestBody @Valid UpdateFlagRequestDTO payload) {
+        return this.userService.setFlagById(id, payload);
     }
 
 

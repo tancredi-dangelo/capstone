@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.person.user.userDTOs.updateUser;
+package tancredidangelo.capstone.entities.person.user.userDTOs.requests;
 
 import jakarta.validation.constraints.*;
 

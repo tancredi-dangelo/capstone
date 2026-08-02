@@ -8,7 +8,11 @@ import org.springframework.data.jpa.domain.Specification;
 
 import org.springframework.stereotype.Service;
 
-import tancredidangelo.capstone.entities.person.user.userDTOs.updateUser.*;
+import tancredidangelo.capstone.emailSender.EmailSender;
+import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateEmailRequestDTO;
+import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateFlagRequestDTO;
+import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateUserRequestDTO;
+import tancredidangelo.capstone.entities.person.user.userDTOs.responses.UserResponseDTO;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
@@ -25,9 +29,11 @@ public class UserService {
 
     /// dependency injection
     private final UserRepository userRepository;
+    private final EmailSender emailSender;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, EmailSender emailSender) {
         this.userRepository = userRepository;
+        this.emailSender = emailSender;
     }
 
 
@@ -43,7 +49,7 @@ public class UserService {
 
     /// UPDATE USER DETAILS -> ONLY USER
     @Transactional
-    public UpdateUserResponseDTO updateById(UUID id, UpdateUserRequestDTO payload) {
+    public UserResponseDTO updateById(UUID id, UpdateUserRequestDTO payload) {
         User found = findById(id);
 
         found.setFirstName(payload.firstName());
@@ -53,13 +59,14 @@ public class UserService {
 
         User updated = this.userRepository.save(found);
         log.info("User updated.");
-        return new UpdateUserResponseDTO(updated.getId());
+
+        return UserResponseDTO.fromEntity(updated);
     }
 
 
     /// UPDATE USER EMAIL -> ONLY USER
     @Transactional
-    public UpdateEmailResponseDTO updateEmailById(UUID id, UpdateEmailRequestDTO payload) {
+    public UserResponseDTO updateEmailById(UUID id, UpdateEmailRequestDTO payload) {
 
         User found = findById(id);
 
@@ -72,13 +79,14 @@ public class UserService {
             }
         }
 
-        // TODO: SEND CONFIRMATION EMAIL TO NEW EMAIL ADDRESS
-
         found.setEmail(payload.email());
         log.info("Email updated");
 
         User updated = this.userRepository.save(found);
-        return new UpdateEmailResponseDTO(updated.getId());
+
+        this.emailSender.sendRegistrationEmail(updated);
+
+        return UserResponseDTO.fromEntity(updated);
     }
 
 
@@ -87,9 +95,10 @@ public class UserService {
 
 
     /// SEARCH AND FILTER ALL USERS -> ONLY ADMIN
-    public Page<User> searchUsers(Boolean isFlagged, String emailMatch, String country, LocalDate birthdate, Pageable pageable) {
+    public Page<UserResponseDTO> searchUsers(Boolean isFlagged, String emailMatch, String country, LocalDate birthdate, Pageable pageable) {
         Specification<User> spec = UserSpecification.filterUsers(country, emailMatch, birthdate, isFlagged);
-        return this.userRepository.findAll(spec, pageable);
+        Page<User> rawUsers = this.userRepository.findAll(spec, pageable);
+        return rawUsers.map(UserResponseDTO::fromEntity);
     }
 
 
@@ -113,19 +122,21 @@ public class UserService {
 
     /// FLAG USER
     @Transactional
-    public UpdateFlagResponseDTO setFlagById(UUID id, boolean flagValue) {
+    public UserResponseDTO setFlagById(UUID id, UpdateFlagRequestDTO payload) {
 
         User found = findById(id);
 
-        if (found.isFlagged() && flagValue) {
+        if (found.isFlagged() && payload.flagValue()) {
             throw new ValidationException("This user is already flagged.");
-        } else if (!found.isFlagged() && !flagValue) {
+        } else if (!found.isFlagged() && !payload.flagValue()) {
             throw new ValidationException("This user is already unflagged.");
         }
 
-        found.setFlagged(flagValue);
-        this.userRepository.save(found);
-        return new UpdateFlagResponseDTO(found.getId());
+        found.setFlagged(payload.flagValue());
+
+        User updated = this.userRepository.save(found);
+
+        return UserResponseDTO.fromEntity(updated);
 
     }
 

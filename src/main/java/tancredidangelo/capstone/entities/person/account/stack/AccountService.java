@@ -7,9 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import tancredidangelo.capstone.entities.person.account.accountDTOs.newAccount.NewAccountRequestDTO;
-import tancredidangelo.capstone.entities.person.account.accountDTOs.newAccount.NewAccountResponseDTO;
-import tancredidangelo.capstone.entities.person.account.accountDTOs.updateAccount.*;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.NewAccountRequestDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.SetAccountBanRequestDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdateAccountRequestDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdatePasswordRequestDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.OwnAccountResponseDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.user.stack.User;
 import tancredidangelo.capstone.entities.person.user.stack.UserService;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
@@ -26,7 +29,7 @@ public class AccountService {
 
     /// dependency injection
     private final AccountRepository accountRepository;
-    private  final UserService userService;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
     public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder) {
@@ -41,7 +44,7 @@ public class AccountService {
 
     /// CREATE NEW ACCOUNT
     @Transactional
-    public NewAccountResponseDTO save(UUID user_id, NewAccountRequestDTO payload) {
+    public OwnAccountResponseDTO save(UUID user_id, NewAccountRequestDTO payload) {
 
         if (this.accountRepository.existsByUsername(payload.username())) {
             throw new AlreadyExistsException("This username is already being used. Please choose another username.");
@@ -56,45 +59,46 @@ public class AccountService {
                 payload.profilePicUrl(),
                 payload.bio(),
                 payload.tags()
-                );
+        );
 
         Account saved = this.accountRepository.save(newAccount);
 
-        return new NewAccountResponseDTO(saved.getId());
-    }
-
-
-    /// FIND BY USERNAME -> USER, ADMIN, IT
-    public Account findByUsername(String username) {
-        return this.accountRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Account not found."));
+        return OwnAccountResponseDTO.fromEntity(saved);
     }
 
 
     /// FIND ACTIVE ACCOUNTS -> USER, ADMIN
-    public Page<Account> searchActiveAccounts(String country, String usernameMatch, List<String> tags, Pageable pageable) {
+    public Page<PublicAccountResponseDTO> searchActiveAccounts(String country, String usernameMatch, List<String> tags, Pageable pageable) {
         Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags);
-        return this.accountRepository.findAll(spec, pageable);
+        Page<Account> rawAccounts = this.accountRepository.findAll(spec, pageable);
+        return rawAccounts.map(PublicAccountResponseDTO::fromEntity);
     }
 
 
     /// UPDATE ACCOUNT -> OWNER
     @Transactional
-    public UpdateAccountResponseDTO updateById(Long id, UpdateAccountRequestDTO payload) {
+    public OwnAccountResponseDTO updateById(Long id, UpdateAccountRequestDTO payload) {
         Account found = findById(id);
 
-        found.setUsername(payload.username());
-        found.setProfilePicUrl(payload.profilePicUrl());
-        found.setBio(payload.bio());
-        found.setTags(payload.tags());
+        if (payload.username() != null && !found.getUsername().equalsIgnoreCase(payload.username())) {
+            if (this.accountRepository.existsByUsername(payload.username())) {
+                throw new AlreadyExistsException("This username is already taken.");
+            }
+            found.setUsername(payload.username());
+        }
+
+        if (payload.profilePicUrl() != null) found.setProfilePicUrl(payload.profilePicUrl());
+        if (payload.bio() != null) found.setBio(payload.bio());
+        if (payload.tags() != null) found.setTags(payload.tags());
 
         Account saved = this.accountRepository.save(found);
-        return new UpdateAccountResponseDTO(saved.getId());
+        return OwnAccountResponseDTO.fromEntity(saved);
     }
 
 
     /// UPDATE PASSWORD -> OWNER
     @Transactional
-    public UpdatePasswordResponseDTO updatePasswordById(Long id, UpdatePasswordRequestDTO payload) {
+    public OwnAccountResponseDTO updatePasswordById(Long id, UpdatePasswordRequestDTO payload) {
 
         Account found = findById(id);
 
@@ -109,17 +113,17 @@ public class AccountService {
         found.setPassword(passwordEncoder.encode(payload.newPassword()));
 
         Account updated = this.accountRepository.save(found);
-        log.info("Password successfully updated");
+        log.info("Password successfully updated for Account ID {}", id);
 
-        return new UpdatePasswordResponseDTO(updated.getId());
+        return OwnAccountResponseDTO.fromEntity(updated);
     }
 
 
-    /// DELETE ACCOUNT -> OWNER
+    /// DELETE ACCOUNT -> OWNER / ADMIN
     @Transactional
     public void deleteById(Long id) {
         Account found = findById(id);
-        this.accountRepository.deleteById(id);
+        this.accountRepository.deleteById(found.getId());
     }
 
 
@@ -127,9 +131,21 @@ public class AccountService {
     // ------------------------------- ADMIN METHODS --------------------------------------------------------------
 
 
-    /// FIND ACCOUNT BY ID -> IT, ADMIN
+    /// FIND ACCOUNT ENTITY BY ID -> INTERNAL, ADMIN
     public Account findById(Long id) {
         return this.accountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account not found."));
+    }
+
+
+    /// FIND PUBLIC DTO BY ID -> PUBLIC
+    public PublicAccountResponseDTO findPublicDTOById(Long id) {
+        return PublicAccountResponseDTO.fromEntity(findById(id));
+    }
+
+
+    /// FIND BY USERNAME -> ADMIN, IT
+    public Account findByUsername(String username) {
+        return (this.accountRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Account not found.")));
     }
 
 
@@ -154,13 +170,12 @@ public class AccountService {
 
     /// BAN ACCOUNT
     @Transactional
-    public SetAccountBanResponseDTO setBanStatusById(Long id, SetAccountBanRequestDTO payload) {
+    public OwnAccountResponseDTO setBanStatusById(Long id, SetAccountBanRequestDTO payload) {
         Account found = findById(id);
         found.setBanned(payload.value());
-        this.accountRepository.save(found);
-        return new SetAccountBanResponseDTO(found.getId());
+        Account banned = this.accountRepository.save(found);
+        log.info("Ban status updated to {} for account ID {}", payload.value(), id);
+        return OwnAccountResponseDTO.fromEntity(banned);
     }
 
-
 }
-
