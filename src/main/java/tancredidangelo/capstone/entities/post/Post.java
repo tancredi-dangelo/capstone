@@ -39,6 +39,9 @@ public abstract class Post {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
+    @Column(name = "was_updated")
+    private boolean isUpdated;
+
     @OneToMany(mappedBy = "post")
     @Setter(AccessLevel.NONE)
     private List<Like> likes = new ArrayList<>();
@@ -54,12 +57,16 @@ public abstract class Post {
         this.author = author;
         this.caption = caption;
         this.timestamp = LocalDateTime.now();
+        this.isUpdated = false;
     }
 
     public Post(Account author) {
         this.author = author;
         this.timestamp = LocalDateTime.now();
+        this.isUpdated = false;
     }
+
+
 
     /// helper methods LIKE
 
@@ -98,6 +105,7 @@ public abstract class Post {
                 ", timestamp=" + timestamp +
                 ", likes=" + likes.size() +
                 ", comments=" + comments.size() +
+                ", isUpdated=" + isUpdated +
                 '}';
     }
 }

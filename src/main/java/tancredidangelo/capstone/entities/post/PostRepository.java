@@ -17,7 +17,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
     // ----------------- PUBLIC METHODS --------------------------------------------------------------
 
-    // FIND POST BY FOLLOWED ACCOUNTS AND ORDER BY TIMESTAMP, DURATION <= 24H (FEED)
+    // FIND POSTS BY FOLLOWED ACCOUNTS AND ORDER BY TIMESTAMP, DURATION <= 24H (FEED)
     @Query("""
     SELECT p FROM Post p
     WHERE p.author.id IN (

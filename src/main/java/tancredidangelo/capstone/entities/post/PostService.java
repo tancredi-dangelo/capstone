@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import tancredidangelo.capstone.entities.post.postDTO.PostResponseDTO;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
@@ -32,8 +33,9 @@ public class PostService {
 
     /// get Feed
     LocalDateTime since = LocalDateTime.now().minusHours(24);
-    public Page<Post> getFeed(Long accountId, LocalDateTime since, Pageable pageable) {
-        return this.postRepository.findFeedForAccount(accountId, since, pageable);
+    public Page<PostResponseDTO> getFeed(Long accountId, LocalDateTime since, Pageable pageable) {
+        Page<Post> rawPosts = this.postRepository.findFeedForAccount(accountId, since, pageable);
+        // TODO: finish feed fetch
     }
 
 

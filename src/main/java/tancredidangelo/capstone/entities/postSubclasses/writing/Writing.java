@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.post.subclasses;
+package tancredidangelo.capstone.entities.postSubclasses.writing;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
