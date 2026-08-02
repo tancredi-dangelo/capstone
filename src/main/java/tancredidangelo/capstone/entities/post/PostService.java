@@ -1,19 +1,20 @@
 package tancredidangelo.capstone.entities.post;
 
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import tancredidangelo.capstone.entities.post.postDTO.requests.update.UpdatePostRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.responses.*;
-import tancredidangelo.capstone.entities.postSubclasses.carousel.Carousel;
-import tancredidangelo.capstone.entities.postSubclasses.photo.Photo;
-import tancredidangelo.capstone.entities.postSubclasses.video.Video;
+import tancredidangelo.capstone.helpers.ConverterPostDTO;
+import tancredidangelo.capstone.helpers.ConverterPostDTO.*;
 import tancredidangelo.capstone.entities.postSubclasses.writing.Writing;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
+
+import static tancredidangelo.capstone.helpers.ConverterPostDTO.convertToDTO;
 
 @Service
 @Slf4j
@@ -54,8 +55,28 @@ public class PostService {
 
         Page<Post> rawPosts = this.postRepository.findFeedForAccount(accountId, effectiveSince, pageable);
 
-        return rawPosts.map(this::convertToDTO);
+        return rawPosts.map(ConverterPostDTO::convertToDTO);
     }
+
+
+    /// Update post by id
+    public PostResponseDTO updateById(Long id, UpdatePostRequestDTO payload) {
+
+        Post found = findById(id);
+
+        if (found instanceof Writing) {
+            ((Writing) found).setText(payload.text());
+        } else {
+            found.setCaption(payload.caption());
+        }
+
+        found.setUpdated(true);
+        Post saved = save(found);
+
+        return convertToDTO(saved);
+    }
+
+
 
     /// Delete post by id
     @Transactional
@@ -65,18 +86,4 @@ public class PostService {
         log.info("Post with ID {} successfully deleted.", id);
     }
 
-
-
-    // ------------------ HELPER DTO MAPPER -----------------------------------------------------------
-
-    /// Polymorphic mapper for Post subclasses
-    public PostResponseDTO convertToDTO(Post post) {
-        return switch (post) {
-            case Writing writing   -> WritingResponseDTO.fromEntity(writing);
-            case Photo photo       -> PhotoResponseDTO.fromEntity(photo);
-            case Carousel carousel -> CarouselResponseDTO.fromEntity(carousel);
-            case Video video       -> VideoResponseDTO.fromEntity(video);
-            default -> throw new IllegalArgumentException("Unknown post subclass type: " + post.getClass().getName());
-        };
-    }
 }

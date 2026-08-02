@@ -2,58 +2,40 @@ package tancredidangelo.capstone.entities.postSubclasses.writing;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.PostService;
-import tancredidangelo.capstone.entities.post.postDTO.responses.WritingResponseDTO;
+import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreatePhotoRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreateWritingRequestDTO;
-import tancredidangelo.capstone.exceptions.BadRequestException;
+import tancredidangelo.capstone.entities.post.postDTO.responses.PhotoResponseDTO;
+import tancredidangelo.capstone.entities.post.postDTO.responses.WritingResponseDTO;
+import tancredidangelo.capstone.entities.postSubclasses.photo.Photo;
+
 
 @Service
 @Slf4j
 public class WritingService {
 
+    /// dependency injection
+
     private final PostService postService;
+    private final AccountService accountService;
 
-    public WritingService(PostService postService) {
+    public WritingService(PostService postService, AccountService accountService) {
         this.postService = postService;
+        this.accountService = accountService;
     }
 
 
+    // methods
 
-    // ------------------------------- methods ------------------------------------------
-
-    /// Create new Writing
+    /// create Writing
     public WritingResponseDTO createWriting(CreateWritingRequestDTO payload) {
-        Writing newWritingPost = new Writing(payload.author(), payload.text());
-
-        Post saved = this.postService.save(newWritingPost);
-        log.info("Writing Post created with ID: {}", saved.getId());
-
+        Account author = this.accountService.findById(payload.authorId());
+        Writing newWriting = new Writing(author, payload.text());
+        Post saved = this.postService.save(newWriting);
+        log.info("Post type:'Writing' created.");
         return WritingResponseDTO.fromEntity((Writing) saved);
-    }
-
-    /// Update Writing post
-    public WritingResponseDTO updateById(Long id, UpdateWritingRequestDTO payload) {
-
-        Post found = this.postService.findById(id);
-
-        if (!(found instanceof Writing writingToUpdate)) {
-            throw new BadRequestException("Post is not type 'Writing'");
-        }
-
-        writingToUpdate.setText(payload.text());
-        writingToUpdate.setUpdated(true);
-
-        Post saved = this.postService.save(writingToUpdate);
-        log.info("Writing Post with ID {} updated.", saved.getId());
-
-        return WritingResponseDTO.fromEntity((Writing) saved);
-    }
-
-    /// Delete Writing post
-    public void deleteById(Long id) {
-        // Delega la cancellazione direttamente al PostService generico per ID
-        this.postService.deleteById(id);
-        log.info("Writing Post with ID {} deleted.", id);
     }
 }
