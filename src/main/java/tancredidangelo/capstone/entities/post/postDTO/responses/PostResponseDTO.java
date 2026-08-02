@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.post.postDTO;
+package tancredidangelo.capstone.entities.post.postDTO.responses;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

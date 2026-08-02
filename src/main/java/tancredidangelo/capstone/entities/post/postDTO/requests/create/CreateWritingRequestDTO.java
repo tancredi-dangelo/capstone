@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.postSubclasses.writing.writingDTO;
+package tancredidangelo.capstone.entities.post.postDTO.requests.create;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

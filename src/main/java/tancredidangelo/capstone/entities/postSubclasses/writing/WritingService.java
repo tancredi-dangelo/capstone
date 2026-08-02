@@ -1,13 +1,11 @@
 package tancredidangelo.capstone.entities.postSubclasses.writing;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.PostService;
-import tancredidangelo.capstone.entities.post.postDTO.WritingResponseDTO;
-import tancredidangelo.capstone.entities.postSubclasses.writing.writingDTO.CreateWritingRequestDTO;
-import tancredidangelo.capstone.entities.postSubclasses.writing.writingDTO.UpdateWritingRequestDTO;
+import tancredidangelo.capstone.entities.post.postDTO.responses.WritingResponseDTO;
+import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreateWritingRequestDTO;
 import tancredidangelo.capstone.exceptions.BadRequestException;
 
 @Service

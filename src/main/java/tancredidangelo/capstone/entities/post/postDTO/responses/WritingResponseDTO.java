@@ -1,5 +1,6 @@
-package tancredidangelo.capstone.entities.post.postDTO;
+package tancredidangelo.capstone.entities.post.postDTO.responses;
 
+import jakarta.validation.constraints.*;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.postSubclasses.writing.Writing;
 
@@ -7,12 +8,12 @@ import java.time.LocalDateTime;
 
 public record WritingResponseDTO(
 
-        Long id,
-        Account author,
-        String text,
-        LocalDateTime timestamp,
-        int likes,
-        int comments,
+        @NotNull Long id,
+        @NotNull Account author,
+        @NotBlank @Size(max = 2200, message = "Il testo non può superare i 2200 caratteri") String text,
+        @NotNull @PastOrPresent LocalDateTime timestamp,
+        @Min(0) int likes,
+        @Min(0) int comments,
         boolean isUpdated
 
 ) implements PostResponseDTO {

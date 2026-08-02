@@ -15,6 +15,7 @@ import tancredidangelo.capstone.entities.post.Post;
 
 @Entity
 @Table(name = "written_posts")
+
 public class Writing extends Post {
 
     /// attributes

@@ -6,25 +6,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import tancredidangelo.capstone.entities.post.postDTO.*;
+import tancredidangelo.capstone.entities.post.postDTO.responses.*;
 import tancredidangelo.capstone.entities.postSubclasses.carousel.Carousel;
-import tancredidangelo.capstone.entities.post.postDTO.CarouselResponseDTO;
 import tancredidangelo.capstone.entities.postSubclasses.photo.Photo;
-import tancredidangelo.capstone.entities.post.postDTO.PhotoResponseDTO;
 import tancredidangelo.capstone.entities.postSubclasses.video.Video;
-import tancredidangelo.capstone.entities.post.postDTO.VideoResponseDTO;
 import tancredidangelo.capstone.entities.postSubclasses.writing.Writing;
-import tancredidangelo.capstone.entities.post.postDTO.WritingResponseDTO;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+
 public class PostService {
 
     private final PostRepository postRepository;
+
+    public PostService(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     // ------------------ METHODS --------------------------------------
 
@@ -65,7 +65,9 @@ public class PostService {
         log.info("Post with ID {} successfully deleted.", id);
     }
 
-    // ------------------ HELPER MAPPER --------------------------------------
+
+
+    // ------------------ HELPER DTO MAPPER -----------------------------------------------------------
 
     /// Polymorphic mapper for Post subclasses
     public PostResponseDTO convertToDTO(Post post) {
