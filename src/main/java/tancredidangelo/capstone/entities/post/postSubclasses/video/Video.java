@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.postSubclasses.photo;
+package tancredidangelo.capstone.entities.post.postSubclasses.video;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,39 +14,38 @@ import tancredidangelo.capstone.entities.post.Post;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "photos")
+@Table(name = "videos")
 
-public class Photo extends Post {
+public class Video extends Post {
 
     /// attributes
 
-    @Column(name = "photo_url", nullable = false)
-    private String photoUrl;
+    @Column(name = "video_url", nullable = false)
+    private String videoUrl;
 
+    @Column(name = "duration_seconds", nullable = false)
+    private int durationSeconds;
 
 
     /// constructor
-
-    public Photo(Account author, String caption, String photoUrl) {
+    public Video(Account author, String caption, String videoUrl, int durationSeconds) {
         super(author, caption);
-        this.photoUrl = photoUrl;
+        this.videoUrl = videoUrl;
+        this.durationSeconds = durationSeconds;
     }
 
-
-
     /// to string
-
     @Override
     public String toString() {
-        return "Photo{" +
+        return "Video{" +
                 "id=" + getId() +
                 ", author=" + getAuthor() +
                 ", caption='" + (getCaption() != null ? getCaption() : null) + '\'' +
                 ", likes=" + getLikes().size() +
                 ", comments=" + getComments().size() +
-                ", photoUrl='" + photoUrl + '\'' +
+                ", videoUrl='" + videoUrl + '\'' +
+                ", durationSeconds=" + durationSeconds +
                 ", timestamp=" + getTimestamp() +
                 '}';
     }
-
 }

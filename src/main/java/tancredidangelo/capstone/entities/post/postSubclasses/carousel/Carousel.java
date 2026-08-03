@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.postSubclasses.carousel;
+package tancredidangelo.capstone.entities.post.postSubclasses.carousel;
 
 import jakarta.persistence.*;
 import lombok.Getter;

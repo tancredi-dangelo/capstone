@@ -3,7 +3,7 @@ package tancredidangelo.capstone.entities.post.postDTO.responses;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
-import tancredidangelo.capstone.entities.postSubclasses.photo.Photo;
+import tancredidangelo.capstone.entities.post.postSubclasses.photo.Photo;
 
 import java.time.LocalDateTime;
 

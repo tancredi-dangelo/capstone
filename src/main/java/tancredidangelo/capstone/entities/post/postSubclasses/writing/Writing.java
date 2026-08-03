@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.postSubclasses.video;
+package tancredidangelo.capstone.entities.post.postSubclasses.writing;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,37 +14,34 @@ import tancredidangelo.capstone.entities.post.Post;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "videos")
+@Table(name = "written_posts")
 
-public class Video extends Post {
+public class Writing extends Post {
 
     /// attributes
 
-    @Column(name = "video_url", nullable = false)
-    private String videoUrl;
+    @Column(nullable = false)
+    private String text;
 
-    @Column(name = "duration_seconds", nullable = false)
-    private int durationSeconds;
 
 
     /// constructor
-    public Video(Account author, String caption, String videoUrl, int durationSeconds) {
-        super(author, caption);
-        this.videoUrl = videoUrl;
-        this.durationSeconds = durationSeconds;
+
+    public Writing(Account author, String text) {
+        super(author);
+        this.text = text;
     }
+
 
     /// to string
     @Override
     public String toString() {
-        return "Video{" +
+        return "Writing{" +
                 "id=" + getId() +
                 ", author=" + getAuthor() +
-                ", caption='" + (getCaption() != null ? getCaption() : null) + '\'' +
+                ", text='" + text + '\'' +
                 ", likes=" + getLikes().size() +
                 ", comments=" + getComments().size() +
-                ", videoUrl='" + videoUrl + '\'' +
-                ", durationSeconds=" + durationSeconds +
                 ", timestamp=" + getTimestamp() +
                 '}';
     }

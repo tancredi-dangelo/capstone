@@ -14,12 +14,11 @@ import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreateVide
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreateWritingRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.requests.update.UpdatePostRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.responses.*;
-import tancredidangelo.capstone.entities.postSubclasses.carousel.CarouselService;
-import tancredidangelo.capstone.entities.postSubclasses.photo.PhotoService;
-import tancredidangelo.capstone.entities.postSubclasses.video.VideoService;
-import tancredidangelo.capstone.entities.postSubclasses.writing.WritingService;
+import tancredidangelo.capstone.entities.post.postSubclasses.carousel.CarouselService;
+import tancredidangelo.capstone.entities.post.postSubclasses.photo.PhotoService;
+import tancredidangelo.capstone.entities.post.postSubclasses.video.VideoService;
+import tancredidangelo.capstone.entities.post.postSubclasses.writing.WritingService;
 import tancredidangelo.capstone.helpers.ConverterPostDTO;
-import tancredidangelo.capstone.helpers.ConverterPostDTO.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

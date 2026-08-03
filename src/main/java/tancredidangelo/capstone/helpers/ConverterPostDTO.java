@@ -2,10 +2,10 @@ package tancredidangelo.capstone.helpers;
 
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.postDTO.responses.*;
-import tancredidangelo.capstone.entities.postSubclasses.carousel.Carousel;
-import tancredidangelo.capstone.entities.postSubclasses.photo.Photo;
-import tancredidangelo.capstone.entities.postSubclasses.video.Video;
-import tancredidangelo.capstone.entities.postSubclasses.writing.Writing;
+import tancredidangelo.capstone.entities.post.postSubclasses.carousel.Carousel;
+import tancredidangelo.capstone.entities.post.postSubclasses.photo.Photo;
+import tancredidangelo.capstone.entities.post.postSubclasses.video.Video;
+import tancredidangelo.capstone.entities.post.postSubclasses.writing.Writing;
 
 public class ConverterPostDTO {
     /// Polymorphic mapper for Post subclasses

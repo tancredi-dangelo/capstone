@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.postSubclasses.carousel;
+package tancredidangelo.capstone.entities.post.postSubclasses.carousel;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

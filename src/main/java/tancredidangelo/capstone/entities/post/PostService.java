@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.post.postDTO.requests.update.UpdatePostRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.responses.*;
 import tancredidangelo.capstone.helpers.ConverterPostDTO;
-import tancredidangelo.capstone.helpers.ConverterPostDTO.*;
-import tancredidangelo.capstone.entities.postSubclasses.writing.Writing;
+import tancredidangelo.capstone.entities.post.postSubclasses.writing.Writing;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;

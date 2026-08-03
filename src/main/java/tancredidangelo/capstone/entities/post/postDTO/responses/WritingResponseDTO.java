@@ -2,7 +2,7 @@ package tancredidangelo.capstone.entities.post.postDTO.responses;
 
 import jakarta.validation.constraints.*;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
-import tancredidangelo.capstone.entities.postSubclasses.writing.Writing;
+import tancredidangelo.capstone.entities.post.postSubclasses.writing.Writing;
 
 import java.time.LocalDateTime;
 

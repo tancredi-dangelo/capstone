@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.postSubclasses.writing;
+package tancredidangelo.capstone.entities.post.postSubclasses.photo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,35 +14,39 @@ import tancredidangelo.capstone.entities.post.Post;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "written_posts")
+@Table(name = "photos")
 
-public class Writing extends Post {
+public class Photo extends Post {
 
     /// attributes
 
-    @Column(nullable = false)
-    private String text;
+    @Column(name = "photo_url", nullable = false)
+    private String photoUrl;
 
 
 
     /// constructor
 
-    public Writing(Account author, String text) {
-        super(author);
-        this.text = text;
+    public Photo(Account author, String caption, String photoUrl) {
+        super(author, caption);
+        this.photoUrl = photoUrl;
     }
+
 
 
     /// to string
+
     @Override
     public String toString() {
-        return "Writing{" +
+        return "Photo{" +
                 "id=" + getId() +
                 ", author=" + getAuthor() +
-                ", text='" + text + '\'' +
+                ", caption='" + (getCaption() != null ? getCaption() : null) + '\'' +
                 ", likes=" + getLikes().size() +
                 ", comments=" + getComments().size() +
+                ", photoUrl='" + photoUrl + '\'' +
                 ", timestamp=" + getTimestamp() +
                 '}';
     }
+
 }

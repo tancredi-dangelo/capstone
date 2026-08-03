@@ -13,13 +13,12 @@ import tancredidangelo.capstone.entities.savedPost.savedPostDTO.requests.SavedPo
 import tancredidangelo.capstone.entities.savedPost.savedPostDTO.responses.SavedPostResponseDTO;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
-
+import tancredidangelo.capstone.exceptions.UnauthorizedException;
 
 @Service
 @Slf4j
 public class SavedPostService {
 
-    /// dependency injection
     private final SavedPostRepository savedPostRepository;
     private final PostService postService;
 
@@ -27,10 +26,6 @@ public class SavedPostService {
         this.savedPostRepository = savedPostRepository;
         this.postService = postService;
     }
-
-
-
-    // methods
 
     /// SAVE POST
     @Transactional
@@ -44,20 +39,18 @@ public class SavedPostService {
         }
 
         SavedPost newSavedPost = new SavedPost(authenticatedAccount, post);
-
         SavedPost saved = this.savedPostRepository.save(newSavedPost);
 
-        log.info("Post saved.");
+        log.info("Post with ID {} saved for account ID {}.", post.getId(), authenticatedAccount.getId());
 
         return SavedPostResponseDTO.fromEntity(saved);
     }
 
-
     /// FIND BY ID
     public SavedPost findById(Long id) {
-        return this.savedPostRepository.findById(id).orElseThrow(() -> new NotFoundException("Post Not Found."));
+        return this.savedPostRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Saved post with ID " + id + " not found."));
     }
-
 
     /// GET SAVED POSTS LIST OF A SPECIFIC ACCOUNT
     public Page<SavedPostResponseDTO> findByAccountId(Long id, Pageable pageable) {
@@ -65,11 +58,16 @@ public class SavedPostService {
         return rawPosts.map(SavedPostResponseDTO::fromEntity);
     }
 
-
-    /// DELETE
+    /// DELETE BY SAVED_POST ID
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteById(Long id, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
         SavedPost found = findById(id);
-        this.savedPostRepository.deleteById(found.getId());
+
+        if (!found.getAccount().getId().equals(authenticatedAccount.getId())) {
+            throw new UnauthorizedException("You don't have authorization to perform this action.");
+        }
+
+        this.savedPostRepository.delete(found);
     }
 }
