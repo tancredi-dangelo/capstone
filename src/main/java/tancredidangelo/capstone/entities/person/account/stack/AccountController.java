@@ -13,6 +13,7 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.New
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.SetAccountBanRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdateAccountRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdatePasswordRequestDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.AdminAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.OwnAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 
@@ -37,28 +38,9 @@ public class AccountController {
 
     // *******  PUBLIC / AUTHENTICATED METHODS *******
 
-    /// GET CURRENT LOGGED ACCOUNT PROFILE -> GET "/accounts/me"
-    @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()")
-    public OwnAccountResponseDTO getMyAccount(Authentication authentication) {
-        Account currentAccount = (Account) authentication.getPrincipal();
-        Account freshAccount = this.accountService.findById(currentAccount.getId());
-        return OwnAccountResponseDTO.fromEntity(freshAccount);
-    }
-
-    /// PUBLIC VS OWNER
-    /// FIND ACCOUNT BY ID -> GET "/accounts/{id}"
-    @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public PublicAccountResponseDTO getAccountById(@PathVariable Long id) {
-        return this.accountService.findPublicDTOById(id);
-    }
-
-
-    /// USER + ADMIN
     /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "/accounts/browse"
     @GetMapping("/browse")
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public Page<PublicAccountResponseDTO> getActiveAccountsAndFilter(
             @RequestParam(required = false) String usernameMatch,
             @RequestParam(required = false) String country,
@@ -73,6 +55,15 @@ public class AccountController {
 
 
     // *******  OWNER METHODS *******
+
+    /// GET CURRENT LOGGED ACCOUNT PROFILE -> GET "/accounts/me"
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public OwnAccountResponseDTO getMyAccount(Authentication authentication) {
+        Account currentAccount = (Account) authentication.getPrincipal();
+        Account freshAccount = this.accountService.findById(currentAccount.getId());
+        return OwnAccountResponseDTO.fromEntity(freshAccount);
+    }
 
 
     /// OWNER -> AUTHENTICATED ACCOUNT REGISTERS NEW ACCOUNT
@@ -108,10 +99,19 @@ public class AccountController {
 
 
     /// ADMIN
+    /// FIND ACCOUNT BY ID -> GET "/accounts/{id}"
+    @GetMapping("/{id}")
+    @PreAuthorize("@authConfig.isAdmin(authentication)")
+    public AdminAccountResponseDTO getAccountById(@PathVariable Long id) {
+        return this.accountService.findAccountById(id);
+    }
+
+
+    /// ADMIN
     /// SEARCH ACCOUNT WITH FILTERS -> GET "/accounts/search"
     @GetMapping("/search")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
-    public Page<OwnAccountResponseDTO> getAllAccountsAndFilter(
+    public Page<AdminAccountResponseDTO> getAllAccountsAndFilter(
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String usernameMatch,
             @RequestParam(required = false) Boolean isBanned,
@@ -126,9 +126,7 @@ public class AccountController {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Account> rawAccounts = this.accountService.searchBannedAccounts(country, usernameMatch, isBanned, pageable);
-
-        return rawAccounts.map(OwnAccountResponseDTO::fromEntity);
+        return this.accountService.searchBannedAccounts(country, usernameMatch, isBanned, pageable);
     }
 
 
@@ -136,9 +134,8 @@ public class AccountController {
     /// SEARCH ACCOUNTS BELONGING TO USER : USER_ID -> GET "/accounts/by-user/{userId}"
     @GetMapping("/by-user/{userId}")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
-    public List<PublicAccountResponseDTO> findAccountByUserId(@PathVariable UUID userId) {
-        List<Account> rawAccounts = this.accountService.findByUserId(userId);
-        return rawAccounts.stream().map(PublicAccountResponseDTO::fromEntity).toList();
+    public List<AdminAccountResponseDTO> findAccountByUserId(@PathVariable UUID userId) {
+        return this.accountService.findByUserId(userId);
     }
 
 
@@ -146,7 +143,7 @@ public class AccountController {
     /// SET ACCOUNT BAN -> PUT "/accounts/{id}/ban"
     @PutMapping("/{id}/ban")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
-    public OwnAccountResponseDTO setAccountBan(@PathVariable Long id, @RequestBody @Valid SetAccountBanRequestDTO payload) {
+    public AdminAccountResponseDTO setAccountBan(@PathVariable Long id, @RequestBody @Valid SetAccountBanRequestDTO payload) {
         return this.accountService.setBanStatusById(id, payload);
     }
 

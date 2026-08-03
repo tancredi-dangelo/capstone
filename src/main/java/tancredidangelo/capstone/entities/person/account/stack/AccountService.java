@@ -11,6 +11,7 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.New
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.SetAccountBanRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdateAccountRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdatePasswordRequestDTO;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.AdminAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.OwnAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.user.stack.User;
@@ -141,20 +142,21 @@ public class AccountService {
 
 
     /// FIND PUBLIC DTO BY ID -> PUBLIC
-    public PublicAccountResponseDTO findPublicDTOById(Long id) {
-        return PublicAccountResponseDTO.fromEntity(findById(id));
+    public AdminAccountResponseDTO findAccountById(Long id) {
+        return AdminAccountResponseDTO.fromEntity(findById(id));
     }
 
 
     /// FIND BY USERNAME -> ADMIN, IT
     public Account findByUsername(String username) {
-        return (this.accountRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Account not found.")));
+        return this.accountRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Account not found."));
     }
 
 
     /// FIND ACCOUNTS BY USER ID
-    public List<Account> findByUserId(UUID userId) {
-        return this.accountRepository.findByUserId(userId);
+    public List<AdminAccountResponseDTO> findByUserId(UUID userId) {
+        List<Account> rawAccounts = this.accountRepository.findByUserId(userId);
+        return rawAccounts.stream().map(AdminAccountResponseDTO::fromEntity).toList();
     }
 
 
@@ -165,20 +167,21 @@ public class AccountService {
 
 
     /// FIND BANNED ACCOUNTS -> ADMIN
-    public Page<Account> searchBannedAccounts(String country, String usernameMatch, Boolean isBanned, Pageable pageable) {
+    public Page<AdminAccountResponseDTO> searchBannedAccounts(String country, String usernameMatch, Boolean isBanned, Pageable pageable) {
         Specification<Account> spec = AccountSpecification.filterAccounts(country, usernameMatch, isBanned);
-        return this.accountRepository.findAll(spec, pageable);
+        Page<Account> rawAccounts = this.accountRepository.findAll(spec, pageable);
+        return rawAccounts.map(AdminAccountResponseDTO::fromEntity);
     }
 
 
     /// BAN ACCOUNT
     @Transactional
-    public OwnAccountResponseDTO setBanStatusById(Long id, SetAccountBanRequestDTO payload) {
+    public AdminAccountResponseDTO setBanStatusById(Long id, SetAccountBanRequestDTO payload) {
         Account found = findById(id);
         found.setBanned(payload.value());
         Account banned = this.accountRepository.save(found);
         log.info("Ban status updated to {} for account ID {}", payload.value(), id);
-        return OwnAccountResponseDTO.fromEntity(banned);
+        return AdminAccountResponseDTO.fromEntity(banned);
     }
 
 }
