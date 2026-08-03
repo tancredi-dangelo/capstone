@@ -3,6 +3,7 @@ package tancredidangelo.capstone.entities.post.postDTO.responses;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.savedPost.savedPostDTO.responses.SavedPostResponseDTO;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type" // Campo "type" aggiunto automaticamente al JSON
+        property = "type"
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = WritingResponseDTO.class, name = "WRITING"),
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 })
 
 // GENERIC DTO INTERFACE WITH COMMON POST ATTRIBUTES
+
 public sealed interface PostResponseDTO permits WritingResponseDTO, PhotoResponseDTO, CarouselResponseDTO, VideoResponseDTO {
     Long id();
     Account author();

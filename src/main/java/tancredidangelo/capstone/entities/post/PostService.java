@@ -41,12 +41,6 @@ public class PostService {
     }
 
 
-    /// Get Single Post DTO (Polymorphic)
-    public PostResponseDTO findDTOById(Long id) {
-        Post found = findById(id);
-        return convertToDTO(found);
-    }
-
 
     /// Get Feed
     public Page<PostResponseDTO> getFeed(Long accountId, LocalDateTime since, Pageable pageable) {
