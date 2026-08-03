@@ -41,6 +41,8 @@ public record UserRegistrationRequestDTO(
         )
         String password,
 
+        @NotNull Boolean isPrivate,
+
         String profilePicUrl,
 
         @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,

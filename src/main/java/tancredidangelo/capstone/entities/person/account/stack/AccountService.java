@@ -60,6 +60,7 @@ public class AccountService {
                 passwordEncoder.encode(payload.password()),
                 payload.profilePicUrl(),
                 payload.bio(),
+                payload.isPrivate(),
                 payload.tags()
         );
 

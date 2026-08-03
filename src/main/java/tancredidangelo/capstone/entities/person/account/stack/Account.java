@@ -52,6 +52,9 @@ public class Account implements UserDetails {
     @Column(name = "bio")
     private String bio;
 
+    @Column(name = "is_private")
+    private boolean isPrivate;
+
     @Column(name = "is_banned", nullable = false)
     private boolean isBanned;
 
@@ -85,12 +88,13 @@ public class Account implements UserDetails {
 
     /// constructor
 
-    public Account(User user, String username, String password, String profilePicUrl, String bio, List<String> tags) {
+    public Account(User user, String username, String password, String profilePicUrl, String bio, boolean isPrivate, List<String> tags) {
         this.user = user;
         this.username = username;
         this.password = password;
         this.profilePicUrl = profilePicUrl == null ? "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" : profilePicUrl;
         this.bio = bio;
+        this.isPrivate = isPrivate;
         this.isBanned = false;
         this.tags = (tags == null) ? new ArrayList<>() : tags;
         this.dateOfRegistration = LocalDateTime.now();

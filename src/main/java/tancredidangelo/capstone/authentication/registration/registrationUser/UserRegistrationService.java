@@ -77,6 +77,7 @@ public class UserRegistrationService {
                 this.passwordEncoder.encode(payload.password()),
                 payload.profilePicUrl(),
                 payload.bio(),
+                payload.isPrivate(),
                 payload.tags()
         );
 

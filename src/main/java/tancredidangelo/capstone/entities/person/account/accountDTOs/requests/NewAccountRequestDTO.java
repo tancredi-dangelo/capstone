@@ -22,6 +22,7 @@ public record NewAccountRequestDTO(
         )
         String password,
 
+        @NotNull Boolean isPrivate,
 
         List<String> tags) {
 }

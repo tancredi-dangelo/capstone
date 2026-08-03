@@ -1,6 +1,7 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs.requests;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public record UpdateAccountRequestDTO(
         String profilePicUrl,
 
         String bio,
+
+        @NotNull Boolean isPrivate,
 
         List<String> tags
 ) {
