@@ -133,14 +133,6 @@ public class AccountController {
     }
 
 
-    /// ADMIN
-    /// SET ACCOUNT BAN -> PUT "/accounts/{id}/ban"
-    @PutMapping("/{id}/ban")
-    @PreAuthorize("@authConfig.isAdmin(authentication)")
-    public AdminAccountResponseDTO setAccountBan(@PathVariable Long id, @RequestBody @Valid SetAccountBanRequestDTO payload) {
-        return this.accountService.setBanStatusById(id, payload);
-    }
-
 
     // ****** OWNER OR ADMIN ******
 

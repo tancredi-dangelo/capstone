@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.adminActions;
+package tancredidangelo.capstone.entities.adminActions.flag;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -41,10 +41,10 @@ public class Flag {
 
 
     /// constructor
-    public Flag(User user, Account admin, LocalDateTime timestamp, String reason) {
+    public Flag(User user, Account admin, String reason) {
         this.user = user;
         this.admin = admin;
-        this.timestamp = timestamp;
+        this.timestamp = LocalDateTime.now();
         this.reason = reason;
     }
 

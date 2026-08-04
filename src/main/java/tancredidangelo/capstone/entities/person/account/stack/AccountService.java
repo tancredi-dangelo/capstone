@@ -174,15 +174,4 @@ public class AccountService {
         return rawAccounts.map(AdminAccountResponseDTO::fromEntity);
     }
 
-
-    /// BAN ACCOUNT
-    @Transactional
-    public AdminAccountResponseDTO setBanStatusById(Long id, SetAccountBanRequestDTO payload) {
-        Account found = findById(id);
-        found.setBanned(payload.value());
-        Account banned = this.accountRepository.save(found);
-        log.info("Ban status updated to {} for account ID {}", payload.value(), id);
-        return AdminAccountResponseDTO.fromEntity(banned);
-    }
-
 }

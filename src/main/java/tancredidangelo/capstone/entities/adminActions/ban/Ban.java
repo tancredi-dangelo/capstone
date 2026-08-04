@@ -1,4 +1,4 @@
-package tancredidangelo.capstone.entities.adminActions;
+package tancredidangelo.capstone.entities.adminActions.ban;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -32,9 +32,6 @@ public class Ban {
     private Account admin;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp;
-
-    @Column(nullable = false)
     private String reason;
 
     @Column(name = "is_permanent")
@@ -53,25 +50,13 @@ public class Ban {
 
 
     /// constructor
-    public Ban(Account account, Account admin, String reason, LocalDateTime startingDate, LocalDateTime expiringDate) {
+    public Ban(Account account, Account admin, String reason, boolean isPermanent, LocalDateTime expiringDate) {
         this.account = account;
         this.admin = admin;
-        this.timestamp = LocalDateTime.now();
         this.reason = reason;
-        this.isPermanent = false;
-        this.startingDate = startingDate;
-        this.expiringDate = expiringDate;
-        this.isRevoked = false;
-    }
-
-    public Ban(Account account, Account admin, LocalDateTime timestamp, String reason, boolean isPermanent) {
-        this.account = account;
-        this.admin = admin;
-        this.timestamp = timestamp;
-        this.reason = reason;
-        this.isPermanent = isPermanent;
         this.startingDate = LocalDateTime.now();
-        this.expiringDate = null;
+        this.isPermanent = isPermanent;
+        this.expiringDate = this.isPermanent ? null : expiringDate;
         this.isRevoked = false;
     }
 
@@ -100,7 +85,6 @@ public class Ban {
                 "id=" + id +
                 ", accountId=" + (account != null ? account.getId() : null) +
                 ", adminId=" + (admin != null ? admin.getId() : null) +
-                ", timestamp=" + timestamp +
                 ", isPermanent=" + isPermanent +
                 ", reason='" + reason + '\'' +
                 ", startingDate=" + (startingDate != null ? startingDate : null) +
