@@ -54,6 +54,16 @@ public class Follow {
     }
 
 
-    /// helper methods
-
+    /// to string
+    @Override
+    public String toString() {
+        return "Follow{" +
+                "id=" + id +
+                ", follower=" + follower +
+                ", followed=" + followed +
+                ", followStatus=" + followStatus +
+                ", requestDate=" + requestDate +
+                ", responseDate=" + responseDate +
+                '}';
+    }
 }
