@@ -56,7 +56,7 @@ public class AccountController {
 
     // *******  OWNER METHODS *******
 
-    /// GET CURRENT LOGGED ACCOUNT PROFILE -> GET "/accounts/me"
+    /// OWNER -> GET CURRENT LOGGED ACCOUNT PROFILE -> GET "/accounts/me"
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public OwnAccountResponseDTO getMyAccount(Authentication authentication) {
@@ -67,7 +67,6 @@ public class AccountController {
 
 
     /// OWNER -> AUTHENTICATED ACCOUNT REGISTERS NEW ACCOUNT
-    /// POST "/accounts/create"
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.CREATED)
@@ -77,8 +76,7 @@ public class AccountController {
     }
 
 
-    /// OWNER
-    /// UPDATE ACCOUNT BY ID -> PUT "/accounts/{id}"
+    /// OWNER -> UPDATE ACCOUNT BY ID -> PUT "/accounts/{id}"
     @PutMapping("/{id}")
     @PreAuthorize("@authConfig.isOwner(#id, authentication)")
     public OwnAccountResponseDTO updateAccountById(@PathVariable Long id, @RequestBody @Valid UpdateAccountRequestDTO payload) {
@@ -86,8 +84,7 @@ public class AccountController {
     }
 
 
-    /// OWNER
-    /// UPDATE PASSWORD BY ID -> PUT "/accounts/{id}/password"
+    /// OWNER -> UPDATE PASSWORD BY ID -> PUT "/accounts/{id}/password"
     @PutMapping("/{id}/password")
     @PreAuthorize("@authConfig.isOwner(#id, authentication)")
     public OwnAccountResponseDTO updatePasswordById(@PathVariable Long id, @RequestBody @Valid UpdatePasswordRequestDTO payload) {
@@ -98,8 +95,7 @@ public class AccountController {
     // ******* ADMIN METHODS *******
 
 
-    /// ADMIN
-    /// FIND ACCOUNT BY ID -> GET "/accounts/{id}"
+    /// ADMIN -> FIND ACCOUNT BY ID -> GET "/accounts/{id}"
     @GetMapping("/{id}")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public AdminAccountResponseDTO getAccountById(@PathVariable Long id) {
@@ -107,8 +103,7 @@ public class AccountController {
     }
 
 
-    /// ADMIN
-    /// SEARCH ACCOUNT WITH FILTERS -> GET "/accounts/search"
+    /// ADMIN > SEARCH ACCOUNT WITH FILTERS -> GET "/accounts/search"
     @GetMapping("/search")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public Page<AdminAccountResponseDTO> getAllAccountsAndFilter(
@@ -130,8 +125,7 @@ public class AccountController {
     }
 
 
-    /// ADMIN
-    /// SEARCH ACCOUNTS BELONGING TO USER : USER_ID -> GET "/accounts/by-user/{userId}"
+    /// ADMIN > SEARCH ACCOUNTS BELONGING TO USER : USER_ID -> GET "/accounts/by-user/{userId}"
     @GetMapping("/by-user/{userId}")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public List<AdminAccountResponseDTO> findAccountByUserId(@PathVariable UUID userId) {

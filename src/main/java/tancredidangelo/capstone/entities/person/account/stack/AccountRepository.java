@@ -27,17 +27,6 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
     List<Account> findByUserId(UUID userId);
 
 
-    /// FIND BY MATCH USERNAME results STARTING BY typed characters are displayed first, IS BANNED = FALSE
-    @Query("""
-        SELECT a FROM Account a
-        WHERE LOWER(a.username) LIKE LOWER(CONCAT('%', :query, '%'))
-        AND a.isBanned = FALSE
-        ORDER BY
-            CASE WHEN LOWER(a.username) LIKE LOWER(CONCAT(:query, '%')) THEN 0 ELSE 1 END,
-            a.username ASC
-    """)
-    Page<Account> searchByUsernameMatchingAndIsBannedFalse(@Param("query") String query, Pageable pageable);
-
 
 
 

@@ -72,7 +72,7 @@ public class AccountService {
     }
 
 
-    /// FIND ACTIVE ACCOUNTS -> USER, ADMIN
+    /// FIND ACTIVE ACCOUNTS + FILTERS -> ADMIN
     public Page<PublicAccountResponseDTO> searchActiveAccounts(String country, String usernameMatch, List<String> tags, Pageable pageable) {
         Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags);
         Page<Account> rawAccounts = this.accountRepository.findAll(spec, pageable);

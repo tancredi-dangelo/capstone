@@ -1,6 +1,7 @@
 package tancredidangelo.capstone.entities.feedActions.like;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class Like {
     /// attributes
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Setter(AccessLevel.NONE)
     private Long id;
 
     @ManyToOne

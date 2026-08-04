@@ -50,6 +50,7 @@ public class Report {
 
     /// constructor
 
+    // report account
     public Report(Account author, Account reportedAccount, String reason) {
         this.author = author;
         this.reportedAccount = reportedAccount;
@@ -57,6 +58,17 @@ public class Report {
         this.timestamp = LocalDateTime.now();
         this.status = ReportStatus.PENDING;
     }
+
+
+    // report post
+    public Report(Account author, Post reportedPost, String reason) {
+        this.author = author;
+        this.reportedPost = reportedPost;
+        this.reason = reason;
+        this.timestamp = LocalDateTime.now();
+        this.status = ReportStatus.PENDING;
+    }
+
 
 
     /// to string

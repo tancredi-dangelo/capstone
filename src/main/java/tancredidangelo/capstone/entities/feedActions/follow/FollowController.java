@@ -1,24 +1,23 @@
 package tancredidangelo.capstone.entities.feedActions.follow;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowResolveRequestDTO;
-import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowPendingResponseDTO;
+
+import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResolvedResponseDTO;
 
 @RestController
 @RequestMapping("/follows")
 public class FollowController {
-
-    /// dependency injection
 
     private final FollowService followService;
 
@@ -26,38 +25,40 @@ public class FollowController {
         this.followService = followService;
     }
 
-
     // ---------------------- ENDPOINTS ------------------------------------------
 
-    
     /// FOLLOW PUBLIC ACCOUNT
     @PostMapping("/follow")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public FollowResponseDTO follow(@RequestBody FollowRequestDTO payload, Authentication authentication) {
+    public FollowResponseDTO follow(
+            @RequestBody @Valid FollowRequestDTO payload,
+            Authentication authentication
+    ) {
         return this.followService.followPublicAccount(payload, authentication);
     }
 
-
-
     /// REQUEST FOLLOW PRIVATE ACCOUNT
-    @PostMapping("/request}")
+    @PostMapping("/request") // Corretto il typo "/request}"
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public FollowPendingResponseDTO requestFollow(@RequestBody FollowRequestDTO payload, Authentication authentication) {
+    public FollowPendingResponseDTO requestFollow(
+            @RequestBody @Valid FollowRequestDTO payload,
+            Authentication authentication
+    ) {
         return this.followService.requestFollow(payload, authentication);
     }
-
-
 
     /// ANSWER FOLLOW REQUEST PRIVATE ACCOUNT
     @PutMapping("/{followId}/respond")
     @PreAuthorize("isAuthenticated()")
-    public FollowResolvedResponseDTO respondToFollowRequest(@RequestBody FollowResolveRequestDTO payload, Authentication authentication) {
-        return this.followService.respondToFollowRequest(payload, authentication);
+    public FollowResolvedResponseDTO respondToFollowRequest(
+            @PathVariable Long followId,
+            @RequestBody @Valid FollowResolveRequestDTO payload,
+            Authentication authentication
+    ) {
+        return this.followService.respondToFollowRequest(followId, payload, authentication);
     }
-
-
 
     /// UNFOLLOW
     @DeleteMapping("/unfollow/{targetAccountId}")
@@ -67,11 +68,9 @@ public class FollowController {
         this.followService.unfollow(targetAccountId, authentication);
     }
 
-
-
     /// GET ACCOUNT FOLLOWERS
     @GetMapping("/followers/{accountId}")
-    public Page<Follow> getFollowers(
+    public Page<FollowResponseDTO> getFollowers(
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -80,11 +79,9 @@ public class FollowController {
         return this.followService.getFollowers(accountId, pageable);
     }
 
-
-
     /// GET ACCOUNT FOLLOWING
     @GetMapping("/following/{accountId}")
-    public Page<Follow> getFollowing(
+    public Page<FollowResponseDTO> getFollowing(
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size

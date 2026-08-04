@@ -1,18 +1,18 @@
 package tancredidangelo.capstone.entities.feedActions.follow;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowResolveRequestDTO;
-import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowPendingResponseDTO;
+import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResolvedResponseDTO;
-import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.BadRequestException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
@@ -22,10 +22,7 @@ import java.time.LocalDateTime;
 
 @Service
 @Slf4j
-
 public class FollowService {
-
-    /// dependency injection
 
     private final FollowRepository followRepository;
     private final AccountService accountService;
@@ -35,45 +32,15 @@ public class FollowService {
         this.accountService = accountService;
     }
 
-
-
     // ------------------- METHODS ---------------------------------------------
 
     /// SAVE FOLLOW (PUBLIC ACCOUNT)
-
     @Transactional
     public FollowResponseDTO followPublicAccount(FollowRequestDTO payload, Authentication authentication) {
 
         Account follower = (Account) authentication.getPrincipal();
-        Account followed = this.accountService.findById(payload.followedId());
 
-        if (follower.getId().equals(payload.followerId())) {
-            throw new BadRequestException("An account cannot follow itself.");
-        }
-
-        if (this.followRepository.existsByFollowerIdAndFollowedId(follower.getId(), followed.getId())) {
-            throw new AlreadyExistsException("Tou already follow this account.");
-        }
-
-        Follow newFollow = new Follow(follower, followed);
-
-        Follow saved = this.followRepository.save(newFollow);
-
-        return FollowResponseDTO.fromEntity(saved);
-
-    }
-
-
-
-    /// SAVE FOLLOW (PRIVATE ACCOUNT -> REQUEST PENDING)
-
-    @Transactional
-    public FollowPendingResponseDTO requestFollow(FollowRequestDTO payload, Authentication authentication) {
-
-        // authenticated account is the FOLLOWER
-        Account follower = (Account) authentication.getPrincipal();
-
-        if (follower.getId().equals(payload.followerId())) {
+        if (follower.getId().equals(payload.followedId())) {
             throw new BadRequestException("An account cannot follow itself.");
         }
 
@@ -82,6 +49,35 @@ public class FollowService {
         }
 
         Account followed = this.accountService.findById(payload.followedId());
+
+        Follow newFollow = new Follow(follower, followed);
+        newFollow.setFollowStatus(FollowStatus.ACCEPTED);
+
+        Follow saved = this.followRepository.save(newFollow);
+        log.info("Account {} is now following Account {}.", follower.getId(), followed.getId());
+
+        return FollowResponseDTO.fromEntity(saved);
+    }
+
+
+
+
+    /// SAVE FOLLOW (PRIVATE ACCOUNT -> REQUEST PENDING)
+    @Transactional
+    public FollowPendingResponseDTO requestFollow(FollowRequestDTO payload, Authentication authentication) {
+
+        Account follower = (Account) authentication.getPrincipal();
+
+        if (follower.getId().equals(payload.followedId())) {
+            throw new BadRequestException("An account cannot follow itself.");
+        }
+
+        if (this.followRepository.existsByFollowerIdAndFollowedId(follower.getId(), payload.followedId())) {
+            throw new AlreadyExistsException("Follow relationship already exists or is pending.");
+        }
+
+        Account followed = this.accountService.findById(payload.followedId());
+
         Follow follow = new Follow(follower, followed);
 
         log.info("Follow request sent from Account {} to Account {}.", follower.getId(), followed.getId());
@@ -92,14 +88,13 @@ public class FollowService {
 
 
 
+
     /// SAVE FOLLOW (PRIVATE ACCOUNT -> REQUEST ANSWERED)
-
     @Transactional
-    public FollowResolvedResponseDTO respondToFollowRequest(FollowResolveRequestDTO payload, Authentication authentication) {
+    public FollowResolvedResponseDTO respondToFollowRequest(Long followId, FollowResolveRequestDTO payload, Authentication authentication) {
 
-        // authenticated account is the FOLLOWED
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-        Follow follow = findById(payload.followId());
+        Follow follow = findById(followId);
 
         if (!follow.getFollowed().getId().equals(authenticatedAccount.getId())) {
             throw new UnauthorizedException("You are not authorized to respond to this follow request.");
@@ -120,11 +115,13 @@ public class FollowService {
 
 
 
-    /// UNFOLLOW (delete)
 
+    /// UNFOLLOW (delete)
     @Transactional
     public void unfollow(Long targetAccountId, Authentication authentication) {
+
         Account follower = (Account) authentication.getPrincipal();
+
         Follow follow = this.followRepository.findByFollowerIdAndFollowedId(follower.getId(), targetAccountId)
                 .orElseThrow(() -> new NotFoundException("Follow relationship not found."));
 
@@ -134,9 +131,7 @@ public class FollowService {
 
 
 
-
     /// FIND BY ID
-
     public Follow findById(Long id) {
         return this.followRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Follow with ID " + id + " not found."));
@@ -145,16 +140,18 @@ public class FollowService {
 
 
     /// GET FOLLOWERS
-
-    public Page<Follow> getFollowers(Long accountId, Pageable pageable) {
-        return this.followRepository.findByFollowedIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable);
+    public Page<FollowResponseDTO> getFollowers(Long accountId, Pageable pageable) {
+        return this.followRepository
+                .findByFollowedIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable)
+                .map(FollowResponseDTO::fromEntity);
     }
 
 
 
     /// GET FOLLOWING
-
-    public Page<Follow> getFollowing(Long accountId, Pageable pageable) {
-        return this.followRepository.findByFollowerIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable);
+    public Page<FollowResponseDTO> getFollowing(Long accountId, Pageable pageable) {
+        return this.followRepository
+                .findByFollowerIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable)
+                .map(FollowResponseDTO::fromEntity);
     }
 }
