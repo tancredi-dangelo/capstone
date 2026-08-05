@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 public record VideoResponseDTO(
 
         @NotNull Long id,
-        @NotNull Account author,
+        @NotNull String authorUsername,
+        @NotBlank @URL(message = "Url must be valid.") String videoUrl,
         @Size(max = 2200) String caption,
-        @NotBlank @URL(message = "L'URL del video deve essere valido") String videoUrl,
-        @Positive(message = "La durata in secondi deve essere un numero positivo") int durationSeconds,
+        @Positive int durationSeconds,
         @NotNull @PastOrPresent LocalDateTime timestamp,
         @Min(0) int likes,
         @Min(0) int comments,
@@ -24,7 +24,7 @@ public record VideoResponseDTO(
     public static VideoResponseDTO fromEntity(Video video) {
         return new VideoResponseDTO(
                 video.getId(),
-                video.getAuthor(),
+                video.getAuthor().getUsername(),
                 video.getVideoUrl(),
                 video.getCaption(),
                 video.getDurationSeconds(),

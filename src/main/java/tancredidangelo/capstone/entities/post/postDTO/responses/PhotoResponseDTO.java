@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 public record PhotoResponseDTO(
 
         @NotNull Long id,
-        @NotNull Account author,
-        @Size(max = 2200, message = "La didascalia non può superare i 2200 caratteri") String caption,
-        @NotBlank @URL(message = "L'URL della foto deve essere valido") String photoUrl,
+        @NotNull String authorUsername,
+        @NotBlank @URL(message = "Url must be valid") String photoUrl,
+        @Size(max = 2200, message = "Caption shouldn't exceed 2200 characters.") String caption,
         @NotNull @PastOrPresent LocalDateTime timestamp,
         @Min(0) int likes,
         @Min(0) int comments,
@@ -23,7 +23,7 @@ public record PhotoResponseDTO(
     public static PhotoResponseDTO fromEntity(Photo photo) {
         return new PhotoResponseDTO(
                 photo.getId(),
-                photo.getAuthor(),
+                photo.getAuthor().getUsername(),
                 photo.getPhotoUrl(),
                 photo.getCaption(),
                 photo.getTimestamp(),

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.requests.CommentRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.requests.UpdateCommentRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.responses.CommentResponseDTO;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.post.Post;
 
 @RestController
 @RequestMapping("/comments")
@@ -29,20 +31,18 @@ public class CommentController {
 
 
     /// CREATE A NEW COMMENT ON A POST
-    @PostMapping
+    @PostMapping("/posts/{postId}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public CommentResponseDTO createComment(
-            @RequestBody @Valid CommentRequestDTO payload,
-            Authentication authentication
-    ) {
-        return this.commentService.save(payload, authentication);
+    public CommentResponseDTO createComment(@PathVariable Long postId, @RequestBody @Valid CommentRequestDTO payload, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.commentService.save(authenticatedAccount.getId(), postId, payload);
     }
 
 
 
     /// GET ALL COMMENTS FOR A SPECIFIC POST (PAGINATED)
-    @GetMapping("/post/{postId}")
+    @GetMapping("/posts/{postId}")
     public Page<CommentResponseDTO> getCommentsByPost(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "0") int page,

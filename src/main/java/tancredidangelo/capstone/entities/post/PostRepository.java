@@ -20,19 +20,21 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
     // ----------------- PUBLIC METHODS --------------------------------------------------------------
 
-    // FIND POSTS BY FOLLOWED ACCOUNTS AND ORDER BY TIMESTAMP, DURATION <= 24H (FEED)
+    /// FIND POSTS BY FOLLOWED ACCOUNTS AND ORDER BY TIMESTAMP, DURATION <= 24H (FEED)
     @Query("""
     SELECT p FROM Post p
     WHERE p.author.id IN (
-        SELECT f.followed.id FROM Follow f WHERE f.follower.id = :accountId AND f.followed.isBanned = FALSE
+        SELECT f.followed.id FROM Follow f 
+        WHERE f.follower.id = :accountId 
+        AND f.followed.isBanned = FALSE
     )
     AND p.timestamp >= :since
     ORDER BY p.timestamp DESC
     """)
-    Page<Post> findFeedForAccount(@Param("accountId") Long accountId, @Param("startOfToday") LocalDateTime startOfToday, Pageable pageable);
+    Page<Post> findFeedForAccount(@Param("accountId") Long accountId, @Param("since") LocalDateTime since, Pageable pageable);
 
 
-    // FIND POST BY ACCOUNT AND ORDER BY DATE (ACCOUNT PAGE)
+    /// FIND POST BY ACCOUNT AND ORDER BY DATE (ACCOUNT PAGE)
     Page<Post> findByAuthorIdOrderByTimestampDesc(Long authorId, Pageable pageable);
 
 

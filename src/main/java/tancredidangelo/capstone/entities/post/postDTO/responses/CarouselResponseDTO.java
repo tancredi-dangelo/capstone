@@ -11,7 +11,7 @@ import java.util.List;
 public record CarouselResponseDTO(
 
         @NotNull Long id,
-        @NotNull Account author,
+        @NotNull String authorUsername,
         @Size(max = 2200) String caption,
         @Size(min = 2, max = 10) List<@NotBlank @URL String> mediaUrls,
         @Min(2) @Max(10) int length,
@@ -25,7 +25,7 @@ public record CarouselResponseDTO(
     public static CarouselResponseDTO fromEntity(Carousel carousel) {
         return new CarouselResponseDTO(
                 carousel.getId(),
-                carousel.getAuthor(),
+                carousel.getAuthor().getUsername(),
                 carousel.getCaption(),
                 carousel.getMediaUrls(),
                 carousel.getLength(),

@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record OwnAccountResponseDTO(
-        Long id,
-        UUID userId,
-        String email,
         String username,
         String profilePicUrl,
         String bio,
@@ -27,9 +24,6 @@ public record OwnAccountResponseDTO(
 ) {
     public static OwnAccountResponseDTO fromEntity(Account account) {
         return new OwnAccountResponseDTO(
-                account.getId(),
-                account.getUser() != null ? account.getUser().getId() : null,
-                account.getUser() != null ? account.getUser().getEmail() : null,
                 account.getUsername(),
                 account.getProfilePicUrl(),
                 account.getBio(),

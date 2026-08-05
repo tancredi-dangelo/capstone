@@ -10,6 +10,7 @@ import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.requests
 import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.requests.UpdateCommentRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.responses.CommentResponseDTO;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.PostService;
 import tancredidangelo.capstone.exceptions.NotFoundException;
@@ -20,20 +21,22 @@ import tancredidangelo.capstone.exceptions.UnauthorizedException;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostService postService;
+    private final AccountService accountService;
 
-    public CommentService(CommentRepository commentRepository, PostService postService) {
+    public CommentService(CommentRepository commentRepository, PostService postService, AccountService accountService) {
         this.commentRepository = commentRepository;
         this.postService = postService;
+        this.accountService = accountService;
     }
 
     /// CREATE COMMENT
     @Transactional
-    public CommentResponseDTO save(CommentRequestDTO payload, Authentication authentication) {
+    public CommentResponseDTO save(Long authorId, Long postId, CommentRequestDTO payload) {
 
-        Account authenticatedAccount = (Account) authentication.getPrincipal();
-        Post post = this.postService.findById(payload.postId());
+        Account author = this.accountService.findById(authorId);
+        Post post = this.postService.findById(postId);
 
-        Comment newComment = new Comment(authenticatedAccount, post, payload.text().trim());
+        Comment newComment = new Comment(author, post, payload.text().trim());
         Comment savedComment = this.commentRepository.save(newComment);
 
         log.info("Comment created.");
@@ -41,11 +44,13 @@ public class CommentService {
         return CommentResponseDTO.fromEntity(savedComment);
     }
 
+
     /// FIND ENTITY BY ID
     public Comment findById(Long id) {
         return this.commentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Comment with ID " + id + " not found."));
     }
+
 
     /// GET COMMENTS BY POST ID (PAGINATED)
     public Page<CommentResponseDTO> findByPostId(Long postId, Pageable pageable) {
@@ -55,6 +60,7 @@ public class CommentService {
         Page<Comment> comments = this.commentRepository.findByPostIdWithAuthor(postId, pageable);
         return comments.map(CommentResponseDTO::fromEntity);
     }
+
 
     /// UPDATE COMMENT TEXT
     @Transactional
@@ -74,6 +80,7 @@ public class CommentService {
 
         return CommentResponseDTO.fromEntity(updated);
     }
+
 
     /// DELETE COMMENT
     @Transactional

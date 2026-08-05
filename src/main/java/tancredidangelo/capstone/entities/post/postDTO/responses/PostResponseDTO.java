@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 
 public sealed interface PostResponseDTO permits WritingResponseDTO, PhotoResponseDTO, CarouselResponseDTO, VideoResponseDTO {
     Long id();
-    Account author();
+    String authorUsername();
     LocalDateTime timestamp();
     int likes();
     int comments();

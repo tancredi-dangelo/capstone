@@ -56,10 +56,8 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Long accountId = ((Account) Objects.requireNonNull(authentication.getPrincipal())).getId();
-        LocalDateTime since = LocalDateTime.now().minusHours(24);
         Pageable pageable = PageRequest.of(page, size);
-
-        return this.postService.getFeed(accountId, since, pageable);
+        return this.postService.getFeed(accountId, pageable);
     }
 
 

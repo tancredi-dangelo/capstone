@@ -38,9 +38,9 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public UserResponseDTO getOwnUserDetails(Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-        this.userService.findById(authenticatedAccount.getUser().getId());
-        return UserResponseDTO.fromEntity(authenticatedAccount.getUser());
+        return this.userService.getOwnUserDetails(authenticatedAccount.getUser().getId());
     }
+
 
     /// OWNER -> UPDATE USER DETAILS -> PUT "/users/me"
     @PutMapping("/me")
@@ -50,6 +50,7 @@ public class UserController {
         return this.userService.updateById(authenticatedAccount.getUser().getId(), payload);
     }
 
+
     /// OWNER -> UPDATE USER EMAIL -> PUT "/users/me/email"
     @PutMapping("/me/email")
     @PreAuthorize("isAuthenticated()")
@@ -58,7 +59,10 @@ public class UserController {
         return this.userService.updateEmailById(authenticatedAccount.getUser().getId(), payload);
     }
 
+
+
     // ------------------------- ADMIN METHODS -------------------------
+
 
     /// ADMIN -> SEARCH USERS WITH FILTERS -> GET "/users/search"
     @GetMapping("/search")
@@ -81,6 +85,7 @@ public class UserController {
         return this.userService.searchUsers(isFlagged, emailMatch, country, birthdate, pageable);
     }
 
+
     /// ADMIN -> GET USER BY ID -> GET "/users/{id}"
     @GetMapping("/{id}")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
@@ -89,6 +94,7 @@ public class UserController {
         return UserResponseDTO.fromEntity(found);
     }
 
+
     /// ADMIN -> UPDATE USER FLAG -> PUT "/users/{id}/flag"
     @PutMapping("/{id}/flag")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
@@ -96,13 +102,25 @@ public class UserController {
         return this.userService.setFlagById(id, payload);
     }
 
+
+
     // ------------------------- OWNER OR ADMIN METHODS -------------------------
 
-    /// OWNER OR ADMIN -> DELETE USER BY ID -> DELETE "/users/{id}"
+    /// ADMIN -> DELETE USER BY ID -> DELETE "/users/{id}"
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("@authConfig.isUserOwnerOrAdmin(#id, authentication)")
     public void deleteUserById(@PathVariable UUID id) {
         this.userService.deleteById(id);
+    }
+
+
+    /// OWNER -> DELETE SELF -> DELETE "/users/me"
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("@isAuthenticated()")
+    public void deleteUserById(Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        this.userService.deleteById(authenticatedAccount.getUser().getId());
     }
 }

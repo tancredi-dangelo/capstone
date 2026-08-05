@@ -49,6 +49,15 @@ public class UserService {
     }
 
 
+
+    public UserResponseDTO getOwnUserDetails(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User non trovato"));
+
+        return UserResponseDTO.fromEntity(user);
+    }
+
+
     /// UPDATE USER DETAILS -> ONLY USER
     @Transactional
     public UserResponseDTO updateById(UUID id, UpdateUserRequestDTO payload) {

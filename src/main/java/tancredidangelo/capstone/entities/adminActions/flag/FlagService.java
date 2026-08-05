@@ -17,6 +17,7 @@ import java.util.UUID;
 @Slf4j
 public class FlagService {
 
+    /// dependency injection
     private final FlagRepository flagRepository;
     private final UserService userService;
 
@@ -25,6 +26,11 @@ public class FlagService {
         this.userService = userService;
     }
 
+
+    // methods
+
+
+    /// CREATE FLAG
     @Transactional
     public FlagResponseDTO createFlag(Account admin, CreateFlagRequestDTO payload) {
 
@@ -33,17 +39,26 @@ public class FlagService {
         Flag flag = new Flag(user, admin, payload.reason());
         Flag saved = flagRepository.save(flag);
 
-        log.info("Flag ID {} assigned to User ID {} by Admin ID {}", saved.getId(), user.getId(), admin.getId());
+        log.info("Flag ID {} created. Flagged User ID {} by Admin ID {}", saved.getId(), user.getId(), admin.getId());
+
         return FlagResponseDTO.fromEntity(saved);
     }
 
+
+
+    /// GET FLAG BY USER
     public Page<FlagResponseDTO> getFlagsByUser(UUID userId, Pageable pageable) {
         return flagRepository.findByUserId(userId, pageable).map(FlagResponseDTO::fromEntity);
     }
 
+
+
+    /// GET FLAG BY ID
     public FlagResponseDTO getFlagById(Long id) {
         Flag flag = flagRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Flag record not found"));
         return FlagResponseDTO.fromEntity(flag);
     }
+
+
 }

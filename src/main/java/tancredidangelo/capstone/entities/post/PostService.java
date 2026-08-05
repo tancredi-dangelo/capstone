@@ -56,11 +56,11 @@ public class PostService {
 
 
     /// Get Feed
-    public Page<PostResponseDTO> getFeed(Long accountId, LocalDateTime since, Pageable pageable) {
+    public Page<PostResponseDTO> getFeed(Long accountId, Pageable pageable) {
 
-        LocalDateTime effectiveSince = (since != null) ? since : LocalDateTime.now().minusHours(24);
+        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
 
-        Page<Post> rawPosts = this.postRepository.findFeedForAccount(accountId, effectiveSince, pageable);
+        Page<Post> rawPosts = this.postRepository.findFeedForAccount(accountId, twentyFourHoursAgo, pageable);
 
         return rawPosts.map(ConverterPostDTO::convertToDTO);
     }

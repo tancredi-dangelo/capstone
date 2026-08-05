@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public record WritingResponseDTO(
 
         @NotNull Long id,
-        @NotNull Account author,
+        @NotNull String authorUsername,
         @NotBlank @Size(max = 2200, message = "Il testo non può superare i 2200 caratteri") String text,
         @NotNull @PastOrPresent LocalDateTime timestamp,
         @Min(0) int likes,
@@ -21,7 +21,7 @@ public record WritingResponseDTO(
     public static WritingResponseDTO fromEntity(Writing writing) {
         return new WritingResponseDTO(
                 writing.getId(),
-                writing.getAuthor(),
+                writing.getAuthor().getUsername(),
                 writing.getText(),
                 writing.getTimestamp(),
                 writing.getLikes().size(),
