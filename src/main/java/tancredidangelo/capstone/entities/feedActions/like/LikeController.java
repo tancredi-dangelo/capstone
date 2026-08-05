@@ -26,14 +26,14 @@ public class LikeController {
 
 
     /// LIKE POST
-    @PostMapping("/post")
+    @PostMapping("/post/{postId}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public LikeResponseDTO likePost(
-            @RequestBody @Valid LikePostRequestDTO payload,
+            @PathVariable Long postId,
             Authentication authentication
     ) {
-        return this.likeService.likePost(payload, authentication);
+        return this.likeService.likePost(postId, authentication);
     }
 
 
@@ -52,14 +52,14 @@ public class LikeController {
 
 
     /// LIKE COMMENT
-    @PostMapping("/comment")
+    @PostMapping("/comment/{commentId}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public LikeResponseDTO likeComment(
-            @RequestBody @Valid LikeCommentRequestDTO payload,
+            @PathVariable Long commentId,
             Authentication authentication
     ) {
-        return this.likeService.likeComment(payload, authentication);
+        return this.likeService.likeComment(commentId, authentication);
     }
 
 

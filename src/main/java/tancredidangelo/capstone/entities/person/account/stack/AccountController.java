@@ -48,6 +48,16 @@ public class AccountController {
         return this.accountService.searchActiveAccounts(country, usernameMatch, tags, pageable);
     }
 
+    /// GET ACCOUNT BY USERNAME
+    @GetMapping("/{username}")
+    @PreAuthorize(("isAuthenticated()"))
+    public PublicAccountResponseDTO getByUsername(@PathVariable String username) {
+        Account found = this.accountService.findByUsername(username);
+        return PublicAccountResponseDTO.fromEntity(found);
+    }
+
+
+
     // ------------------------- OWNER METHODS -------------------------
 
 
@@ -101,7 +111,7 @@ public class AccountController {
     // ------------------------- ADMIN METHODS -------------------------
 
     /// ADMIN -> FIND ACCOUNT BY ID -> GET "/accounts/{id}"
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public AdminAccountResponseDTO getAccountById(@PathVariable Long id) {
         return this.accountService.findAccountById(id);

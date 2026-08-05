@@ -30,23 +30,23 @@ public class ReportController {
     // --------------------  ENDPOINTS  ---------------------------------------------------------------------
 
     /// CREATE ACCOUNT REPORT
-    @PostMapping("/account")
+    @PostMapping("/account/{accountId}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public ReportResponseDTO createReport(@RequestBody @Valid ReportAccountRequestDTO payload, Authentication authentication) {
-        return this.reportService.createAccountReport(payload, authentication);
+    public ReportResponseDTO createAccountReport(@PathVariable Long accountId, @RequestBody @Valid ReportAccountRequestDTO payload, Authentication authentication) {
+        return this.reportService.createAccountReport(accountId, payload, authentication);
     }
 
     /// CREATE POST REPORT
-    @PostMapping("/post")
+    @PostMapping("/post/{postId}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public ReportResponseDTO createReport(@RequestBody @Valid ReportPostRequestDTO payload, Authentication authentication) {
-        return this.reportService.createPostReport(payload, authentication);
+    public ReportResponseDTO createPostReport(@PathVariable Long postId, @RequestBody @Valid ReportPostRequestDTO payload, Authentication authentication) {
+        return this.reportService.createPostReport(postId, payload, authentication);
     }
 
     /// ADMIN -> GET REPORTS LIST SORTED AND FILTERED
-    @GetMapping
+    @GetMapping("/search")
     @PreAuthorize("hasAuthority('ADMIN')")
     public Page<ReportResponseDTO> getReports(
             @RequestParam(required = false) ReportStatus status,

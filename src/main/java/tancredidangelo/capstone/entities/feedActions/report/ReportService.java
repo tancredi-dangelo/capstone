@@ -39,14 +39,15 @@ public class ReportService {
 
     /// CREATE ACCOUNT REPORT
     @Transactional
-    public ReportResponseDTO createAccountReport(ReportAccountRequestDTO payload, Authentication authentication) {
+    public ReportResponseDTO createAccountReport(Long accountId, ReportAccountRequestDTO payload, Authentication authentication) {
+
         Account author = (Account) authentication.getPrincipal();
 
-        if (author.getId().equals(payload.reportedAccountId())) {
+        if (author.getId().equals(accountId)) {
             throw new BadRequestException("You cannot report yourself.");
         }
 
-        Account reportedAccount = this.accountService.findById(payload.reportedAccountId());
+        Account reportedAccount = this.accountService.findById(accountId);
         Report report = new Report(author, reportedAccount, payload.reason());
 
         log.info("Report created by Account ID {} against Account ID {}.", author.getId(), reportedAccount.getId());
@@ -57,9 +58,10 @@ public class ReportService {
 
     /// CREATE POST REPORT
     @Transactional
-    public ReportResponseDTO createPostReport(ReportPostRequestDTO payload, Authentication authentication) {
+    public ReportResponseDTO createPostReport(Long postId, ReportPostRequestDTO payload, Authentication authentication) {
+
         Account author = (Account) authentication.getPrincipal();
-        Post reportedPost = this.postService.findById(payload.reportedPostId());
+        Post reportedPost = this.postService.findById(postId);
 
         if (author.getId().equals(reportedPost.getAuthor().getId())) {
             throw new BadRequestException("You cannot report your own post.");

@@ -22,7 +22,8 @@ public record OwnAccountResponseDTO(
         int followersCount,
         int followingCount,
         int postsCount,
-        int savedPostsCount
+        int savedPostsCount,
+        List<Long> accountsId
 ) {
     public static OwnAccountResponseDTO fromEntity(Account account) {
         return new OwnAccountResponseDTO(
@@ -32,14 +33,15 @@ public record OwnAccountResponseDTO(
                 account.getUsername(),
                 account.getProfilePicUrl(),
                 account.getBio(),
-                account.isPrivate(),
+                account.getIsPrivate(),
                 account.getRole(),
                 account.getTags() != null ? account.getTags() : List.of(),
                 account.getDateOfRegistration(),
                 account.getFollowers() != null ? account.getFollowers().size() : 0,
                 account.getFollowing() != null ? account.getFollowing().size() : 0,
                 account.getPosts() != null ? account.getPosts().size() : 0,
-                account.getSavedPosts() != null ? account.getSavedPosts().size() : 0
+                account.getSavedPosts() != null ? account.getSavedPosts().size() : 0,
+                account.getUser().getUserAccounts() != null ? (account.getUser().getUserAccounts()).stream().map(account1 -> account1.getId()).toList() : null
         );
     }
 }

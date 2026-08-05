@@ -39,7 +39,7 @@ public class FollowController {
     }
 
     /// REQUEST FOLLOW PRIVATE ACCOUNT
-    @PostMapping("/request") // Corretto il typo "/request}"
+    @PostMapping("/request")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public FollowPendingResponseDTO requestFollow(

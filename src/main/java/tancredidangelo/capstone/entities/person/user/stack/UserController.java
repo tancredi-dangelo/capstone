@@ -38,6 +38,7 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public UserResponseDTO getOwnUserDetails(Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
+        this.userService.findById(authenticatedAccount.getUser().getId());
         return UserResponseDTO.fromEntity(authenticatedAccount.getUser());
     }
 

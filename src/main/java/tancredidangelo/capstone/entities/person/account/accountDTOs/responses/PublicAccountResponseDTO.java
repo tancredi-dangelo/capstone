@@ -21,7 +21,7 @@ public record PublicAccountResponseDTO(
                 account.getUsername(),
                 account.getProfilePicUrl(),
                 account.getBio(),
-                account.isPrivate(),
+                account.getIsPrivate(),
                 account.getTags() != null ? account.getTags() : List.of(),
                 account.getFollowers() != null ? account.getFollowers().size() : 0,
                 account.getFollowing() != null ? account.getFollowing().size() : 0,

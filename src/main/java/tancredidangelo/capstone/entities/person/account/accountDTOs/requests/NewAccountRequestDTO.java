@@ -1,7 +1,9 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs.requests;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
+import tancredidangelo.capstone.helpers.ForbiddenUsernamesList;
 
 import java.util.List;
 
@@ -25,4 +27,12 @@ public record NewAccountRequestDTO(
         @NotNull Boolean isPrivate,
 
         List<String> tags) {
+
+
+        // check if username is forbidden
+        @JsonIgnore
+        @AssertTrue(message = "This username is reserved and can't be used. Choose another one.")
+        public boolean isValidUsername() {
+                return !ForbiddenUsernamesList.isReserved(this.username);
+        }
 }

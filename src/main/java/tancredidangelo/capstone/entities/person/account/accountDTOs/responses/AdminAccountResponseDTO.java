@@ -22,8 +22,8 @@ public record AdminAccountResponseDTO(
                 account.getUsername(),
                 account.getDateOfRegistration(),
                 account.getTags() != null ? account.getTags() : List.of(),
-                account.isPrivate(),
-                account.isBanned(),
+                account.getIsPrivate(),
+                account.getIsBanned(),
                 account.getFollowers() != null ? account.getFollowers().size() : 0,
                 account.getFollowing() != null ? account.getFollowing().size() : 0,
                 account.getPosts() != null ? account.getPosts().size() : 0

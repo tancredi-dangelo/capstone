@@ -53,10 +53,10 @@ public class Account implements UserDetails {
     private String bio;
 
     @Column(name = "is_private")
-    private boolean isPrivate;
+    private Boolean isPrivate;
 
     @Column(name = "is_banned", nullable = false)
-    private boolean isBanned;
+    private Boolean isBanned;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

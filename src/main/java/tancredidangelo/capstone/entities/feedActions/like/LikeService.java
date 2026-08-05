@@ -35,18 +35,18 @@ public class LikeService {
 
     /// LIKE POST
     @Transactional
-    public LikeResponseDTO likePost(LikePostRequestDTO payload, Authentication authentication) {
+    public LikeResponseDTO likePost(Long postId, Authentication authentication) {
 
         Account author = (Account) authentication.getPrincipal();
 
-        if (this.likeRepository.existsByAuthorIdAndPostId(author.getId(), payload.postId())) {
+        if (this.likeRepository.existsByAuthorIdAndPostId(author.getId(), postId)) {
             throw new AlreadyExistsException("You have already liked this post.");
         }
 
-        Post post = this.postService.findById(payload.postId());
+        Post post = this.postService.findById(postId);
         Like like = new Like(author, post);
 
-        log.info("Post ID {} liked by Account ID {}.", payload.postId(), author.getId());
+        log.info("Post ID {} liked by Account ID {}.", postId, author.getId());
         Like saved = this.likeRepository.save(like);
 
         return LikeResponseDTO.fromEntity(saved);
@@ -57,17 +57,17 @@ public class LikeService {
 
     /// LIKE COMMENT
     @Transactional
-    public LikeResponseDTO likeComment(LikeCommentRequestDTO payload, Authentication authentication) {
+    public LikeResponseDTO likeComment(Long commentId, Authentication authentication) {
         Account author = (Account) authentication.getPrincipal();
 
-        if (this.likeRepository.existsByAuthorIdAndCommentId(author.getId(), payload.commentId())) {
+        if (this.likeRepository.existsByAuthorIdAndCommentId(author.getId(), commentId)) {
             throw new AlreadyExistsException("You have already liked this comment.");
         }
 
-        Comment comment = this.commentService.findById(payload.commentId());
+        Comment comment = this.commentService.findById(commentId);
         Like like = new Like(author, comment);
 
-        log.info("Comment ID {} liked by Account ID {}.", payload.commentId(), author.getId());
+        log.info("Comment ID {} liked by Account ID {}.", commentId, author.getId());
         Like saved = this.likeRepository.save(like);
 
         return LikeResponseDTO.fromEntity(saved);
