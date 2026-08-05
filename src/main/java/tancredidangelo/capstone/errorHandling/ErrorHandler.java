@@ -127,9 +127,9 @@ public class ErrorHandler {
     }
 
     // 11. Banned Account  Exception
-    @ExceptionHandler(ReservedUsernameException.class)
+    @ExceptionHandler(BannedAccountException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorDTO handleBannedAccount(ReservedUsernameException ex) {
+    public ErrorDTO handleBannedAccount(BannedAccountException ex) {
         ex.printStackTrace();
         return new ErrorDTO("This account has been banned and is currently unavailable.", LocalDateTime.now());
     }
