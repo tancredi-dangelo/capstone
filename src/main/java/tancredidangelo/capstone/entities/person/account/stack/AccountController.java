@@ -77,18 +77,20 @@ public class AccountController {
 
 
     /// OWNER -> UPDATE ACCOUNT BY ID -> PUT "/accounts/{id}"
-    @PutMapping("/{id}")
-    @PreAuthorize("@authConfig.isOwner(#id, authentication)")
-    public OwnAccountResponseDTO updateAccountById(@PathVariable Long id, @RequestBody @Valid UpdateAccountRequestDTO payload) {
-        return this.accountService.updateById(id, payload);
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public OwnAccountResponseDTO updateAccountById(@RequestBody @Valid UpdateAccountRequestDTO payload, Authentication authentication) {
+        Account ownerAccount = (Account) authentication.getPrincipal();
+        return this.accountService.updateById(ownerAccount.getId(), payload);
     }
 
 
     /// OWNER -> UPDATE PASSWORD BY ID -> PUT "/accounts/{id}/password"
-    @PutMapping("/{id}/password")
-    @PreAuthorize("@authConfig.isOwner(#id, authentication)")
-    public OwnAccountResponseDTO updatePasswordById(@PathVariable Long id, @RequestBody @Valid UpdatePasswordRequestDTO payload) {
-        return this.accountService.updatePasswordById(id, payload);
+    @PutMapping("/me/password")
+    @PreAuthorize("@authConfig.isAuthenticated()")
+    public OwnAccountResponseDTO updatePasswordById(@RequestBody @Valid UpdatePasswordRequestDTO payload, Authentication authentication) {
+        Account ownerAccount = (Account) authentication.getPrincipal();
+        return this.accountService.updatePasswordById(ownerAccount.getId(), payload);
     }
 
 

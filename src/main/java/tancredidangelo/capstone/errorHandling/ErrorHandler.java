@@ -126,4 +126,11 @@ public class ErrorHandler {
         return new ErrorDTO("Username invalid: Reserved words.", LocalDateTime.now());
     }
 
+    // 11. Banned Account  Exception
+    @ExceptionHandler(ReservedUsernameException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDTO handleBannedAccount(ReservedUsernameException ex) {
+        ex.printStackTrace();
+        return new ErrorDTO("This account has been banned and is currently unavailable.", LocalDateTime.now());
+    }
 }

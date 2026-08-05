@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import tancredidangelo.capstone.entities.adminActions.ban.Ban;
+import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.postDTO.requests.update.UpdatePostRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.responses.*;
+import tancredidangelo.capstone.exceptions.BannedAccountException;
 import tancredidangelo.capstone.helpers.ConverterPostDTO;
 import tancredidangelo.capstone.entities.post.postSubclasses.writing.Writing;
 import tancredidangelo.capstone.exceptions.NotFoundException;
@@ -21,9 +24,11 @@ import static tancredidangelo.capstone.helpers.ConverterPostDTO.convertToDTO;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final AccountService accountService;
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, AccountService accountService) {
         this.postRepository = postRepository;
+        this.accountService = accountService;
     }
 
     // ------------------ METHODS --------------------------------------
@@ -39,6 +44,15 @@ public class PostService {
         return this.postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post with ID " + id + " not found."));
     }
 
+
+
+    /// Get posts by account id
+    public Page<Post> getPostsByAccountId(Long authorId, Pageable pageable) {
+        if (this.accountService.findById(authorId).isBanned()) {
+            throw new BannedAccountException("This account has been banned and is currently unavailable.");
+        }
+        return this.postRepository.findByAuthorIdOrderByTimestampDesc(authorId, pageable);
+    }
 
 
     /// Get Feed

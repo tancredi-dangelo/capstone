@@ -2,6 +2,7 @@ package tancredidangelo.capstone.entities.post;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,17 +52,29 @@ public class PostController {
     /// GET HOME FEED -> GET "[...](http://localhost/posts/home)" 200 OK
     @GetMapping("/home")
     @PreAuthorize("isAuthenticated()")
-    public Page<PostResponseDTO> getFeed(Authentication authentication, Pageable pageable) {
+    public Page<PostResponseDTO> getFeed(Authentication authentication, @RequestParam (defaultValue = "0") int page, @RequestParam (defaultValue = "10") int size) {
         Long accountId = ((Account) Objects.requireNonNull(authentication.getPrincipal())).getId();
         LocalDateTime since = LocalDateTime.now().minusHours(24);
+        Pageable pageable = PageRequest.of(page, size);
+
         return this.postService.getFeed(accountId, since, pageable);
     }
 
     /// GET SINGLE POST -> GET "[...](http://localhost/posts/{id})" 200 OK
     @GetMapping("/{id}")
+    @PreAuthorize(("isAuthenticated()"))
     public PostResponseDTO getPostById(@PathVariable Long id) {
         Post found = postService.findById(id);
         return ConverterPostDTO.convertToDTO(found);
+    }
+
+
+    /// GET POSTS BY ACCOUNT ID (Account page)
+    @GetMapping("/accounts/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public Page<Post> getPostsByAccountId(Long id, @RequestParam (defaultValue = "0") int page, @RequestParam (defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return this.postService.getPostsByAccountId(id, pageable);
     }
 
 

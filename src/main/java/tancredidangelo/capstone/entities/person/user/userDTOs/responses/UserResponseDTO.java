@@ -14,8 +14,7 @@ public record UserResponseDTO(
         String email,
         LocalDate birthdate,
         String country,
-        List<Long> userAccounts,
-        boolean isFlagged
+        List<Long> userAccounts
 ) {
 
     public static UserResponseDTO fromEntity(User user) {
@@ -26,8 +25,7 @@ public record UserResponseDTO(
                 user.getEmail(),
                 user.getBirthdate(),
                 user.getCountry(),
-                user.getUserAccounts().stream().map(Account::getId).toList(),
-                user.isFlagged()
+                user.getUserAccounts().stream().map(Account::getId).toList()
         );
     }
 }

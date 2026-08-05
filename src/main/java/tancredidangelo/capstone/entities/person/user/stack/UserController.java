@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateEmailRequestDTO;
 import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateFlagRequestDTO;
 import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateUserRequestDTO;
@@ -34,19 +36,32 @@ public class UserController {
     // *******  OWNER METHODS *******
 
     /// OWNER
+    /// GET OWN USER DETAILS
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public UserResponseDTO getOwnUserDetails(Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        User authenticatedUser = authenticatedAccount.getUser();
+        return UserResponseDTO.fromEntity(authenticatedUser);
+    }
+
+
+    /// OWNER
     /// UPDATE USER BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
-    @PutMapping("{id}")
-    @PreAuthorize("@authConfig.isOwner(#id, authentication)")
-    public UserResponseDTO updateUserById(@PathVariable UUID id, @RequestBody @Valid UpdateUserRequestDTO payload) {
-        return this.userService.updateById(id, payload);
+    @PutMapping("me")
+    @PreAuthorize("isAuthenticated()")
+    public UserResponseDTO updateUserById(@RequestBody @Valid UpdateUserRequestDTO payload, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.userService.updateById(authenticatedAccount.getUser().getId(), payload);
     }
 
     /// OWNER
     /// UPDATE USER EMAIL BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
-    @PutMapping("{id}/email")
-    @PreAuthorize("@authConfig.isOwner(#id, authentication)")
-    public UserResponseDTO updateEmailById(@PathVariable UUID id, @RequestBody @Valid UpdateEmailRequestDTO payload) {
-        return this.userService.updateEmailById(id, payload);
+    @PutMapping("me/email")
+    @PreAuthorize("isAuthenticated()")
+    public UserResponseDTO updateEmailById(@RequestBody @Valid UpdateEmailRequestDTO payload, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.userService.updateEmailById(authenticatedAccount.getUser().getId(), payload);
     }
 
 
