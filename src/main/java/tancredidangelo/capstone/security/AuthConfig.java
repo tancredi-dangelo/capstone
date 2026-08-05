@@ -6,13 +6,14 @@ import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.PostService;
 
-
 import java.util.Objects;
+import java.util.UUID;
 
 @Component("authConfig")
 public class AuthConfig {
 
     /// dependency injection
+
     private final PostService postService;
 
     public AuthConfig(PostService postService) {
@@ -20,9 +21,10 @@ public class AuthConfig {
     }
 
 
+    // ---------------------  methods  -----------------------------------------------
 
-    /// METHODS
 
+    /// ACCOUNT OWNER CHECK (Long ID)
     public boolean isOwner(Long id, Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof Account principal)) {
             return false;
@@ -31,19 +33,43 @@ public class AuthConfig {
     }
 
 
-    public boolean isAdmin(Authentication authentication) {
-        if (authentication == null) { return false; }
-        System.out.println("DEBUG Authorities: " + authentication.getAuthorities());
-        return authentication.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ROLE_ADMIN"));
+
+    /// USER OWNER CHECK (UUID ID)
+    public boolean isUserOwner(UUID userId, Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof Account principal)) {
+            return false;
+        }
+        return principal.getUser() != null && principal.getUser().getId().equals(userId);
     }
 
 
+
+    /// ADMIN ROLE CHECK
+    public boolean isAdmin(Authentication authentication) {
+        if (authentication == null) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> Objects.equals(a.getAuthority(), "ROLE_ADMIN"));
+    }
+
+
+
+    /// ACCOUNT OWNER OR ADMIN
     public boolean isOwnerOrAdmin(Long id, Authentication authentication) {
-        System.out.println("DEBUG Authorities: " + authentication.getAuthorities());
         return isAdmin(authentication) || isOwner(id, authentication);
     }
 
 
+
+    /// USER OWNER OR ADMIN
+    public boolean isUserOwnerOrAdmin(UUID userId, Authentication authentication) {
+        return isAdmin(authentication) || isUserOwner(userId, authentication);
+    }
+
+
+
+    /// POST OWNER CHECK
     public boolean isPostOwner(Long postId, Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof Account principal)) {
             return false;
@@ -53,7 +79,9 @@ public class AuthConfig {
     }
 
 
+
+    /// POST OWNER OR ADMIN
     public boolean isPostOwnerOrAdmin(Long postId, Authentication authentication) {
-        return (isPostOwner(postId, authentication) || isAdmin(authentication));
+        return isPostOwner(postId, authentication) || isAdmin(authentication);
     }
 }

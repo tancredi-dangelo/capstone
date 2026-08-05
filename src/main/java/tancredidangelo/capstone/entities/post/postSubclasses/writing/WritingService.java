@@ -28,8 +28,8 @@ public class WritingService {
     // methods
 
     /// create Writing
-    public WritingResponseDTO createWriting(CreateWritingRequestDTO payload) {
-        Account author = this.accountService.findById(payload.authorId());
+    public WritingResponseDTO createWriting(Long authorId, CreateWritingRequestDTO payload) {
+        Account author = this.accountService.findById(authorId);
         Writing newWriting = new Writing(author, payload.text());
         Post saved = this.postService.save(newWriting);
         log.info("Post type:'Writing' created.");

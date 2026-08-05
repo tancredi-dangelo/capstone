@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.NewAccountRequestDTO;
-import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.SetAccountBanRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdateAccountRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdatePasswordRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.AdminAccountResponseDTO;
@@ -18,7 +18,6 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.Ow
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -26,17 +25,14 @@ import java.util.UUID;
 public class AccountController {
 
     /// dependency injection
+
     private final AccountService accountService;
 
     public AccountController(AccountService accountService) {
         this.accountService = accountService;
     }
 
-
-    // -------------------------  ENDPOINTS  ---------------------------------------------------------------
-
-
-    // *******  PUBLIC / AUTHENTICATED METHODS *******
+    // ------------------------- PUBLIC / AUTHENTICATED METHODS -------------------------
 
     /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "/accounts/browse"
     @GetMapping("/browse")
@@ -49,12 +45,11 @@ public class AccountController {
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-
         return this.accountService.searchActiveAccounts(country, usernameMatch, tags, pageable);
     }
 
+    // ------------------------- OWNER METHODS -------------------------
 
-    // *******  OWNER METHODS *******
 
     /// OWNER -> GET CURRENT LOGGED ACCOUNT PROFILE -> GET "/accounts/me"
     @GetMapping("/me")
@@ -66,17 +61,18 @@ public class AccountController {
     }
 
 
-    /// OWNER -> AUTHENTICATED ACCOUNT REGISTERS NEW ACCOUNT
+    /// OWNER -> AUTHENTICATED ACCOUNT REGISTERS NEW ACCOUNT -> POST "/accounts/create"
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.CREATED)
     public OwnAccountResponseDTO createNewAccount(@RequestBody @Valid NewAccountRequestDTO payload, Authentication authentication) {
-        UUID user_id = ((Account) Objects.requireNonNull(authentication.getPrincipal())).getUser().getId();
-        return this.accountService.save(user_id, payload);
+        Account currentAccount = (Account) authentication.getPrincipal();
+        UUID userId = currentAccount.getUser().getId();
+        return this.accountService.save(userId, payload);
     }
 
 
-    /// OWNER -> UPDATE ACCOUNT BY ID -> PUT "/accounts/{id}"
+    /// OWNER -> UPDATE ACCOUNT -> PUT "/accounts/me"
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public OwnAccountResponseDTO updateAccountById(@RequestBody @Valid UpdateAccountRequestDTO payload, Authentication authentication) {
@@ -85,17 +81,24 @@ public class AccountController {
     }
 
 
-    /// OWNER -> UPDATE PASSWORD BY ID -> PUT "/accounts/{id}/password"
+    /// OWNER -> UPDATE PASSWORD -> PUT "/accounts/me/password"
     @PutMapping("/me/password")
-    @PreAuthorize("@authConfig.isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public OwnAccountResponseDTO updatePasswordById(@RequestBody @Valid UpdatePasswordRequestDTO payload, Authentication authentication) {
         Account ownerAccount = (Account) authentication.getPrincipal();
         return this.accountService.updatePasswordById(ownerAccount.getId(), payload);
     }
 
 
-    // ******* ADMIN METHODS *******
+    /// OWNER -> UPDATE PROFILE PIC -> PATCH "/accounts/me/avatar"
+    @PatchMapping("/me/avatar")
+    @PreAuthorize("isAuthenticated()")
+    public String uploadProfilePic(@RequestParam("file") MultipartFile file, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.accountService.uploadAvatar(authenticatedAccount.getId(), file);
+    }
 
+    // ------------------------- ADMIN METHODS -------------------------
 
     /// ADMIN -> FIND ACCOUNT BY ID -> GET "/accounts/{id}"
     @GetMapping("/{id}")
@@ -104,8 +107,7 @@ public class AccountController {
         return this.accountService.findAccountById(id);
     }
 
-
-    /// ADMIN > SEARCH ACCOUNT WITH FILTERS -> GET "/accounts/search"
+    /// ADMIN -> SEARCH ACCOUNTS WITH FILTERS -> GET "/accounts/search"
     @GetMapping("/search")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public Page<AdminAccountResponseDTO> getAllAccountsAndFilter(
@@ -122,21 +124,17 @@ public class AccountController {
                 Sort.by(sortBy).ascending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-
         return this.accountService.searchBannedAccounts(country, usernameMatch, isBanned, pageable);
     }
 
-
-    /// ADMIN > SEARCH ACCOUNTS BELONGING TO USER : USER_ID -> GET "/accounts/by-user/{userId}"
+    /// ADMIN -> SEARCH ACCOUNTS BELONGING TO USER -> GET "/accounts/by-user/{userId}"
     @GetMapping("/by-user/{userId}")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public List<AdminAccountResponseDTO> findAccountByUserId(@PathVariable UUID userId) {
         return this.accountService.findByUserId(userId);
     }
 
-
-
-    // ****** OWNER OR ADMIN ******
+    // ------------------------- OWNER OR ADMIN METHODS -------------------------
 
     /// DELETE ACCOUNT BY ID -> DELETE "/accounts/{id}"
     @DeleteMapping("/{id}")
@@ -145,5 +143,4 @@ public class AccountController {
     public void deleteAccountById(@PathVariable Long id) {
         this.accountService.deleteById(id);
     }
-
 }

@@ -2,6 +2,9 @@ package tancredidangelo.capstone.entities.post.postSubclasses.photo;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import tancredidangelo.capstone.cloudinary.CloudinaryService;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.Post;
@@ -9,29 +12,32 @@ import tancredidangelo.capstone.entities.post.PostService;
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreatePhotoRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.responses.PhotoResponseDTO;
 
+
 @Service
 @Slf4j
 public class PhotoService {
 
-    /// dependency injection
-
     private final PostService postService;
     private final AccountService accountService;
+    private final CloudinaryService cloudinaryService;
 
-    public PhotoService(PostService postService, AccountService accountService) {
+    public PhotoService(PostService postService, AccountService accountService, CloudinaryService cloudinaryService) {
         this.postService = postService;
         this.accountService = accountService;
+        this.cloudinaryService = cloudinaryService;
     }
 
+    @Transactional
+    public PhotoResponseDTO createPhoto(Long authorId, CreatePhotoRequestDTO payload) {
 
-    // methods
+        Account author = this.accountService.findById(authorId);
 
-    /// create Photo
-    public PhotoResponseDTO createPhoto(CreatePhotoRequestDTO payload) {
-        Account author = this.accountService.findById(payload.authorId());
-        Photo newPhoto = new Photo(author, payload.caption(), payload.photoUrl());
+        String photoUrl = this.cloudinaryService.uploadMedia(payload.file(), "posts/photos");
+
+        Photo newPhoto = new Photo(author, payload.caption(), photoUrl);
         Post saved = this.postService.save(newPhoto);
-        log.info("Post type:'Photo' created.");
+
+        log.info("Post type:'Photo' created with ID: {}", saved.getId());
         return PhotoResponseDTO.fromEntity((Photo) saved);
     }
 }

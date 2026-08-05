@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreateCarouselRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreatePhotoRequestDTO;
@@ -87,29 +88,33 @@ public class PostController {
     @PostMapping("/writings")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public WritingResponseDTO createWriting(@RequestBody @Valid CreateWritingRequestDTO payload) {
-        return this.writingService.createWriting(payload);
+    public WritingResponseDTO createWriting(@RequestBody @Valid CreateWritingRequestDTO payload, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.writingService.createWriting(authenticatedAccount.getId(), payload);
     }
 
     @PostMapping("/photos")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public PhotoResponseDTO createPhoto(@RequestBody @Valid CreatePhotoRequestDTO payload) {
-        return this.photoService.createPhoto(payload);
+    public PhotoResponseDTO createPhoto(@RequestBody @Valid CreatePhotoRequestDTO payload, Authentication authentication, MultipartFile file) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.photoService.createPhoto(authenticatedAccount.getId(), payload);
     }
 
     @PostMapping("/carousels")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public CarouselResponseDTO createCarousel(@RequestBody @Valid CreateCarouselRequestDTO payload) {
-        return this.carouselService.createCarousel(payload);
+    public CarouselResponseDTO createCarousel(@RequestBody @Valid CreateCarouselRequestDTO payload, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.carouselService.createCarousel(authenticatedAccount.getId(), payload);
     }
 
     @PostMapping("/videos")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public VideoResponseDTO createVideo(@RequestBody @Valid CreateVideoRequestDTO payload) {
-        return this.videoService.createVideo(payload);
+    public VideoResponseDTO createVideo(@RequestBody @Valid CreateVideoRequestDTO payload, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.videoService.createVideo(authenticatedAccount.getId(), payload);
     }
 
 

@@ -1,5 +1,7 @@
 package tancredidangelo.capstone.entities.person.account.stack;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -7,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.NewAccountRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.SetAccountBanRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdateAccountRequestDTO;
@@ -18,10 +21,12 @@ import tancredidangelo.capstone.entities.person.user.stack.User;
 import tancredidangelo.capstone.entities.person.user.stack.UserService;
 import tancredidangelo.capstone.entities.person.user.userDTOs.responses.UserResponseDTO;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
+import tancredidangelo.capstone.exceptions.BadRequestException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.specifications.AccountSpecification;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,11 +38,13 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final Cloudinary fileUploader;
 
-    public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder) {
+    public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder, Cloudinary fileUploader) {
         this.accountRepository = accountRepository;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.fileUploader = fileUploader;
     }
 
 
@@ -121,6 +128,30 @@ public class AccountService {
         log.info("Password successfully updated for Account ID {}", id);
 
         return OwnAccountResponseDTO.fromEntity(updated);
+    }
+
+
+    /// UPLOAD PROFILE PICTURE
+    public String uploadAvatar(Long accountId, MultipartFile file) {
+
+        Account account = findById(accountId);
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                String url = (String) fileUploader.uploader()
+                        .upload(file.getBytes(), ObjectUtils.emptyMap())
+                        .get("secure_url");
+
+                account.setProfilePicUrl(url);
+                this.accountRepository.save(account);
+                return url;
+
+            } catch (IOException ex) {
+                throw new RuntimeException("Error occurred during file upload.", ex);
+            }
+        }
+
+        throw new BadRequestException("The file uploaded is empty.");
     }
 
 

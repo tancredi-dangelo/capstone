@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -20,56 +21,45 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
-
 public class UserController {
 
     /// dependency injection
+
     private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    // ------------------------ ENDPOINTS ---------------------------------------------------------------------------------
+    // ------------------------- OWNER METHODS -------------------------
 
-
-    // *******  OWNER METHODS *******
-
-    /// OWNER
-    /// GET OWN USER DETAILS
+    /// OWNER -> GET OWN USER DETAILS -> GET "/users/me"
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public UserResponseDTO getOwnUserDetails(Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-        User authenticatedUser = authenticatedAccount.getUser();
-        return UserResponseDTO.fromEntity(authenticatedUser);
+        return UserResponseDTO.fromEntity(authenticatedAccount.getUser());
     }
 
-
-    /// OWNER
-    /// UPDATE USER BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
-    @PutMapping("me")
+    /// OWNER -> UPDATE USER DETAILS -> PUT "/users/me"
+    @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public UserResponseDTO updateUserById(@RequestBody @Valid UpdateUserRequestDTO payload, Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
         return this.userService.updateById(authenticatedAccount.getUser().getId(), payload);
     }
 
-    /// OWNER
-    /// UPDATE USER EMAIL BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
-    @PutMapping("me/email")
+    /// OWNER -> UPDATE USER EMAIL -> PUT "/users/me/email"
+    @PutMapping("/me/email")
     @PreAuthorize("isAuthenticated()")
     public UserResponseDTO updateEmailById(@RequestBody @Valid UpdateEmailRequestDTO payload, Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
         return this.userService.updateEmailById(authenticatedAccount.getUser().getId(), payload);
     }
 
+    // ------------------------- ADMIN METHODS -------------------------
 
-
-    // ****** ADMIN METHODS ******
-
-    /// ADMIN
-    /// GET ALL USERS -> GET "[...](http://localhost:PORT/users/search)" -> 200 OK
+    /// ADMIN -> SEARCH USERS WITH FILTERS -> GET "/users/search"
     @GetMapping("/search")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public Page<UserResponseDTO> getAllUsersAndFilter(
@@ -87,43 +77,31 @@ public class UserController {
                 Sort.by(sortBy).ascending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-
         return this.userService.searchUsers(isFlagged, emailMatch, country, birthdate, pageable);
-
     }
 
-
-    /// ADMIN
-    /// GET USER BY ID -> GET "[...](http://localhost:PORT/users/{id})" -> 200 OK
-    @GetMapping("{id}")
+    /// ADMIN -> GET USER BY ID -> GET "/users/{id}"
+    @GetMapping("/{id}")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public UserResponseDTO getUserById(@PathVariable UUID id) {
         User found = this.userService.findById(id);
         return UserResponseDTO.fromEntity(found);
     }
 
-
-
-    /// ADMIN
-    /// UPDATE USER FLAG BY ID -> PUT "[...](http://localhost:PORT/users/{id})" + {payload} -> 200 OK
-    @PutMapping("{id}/flag")
+    /// ADMIN -> UPDATE USER FLAG -> PUT "/users/{id}/flag"
+    @PutMapping("/{id}/flag")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public UserResponseDTO setUserFlag(@PathVariable UUID id, @RequestBody @Valid UpdateFlagRequestDTO payload) {
         return this.userService.setFlagById(id, payload);
     }
 
+    // ------------------------- OWNER OR ADMIN METHODS -------------------------
 
-
-
-
-    // ******* OWNER OR ADMIN METHODS *******
-
-    /// OWNER OR ADMIN
-    /// DELETE USER BY ID -> DELETE "[...](http://localhost:PORT/users/{id})" -> 200 OK
+    /// OWNER OR ADMIN -> DELETE USER BY ID -> DELETE "/users/{id}"
     @DeleteMapping("/{id}")
-    @PreAuthorize("@authConfig.isOwnerOrAdmin(#id, authentication)")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("@authConfig.isUserOwnerOrAdmin(#id, authentication)")
     public void deleteUserById(@PathVariable UUID id) {
         this.userService.deleteById(id);
     }
-
 }

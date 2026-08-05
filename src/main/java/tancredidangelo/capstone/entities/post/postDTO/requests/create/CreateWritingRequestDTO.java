@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 
 
 public record CreateWritingRequestDTO(
-        @NotNull Long authorId,
         @NotBlank @Size(max = 2000) String text
 ) {
 }

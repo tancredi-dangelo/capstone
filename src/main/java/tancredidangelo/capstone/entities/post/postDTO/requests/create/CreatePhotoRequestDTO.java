@@ -4,10 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.URL;
+import org.springframework.web.multipart.MultipartFile;
 
 public record CreatePhotoRequestDTO(
-        @NotNull Long authorId,
         @Size(max = 2200) String caption,
-        @NotBlank  @URL String photoUrl
-) {
+        @NotNull MultipartFile file
+        ) {
 }
