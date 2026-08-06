@@ -20,6 +20,7 @@ import tancredidangelo.capstone.entities.post.postSubclasses.carousel.CarouselSe
 import tancredidangelo.capstone.entities.post.postSubclasses.photo.PhotoService;
 import tancredidangelo.capstone.entities.post.postSubclasses.video.VideoService;
 import tancredidangelo.capstone.entities.post.postSubclasses.writing.WritingService;
+import tancredidangelo.capstone.exceptions.UnauthorizedException;
 import tancredidangelo.capstone.helpers.ConverterPostDTO;
 
 import java.time.LocalDateTime;
@@ -65,8 +66,15 @@ public class PostController {
     /// GET SINGLE POST -> GET "/posts/{id}"
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public PostResponseDTO getPostById(@PathVariable Long id) {
-        Post found = postService.findById(id);
+    public PostResponseDTO getPostById(@PathVariable Long id, Authentication authentication) {
+        Post found = this.postService.findById(id);
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        Account author = found.getAuthor();
+
+        if (author.getIsPrivate() && !author.getFollowers().contains(authenticatedAccount)) {
+            throw new UnauthorizedException("This account is private. Request follow to see its contents.");
+        }
+
         return ConverterPostDTO.convertToDTO(found);
     }
 
