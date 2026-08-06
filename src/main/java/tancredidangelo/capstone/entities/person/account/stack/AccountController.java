@@ -105,7 +105,7 @@ public class AccountController {
     @PreAuthorize("isAuthenticated()")
     public String uploadProfilePic(@RequestParam("file") MultipartFile file, Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-        return this.accountService.uploadAvatar(authenticatedAccount.getId(), file);
+        return this.accountService.updateAvatar(authenticatedAccount.getId(), file);
     }
 
     // ------------------------- ADMIN METHODS -------------------------

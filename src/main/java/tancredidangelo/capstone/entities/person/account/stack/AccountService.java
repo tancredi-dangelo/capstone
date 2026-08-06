@@ -1,17 +1,15 @@
 package tancredidangelo.capstone.entities.person.account.stack;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import tancredidangelo.capstone.cloudinary.CloudinaryService;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.NewAccountRequestDTO;
-import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.SetAccountBanRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdateAccountRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdatePasswordRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.AdminAccountResponseDTO;
@@ -19,14 +17,12 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.Ow
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.user.stack.User;
 import tancredidangelo.capstone.entities.person.user.stack.UserService;
-import tancredidangelo.capstone.entities.person.user.userDTOs.responses.UserResponseDTO;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.BadRequestException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.specifications.AccountSpecification;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,13 +30,12 @@ import java.util.UUID;
 @Slf4j
 public class AccountService {
 
-    /// dependency injection
     private final AccountRepository accountRepository;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final Cloudinary fileUploader;
+    private final CloudinaryService fileUploader;
 
-    public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder, Cloudinary fileUploader) {
+    public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder, CloudinaryService fileUploader) {
         this.accountRepository = accountRepository;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -48,43 +43,50 @@ public class AccountService {
     }
 
 
+
     // -------------------------- USER METHODS -------------------------------------------------------------------------
 
 
     /// CREATE NEW ACCOUNT
     @Transactional
-    public OwnAccountResponseDTO save(UUID user_id, NewAccountRequestDTO payload) {
-
+    public OwnAccountResponseDTO save(UUID userId, NewAccountRequestDTO payload) {
         if (this.accountRepository.existsByUsername(payload.username())) {
             throw new AlreadyExistsException("This username is already being used. Please choose another username.");
         }
 
-        User userFound = this.userService.findById(user_id);
+        User userFound = this.userService.findById(userId);
+
+        String profilePicUrl = null;
+
+        if (payload.file() != null && !payload.file().isEmpty()) {
+            profilePicUrl = this.fileUploader.uploadMedia(payload.file(), ("/avatar"));
+        }
 
         Account newAccount = new Account(
                 userFound,
                 payload.username(),
                 passwordEncoder.encode(payload.password()),
-                payload.profilePicUrl(),
+                profilePicUrl,
                 payload.bio(),
                 payload.isPrivate(),
                 payload.tags()
         );
 
         Account saved = this.accountRepository.save(newAccount);
-
-        this.userService.save(userFound);
+        log.info("Account successfully created with ID {}", saved.getId());
 
         return OwnAccountResponseDTO.fromEntity(saved);
     }
 
 
+
     /// FIND ACTIVE ACCOUNTS + FILTERS -> ADMIN
+    @Transactional(readOnly = true)
     public Page<PublicAccountResponseDTO> searchActiveAccounts(String country, String usernameMatch, List<String> tags, Pageable pageable) {
         Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags);
-        Page<Account> rawAccounts = this.accountRepository.findAll(spec, pageable);
-        return rawAccounts.map(PublicAccountResponseDTO::fromEntity);
+        return this.accountRepository.findAll(spec, pageable).map(PublicAccountResponseDTO::fromEntity);
     }
+
 
 
     /// UPDATE ACCOUNT -> OWNER
@@ -103,15 +105,14 @@ public class AccountService {
         if (payload.bio() != null) found.setBio(payload.bio());
         if (payload.tags() != null) found.setTags(payload.tags());
 
-        Account saved = this.accountRepository.save(found);
-        return OwnAccountResponseDTO.fromEntity(saved);
+        return OwnAccountResponseDTO.fromEntity(found);
     }
+
 
 
     /// UPDATE PASSWORD -> OWNER
     @Transactional
     public OwnAccountResponseDTO updatePasswordById(Long id, UpdatePasswordRequestDTO payload) {
-
         Account found = findById(id);
 
         if (!this.passwordEncoder.matches(payload.oldPassword(), found.getPassword())) {
@@ -123,35 +124,30 @@ public class AccountService {
         }
 
         found.setPassword(passwordEncoder.encode(payload.newPassword()));
-
-        Account updated = this.accountRepository.save(found);
         log.info("Password successfully updated for Account ID {}", id);
 
-        return OwnAccountResponseDTO.fromEntity(updated);
+        return OwnAccountResponseDTO.fromEntity(found);
     }
 
 
-    /// UPLOAD PROFILE PICTURE
-    public String uploadAvatar(Long accountId, MultipartFile file) {
+
+    /// UPLOAD PROFILE PICTURE FOR EXISTING ACCOUNT
+    @Transactional
+    public String updateAvatar(Long accountId, MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("The uploaded file is empty or missing.");
+        }
 
         Account account = findById(accountId);
 
-        if (file != null && !file.isEmpty()) {
-            try {
-                String url = (String) fileUploader.uploader()
-                        .upload(file.getBytes(), ObjectUtils.emptyMap())
-                        .get("secure_url");
+        String oldMediaPublicId = this.fileUploader.extractPublicIdFromUrl(account.getProfilePicUrl());
+        this.fileUploader.deleteMedia(oldMediaPublicId, "Photo");
 
-                account.setProfilePicUrl(url);
-                this.accountRepository.save(account);
-                return url;
+        String url = this.fileUploader.uploadMedia(file, ("/avatar"));
 
-            } catch (IOException ex) {
-                throw new RuntimeException("Error occurred during file upload.", ex);
-            }
-        }
-
-        throw new BadRequestException("The file uploaded is empty.");
+        account.setProfilePicUrl(url);
+        return url;
     }
 
 
@@ -162,47 +158,53 @@ public class AccountService {
         this.accountRepository.deleteById(found.getId());
     }
 
-
-
-    // ------------------------------- ADMIN METHODS --------------------------------------------------------------
-
+    // ------------------------------- ADMIN / INTERNAL METHODS --------------------------------------------------
 
     /// FIND ACCOUNT ENTITY BY ID -> INTERNAL, ADMIN
+    @Transactional(readOnly = true)
     public Account findById(Long id) {
-        return this.accountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account not found."));
+        return this.accountRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Account with ID " + id + " not found."));
     }
 
 
     /// FIND PUBLIC DTO BY ID -> PUBLIC
+    @Transactional(readOnly = true)
     public AdminAccountResponseDTO findAccountById(Long id) {
         return AdminAccountResponseDTO.fromEntity(findById(id));
     }
 
 
     /// FIND BY USERNAME -> ADMIN, IT
+    @Transactional(readOnly = true)
     public Account findByUsername(String username) {
-        return this.accountRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Account not found."));
+        return this.accountRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Account with username " + username + " not found."));
     }
 
 
     /// FIND ACCOUNTS BY USER ID
+    @Transactional(readOnly = true)
     public List<AdminAccountResponseDTO> findByUserId(UUID userId) {
-        List<Account> rawAccounts = this.accountRepository.findByUserId(userId);
-        return rawAccounts.stream().map(AdminAccountResponseDTO::fromEntity).toList();
+        return this.accountRepository.findByUserId(userId).stream()
+                .map(AdminAccountResponseDTO::fromEntity)
+                .toList();
     }
 
 
     /// EXISTS BY USERNAME -> IT, ADMIN
+    @Transactional(readOnly = true)
     public boolean existsByUsername(String username) {
         return this.accountRepository.existsByUsername(username);
     }
 
 
     /// FIND BANNED ACCOUNTS -> ADMIN
+    @Transactional(readOnly = true)
     public Page<AdminAccountResponseDTO> searchBannedAccounts(String country, String usernameMatch, Boolean isBanned, Pageable pageable) {
         Specification<Account> spec = AccountSpecification.filterAccounts(country, usernameMatch, isBanned);
-        Page<Account> rawAccounts = this.accountRepository.findAll(spec, pageable);
-        return rawAccounts.map(AdminAccountResponseDTO::fromEntity);
+        return this.accountRepository.findAll(spec, pageable).map(AdminAccountResponseDTO::fromEntity);
     }
+
 
 }

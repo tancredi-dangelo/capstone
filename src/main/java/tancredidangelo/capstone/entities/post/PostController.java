@@ -71,7 +71,7 @@ public class PostController {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
         Account author = found.getAuthor();
 
-        if (author.getIsPrivate() && !author.getFollowers().contains(authenticatedAccount)) {
+        if (author.getIsPrivate() && !author.getFollowers().contains(authenticatedAccount) && !authenticatedAccount.getRole().name().equals("ROLE_ADMIN")) {
             throw new UnauthorizedException("This account is private. Request follow to see its contents.");
         }
 

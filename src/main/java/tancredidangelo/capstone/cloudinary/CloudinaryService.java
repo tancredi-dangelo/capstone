@@ -59,4 +59,20 @@ public class CloudinaryService {
             throw new BadRequestException("Could not delete media from Cloudinary: " + e.getMessage());
         }
     }
+
+
+    /// EXTRACT MEDIA PUBLIC ID
+    public String extractPublicIdFromUrl(String url) {
+        if (url == null || url.isBlank()) return null;
+        try {
+            String substring = url.substring(url.indexOf("/upload/") + 8);
+            if (substring.startsWith("v")) {
+                substring = substring.substring(substring.indexOf("/") + 1);
+            }
+            int dotIndex = substring.lastIndexOf(".");
+            return (dotIndex != -1) ? substring.substring(0, dotIndex) : substring;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
