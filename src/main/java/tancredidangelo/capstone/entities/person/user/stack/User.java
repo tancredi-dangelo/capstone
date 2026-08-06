@@ -8,6 +8,7 @@ import lombok.Setter;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +49,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> userAccounts = new ArrayList<>();
 
+    @Column(nullable = false)
+    private LocalDateTime dateOfRegistration;
+
 
 
     /// constructor
@@ -58,6 +62,7 @@ public class User {
         this.birthdate = birthdate;
         this.country = country;
         this.isFlagged = false;
+        this.dateOfRegistration = LocalDateTime.now();
     }
 
 
@@ -72,6 +77,7 @@ public class User {
                 ", birthdate=" + birthdate +
                 ", country='" + country + '\'' +
                 ", isFlagged=" + isFlagged +
+                ", dateOfRegistration=" + dateOfRegistration +
                 '}';
     }
 }
