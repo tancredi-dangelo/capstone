@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tancredidangelo.capstone.cloudinary.CloudinaryService;
 import tancredidangelo.capstone.emailSender.EmailSender;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.account.stack.AccountRepository;
@@ -29,13 +30,15 @@ public class UserRegistrationService {
     private final JWTTools jwtTools;
     private final PasswordEncoder passwordEncoder;
     private final EmailSender emailSender;
+    private final CloudinaryService fileUploader;
 
-    public UserRegistrationService(UserRepository userRepository, AccountRepository accountRepository, JWTTools jwtTools, PasswordEncoder passwordEncoder, EmailSender emailSender) {
+    public UserRegistrationService(UserRepository userRepository, AccountRepository accountRepository, JWTTools jwtTools, PasswordEncoder passwordEncoder, EmailSender emailSender, CloudinaryService fileUploader) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.jwtTools = jwtTools;
         this.passwordEncoder = passwordEncoder;
         this.emailSender = emailSender;
+        this.fileUploader = fileUploader;
     }
 
 
@@ -71,28 +74,27 @@ public class UserRegistrationService {
 
         // ** ACCOUNT **
 
+        String profilePicUrl = null;
+
         Account newAccount = new Account(
                 savedUser,
                 payload.username(),
                 this.passwordEncoder.encode(payload.password()),
-                payload.profilePicUrl(),
+                profilePicUrl,
                 payload.bio(),
                 payload.isPrivate(),
                 payload.tags()
         );
 
+        this.fileUploader.uploadMedia(payload.profilePic(), ("/avatar"));
         Account savedAccount = this.accountRepository.save(newAccount);
         log.info("Account registered with ID: {}.", savedAccount.getId());
-
-
 
         // send registration email
         this.emailSender.sendRegistrationEmail(savedUser);
 
-
         // ** GENERATE TOKEN **
         String token = this.jwtTools.generateToken(savedAccount);
-
 
         return new UserRegistrationResponseDTO(token);
 

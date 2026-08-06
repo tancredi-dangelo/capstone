@@ -101,7 +101,6 @@ public class AccountService {
             found.setUsername(payload.username());
         }
 
-        if (payload.profilePicUrl() != null) found.setProfilePicUrl(payload.profilePicUrl());
         if (payload.bio() != null) found.setBio(payload.bio());
         if (payload.tags() != null) found.setTags(payload.tags());
 
