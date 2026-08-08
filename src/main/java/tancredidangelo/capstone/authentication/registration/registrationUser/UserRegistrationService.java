@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.cloudinary.CloudinaryService;
 import tancredidangelo.capstone.emailSender.EmailSender;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
@@ -74,19 +75,16 @@ public class UserRegistrationService {
 
         // ** ACCOUNT **
 
-        String profilePicUrl = null;
-
         Account newAccount = new Account(
                 savedUser,
                 payload.username(),
                 this.passwordEncoder.encode(payload.password()),
-                profilePicUrl,
+                null,
                 payload.bio(),
                 payload.isPrivate(),
                 payload.tags()
         );
 
-        this.fileUploader.uploadMedia(payload.profilePic(), ("/avatar"));
         Account savedAccount = this.accountRepository.save(newAccount);
         log.info("Account registered with ID: {}.", savedAccount.getId());
 

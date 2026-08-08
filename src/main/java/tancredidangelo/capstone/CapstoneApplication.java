@@ -10,7 +10,7 @@ import static tancredidangelo.capstone.helpers.CountryCodeConverter.toIsoCode;
 @EnableAsync
 public class CapstoneApplication {
 
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		SpringApplication.run(CapstoneApplication.class, args);
 	}
 

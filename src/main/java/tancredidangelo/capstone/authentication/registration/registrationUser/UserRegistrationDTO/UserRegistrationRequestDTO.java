@@ -44,8 +44,6 @@ public record UserRegistrationRequestDTO(
 
         @NotNull Boolean isPrivate,
 
-        MultipartFile profilePic,
-
         @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,
 
         List<String> tags) {
