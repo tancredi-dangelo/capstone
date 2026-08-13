@@ -24,6 +24,7 @@ import tancredidangelo.capstone.exceptions.UnauthorizedException;
 import tancredidangelo.capstone.helpers.ConverterPostDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -51,14 +52,11 @@ public class PostController {
     /// GET HOME FEED -> GET "/posts/home"
     @GetMapping("/home")
     @PreAuthorize("isAuthenticated()")
-    public Page<PostResponseDTO> getFeed(
-            Authentication authentication,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public List<PostResponseDTO> getFeed(
+            Authentication authentication
     ) {
         Long accountId = ((Account) Objects.requireNonNull(authentication.getPrincipal())).getId();
-        Pageable pageable = PageRequest.of(page, size);
-        return this.postService.getFeed(accountId, pageable);
+        return this.postService.getFeed(accountId);
     }
 
 

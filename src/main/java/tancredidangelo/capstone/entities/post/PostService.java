@@ -15,6 +15,7 @@ import tancredidangelo.capstone.entities.post.postSubclasses.writing.Writing;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static tancredidangelo.capstone.helpers.ConverterPostDTO.convertToDTO;
 
@@ -56,13 +57,13 @@ public class PostService {
 
 
     /// Get Feed
-    public Page<PostResponseDTO> getFeed(Long accountId, Pageable pageable) {
+    public List<PostResponseDTO> getFeed(Long accountId) {
 
         LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
 
-        Page<Post> rawPosts = this.postRepository.findFeedForAccount(accountId, twentyFourHoursAgo, pageable);
+        List<Post> rawPosts = this.postRepository.findFeedForAccount(accountId, twentyFourHoursAgo);
 
-        return rawPosts.map(ConverterPostDTO::convertToDTO);
+        return rawPosts.stream().map(ConverterPostDTO::convertToDTO).toList();
     }
 
 

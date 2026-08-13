@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 /// UNIQUE REPOSITORY FOR ALL POST SUBCLASSES
@@ -31,7 +32,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     AND p.timestamp >= :since
     ORDER BY p.timestamp DESC
     """)
-    Page<Post> findFeedForAccount(@Param("accountId") Long accountId, @Param("since") LocalDateTime since, Pageable pageable);
+    List<Post> findFeedForAccount(@Param("accountId") Long accountId, @Param("since") LocalDateTime since);
 
 
     /// FIND POST BY ACCOUNT AND ORDER BY DATE (ACCOUNT PAGE)

@@ -14,6 +14,7 @@ import tancredidangelo.capstone.entities.person.account.AccountRoles;
 import tancredidangelo.capstone.entities.person.user.stack.User;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.savedPost.SavedPost;
+import tancredidangelo.capstone.entities.tag.Tag;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -62,9 +63,9 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     private AccountRoles role = AccountRoles.USER;
 
-    @ElementCollection
-    @CollectionTable(name = "account_tags", joinColumns = @JoinColumn(name = "account_id"))
-    private List<String> tags = new ArrayList<>();
+    @OneToMany
+    @JoinColumn(name = "account_id")
+    private List<Tag> tags = new ArrayList<>();
 
     @Column(name = "date_of_registration")
     private LocalDateTime dateOfRegistration;
@@ -88,7 +89,7 @@ public class Account implements UserDetails {
 
     /// constructor
 
-    public Account(User user, String username, String password, String profilePicUrl, String bio, boolean isPrivate, List<String> tags) {
+    public Account(User user, String username, String password, String profilePicUrl, String bio, boolean isPrivate, List<Tag> tags) {
         this.user = user;
         this.username = username;
         this.password = password;
