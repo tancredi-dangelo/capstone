@@ -6,7 +6,6 @@ import tancredidangelo.capstone.entities.tag.Tag;
 import java.util.List;
 
 public record PublicAccountResponseDTO(
-        Long id,
         String username,
         String profilePicUrl,
         String bio,
@@ -18,7 +17,6 @@ public record PublicAccountResponseDTO(
 ) {
     public static PublicAccountResponseDTO fromEntity(Account account) {
         return new PublicAccountResponseDTO(
-                account.getId(),
                 account.getUsername(),
                 account.getProfilePicUrl(),
                 account.getBio(),

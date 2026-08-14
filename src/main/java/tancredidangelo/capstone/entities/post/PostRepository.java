@@ -36,7 +36,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
 
     /// FIND POST BY ACCOUNT AND ORDER BY DATE (ACCOUNT PAGE)
-    Page<Post> findByAuthorIdOrderByTimestampDesc(Long authorId, Pageable pageable);
+    List<Post> findByAuthorIdOrderByTimestampDesc(Long authorId);
 
 
 

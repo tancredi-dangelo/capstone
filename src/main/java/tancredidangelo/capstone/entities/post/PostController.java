@@ -59,10 +59,35 @@ public class PostController {
         return this.postService.getFeed(accountId);
     }
 
+    /// GET OWN POSTS -> GET "/posts/accounts/me"
+    @GetMapping("/accounts/me")
+    @PreAuthorize("isAuthenticated()")
+    public List<PostResponseDTO> getOwnPosts(
+            Authentication authentication
+    ) {
+        Account ownAccount = (Account) authentication.getPrincipal();
+        List<Post> posts = this.postService.getPostsByAccountId(ownAccount.getId());
 
+        return posts.stream()
+                .map(ConverterPostDTO::convertToDTO)
+                .toList();
+    }
+
+    /// GET POSTS BY ACCOUNT ID -> GET "/posts/accounts/{id}"
+    @GetMapping("/accounts/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public List<PostResponseDTO> getPostsByAccountId(
+            @PathVariable Long id
+    ) {
+        List<Post> posts = this.postService.getPostsByAccountId(id);
+
+        return posts.stream()
+                .map(ConverterPostDTO::convertToDTO)
+                .toList();
+    }
 
     /// GET SINGLE POST -> GET "/posts/{id}"
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     @PreAuthorize("isAuthenticated()")
     public PostResponseDTO getPostById(@PathVariable Long id, Authentication authentication) {
         Post found = this.postService.findById(id);
@@ -75,21 +100,6 @@ public class PostController {
 
         return ConverterPostDTO.convertToDTO(found);
     }
-
-
-
-    /// GET POSTS BY ACCOUNT ID -> GET "/posts/accounts/{id}"
-    @GetMapping("/accounts/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public Page<Post> getPostsByAccountId(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        return this.postService.getPostsByAccountId(id, pageable);
-    }
-
 
 
     // -------------------------------- CREATE --------------------------------

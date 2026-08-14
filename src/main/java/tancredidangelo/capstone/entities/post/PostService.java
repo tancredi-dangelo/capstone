@@ -48,11 +48,11 @@ public class PostService {
 
 
     /// Get posts by account id
-    public Page<Post> getPostsByAccountId(Long authorId, Pageable pageable) {
+    public List<Post> getPostsByAccountId(Long authorId) {
         if (this.accountService.findById(authorId).getIsBanned() == true) {
             throw new BannedAccountException("This account has been banned and is currently unavailable.");
         }
-        return this.postRepository.findByAuthorIdOrderByTimestampDesc(authorId, pageable);
+        return this.postRepository.findByAuthorIdOrderByTimestampDesc(authorId);
     }
 
 

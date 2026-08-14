@@ -49,18 +49,6 @@ public class AccountController {
         return this.accountService.searchActiveAccounts(country, usernameMatch, tagIds, pageable);
     }
 
-    /// GET ACCOUNT BY USERNAME
-    @GetMapping("/{username}")
-    @PreAuthorize(("isAuthenticated()"))
-    public PublicAccountResponseDTO getByUsername(@PathVariable String username) {
-        Account found = this.accountService.findByUsername(username);
-        return PublicAccountResponseDTO.fromEntity(found);
-    }
-
-
-
-    // ------------------------- OWNER METHODS -------------------------
-
 
     /// OWNER -> GET CURRENT LOGGED ACCOUNT PROFILE -> GET "/accounts/me"
     @GetMapping("/me")
@@ -69,6 +57,14 @@ public class AccountController {
         Account currentAccount = (Account) authentication.getPrincipal();
         Account freshAccount = this.accountService.findById(currentAccount.getId());
         return OwnAccountResponseDTO.fromEntity(freshAccount);
+    }
+
+    /// GET ACCOUNT BY USERNAME
+    @GetMapping("/{username}")
+    @PreAuthorize(("isAuthenticated()"))
+    public PublicAccountResponseDTO getByUsername(@PathVariable String username) {
+        Account found = this.accountService.findByUsername(username);
+        return PublicAccountResponseDTO.fromEntity(found);
     }
 
 
