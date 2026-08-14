@@ -16,6 +16,7 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.Upd
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.AdminAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.OwnAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
+import tancredidangelo.capstone.entities.tag.Tag;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,17 +36,17 @@ public class AccountController {
     // ------------------------- PUBLIC / AUTHENTICATED METHODS -------------------------
 
     /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "/accounts/browse"
-    @GetMapping("/browse")
+    @GetMapping("/explore")
     @PreAuthorize("isAuthenticated()")
     public Page<PublicAccountResponseDTO> getActiveAccountsAndFilter(
             @RequestParam(required = false) String usernameMatch,
             @RequestParam(required = false) String country,
-            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false) List<Long> tagIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return this.accountService.searchActiveAccounts(country, usernameMatch, tags, pageable);
+        return this.accountService.searchActiveAccounts(country, usernameMatch, tagIds, pageable);
     }
 
     /// GET ACCOUNT BY USERNAME
@@ -64,7 +65,7 @@ public class AccountController {
     /// OWNER -> GET CURRENT LOGGED ACCOUNT PROFILE -> GET "/accounts/me"
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public OwnAccountResponseDTO getMyAccount(Authentication authentication) {
+    public OwnAccountResponseDTO getOwnAccount(Authentication authentication) {
         Account currentAccount = (Account) authentication.getPrincipal();
         Account freshAccount = this.accountService.findById(currentAccount.getId());
         return OwnAccountResponseDTO.fromEntity(freshAccount);

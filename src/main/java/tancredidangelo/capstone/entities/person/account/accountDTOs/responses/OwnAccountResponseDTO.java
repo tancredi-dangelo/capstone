@@ -2,6 +2,7 @@ package tancredidangelo.capstone.entities.person.account.accountDTOs.responses;
 
 import tancredidangelo.capstone.entities.person.account.AccountRoles;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.tag.Tag;
 
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public record OwnAccountResponseDTO(
         String bio,
         Boolean isPrivate,
         AccountRoles role,
-        List<String> tags,
+        List<Tag> tags,
         LocalDateTime dateOfRegistration,
         int followersCount,
         int followingCount,

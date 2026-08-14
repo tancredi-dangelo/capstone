@@ -3,6 +3,7 @@ package tancredidangelo.capstone.entities.person.account.accountDTOs.requests;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import tancredidangelo.capstone.entities.tag.Tag;
 
 import java.util.List;
 
@@ -16,6 +17,6 @@ public record UpdateAccountRequestDTO(
 
         @NotNull Boolean isPrivate,
 
-        List<String> tags
+        List<Tag> tags
 ) {
 }

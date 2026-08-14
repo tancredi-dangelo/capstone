@@ -1,6 +1,7 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs.responses;
 
 import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.tag.Tag;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public record PublicAccountResponseDTO(
         String profilePicUrl,
         String bio,
         Boolean isPrivate,
-        List<String> tags,
+        List<Tag> tags,
         int followersCount,
         int followingCount,
         int postsCount

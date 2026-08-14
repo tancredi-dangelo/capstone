@@ -1,6 +1,7 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs.responses;
 
 import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.tag.Tag;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,7 +10,7 @@ public record AdminAccountResponseDTO(
         Long id,
         String username,
         LocalDateTime dateOfRegistration,
-        List<String> tags,
+        List<Tag> tags,
         Boolean isPrivate,
         boolean isBanned,
         int followersCount,

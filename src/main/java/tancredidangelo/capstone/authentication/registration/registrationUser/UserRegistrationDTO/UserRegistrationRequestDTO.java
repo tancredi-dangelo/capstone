@@ -3,6 +3,7 @@ package tancredidangelo.capstone.authentication.registration.registrationUser.Us
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
+import tancredidangelo.capstone.entities.tag.Tag;
 import tancredidangelo.capstone.helpers.ForbiddenUsernamesList;
 
 import java.time.LocalDate;
@@ -46,7 +47,7 @@ public record UserRegistrationRequestDTO(
 
         @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,
 
-        List<String> tags) {
+        List<Tag> tags) {
 
 
         // Check if username is in Forbidden List

@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.user.stack.User;
+import tancredidangelo.capstone.entities.tag.Tag;
 
 import java.util.List;
 
@@ -59,29 +60,29 @@ public class AccountSpecification {
 
 
     /// FILTER TAGS
-    public static Specification<Account> hasAllTags(List<String> tags) {
+    public static Specification<Account> hasAllTags(List<Tag> tags) {
         return (root, query, cb) -> {
 
             if (tags == null || tags.isEmpty()) {
                 return cb.conjunction();
             }
 
-            List<String> lowercaseTags = tags.stream()
-                    .map(String::toLowerCase)
+            List<Long> tagIds = tags.stream()
+                    .map(Tag::getId)
                     .toList();
 
-            // create subquery for counting tags
+            // create subquery for counting matching tags
             Subquery<Long> subquery = query.subquery(Long.class);
             Root<Account> subRoot = subquery.from(Account.class);
-            Join<Account, String> tagJoin = subRoot.join("tags", JoinType.INNER);
+            Join<Account, Tag> tagJoin = subRoot.join("tags", JoinType.INNER);
 
-            subquery.select(cb.countDistinct(tagJoin));
+            subquery.select(cb.countDistinct(tagJoin.get("id")));
             subquery.where(
                     cb.equal(subRoot.get("id"), root.get("id")),
-                    cb.lower(tagJoin).in(lowercaseTags)
+                    tagJoin.get("id").in(tagIds)
             );
 
-            return cb.equal(subquery, (long) lowercaseTags.size());
+            return cb.equal(subquery, (long) tagIds.size());
         };
     }
 
@@ -89,7 +90,7 @@ public class AccountSpecification {
 
     /// ------------ FINAL COMBINATION METHOD (USER + ADMIN)-------------------------------------------------------
 
-    public static Specification<Account> filterActiveAccounts(String country, String usernameMatch, List<String> tags) {
+    public static Specification<Account> filterActiveAccounts(String country, String usernameMatch, List<Tag> tags) {
         return Specification
                 .where(isNotBanned())
                 .and(usernameMatches(usernameMatch))

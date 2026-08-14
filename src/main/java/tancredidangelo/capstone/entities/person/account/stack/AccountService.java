@@ -17,12 +17,15 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.Ow
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.user.stack.User;
 import tancredidangelo.capstone.entities.person.user.stack.UserService;
+import tancredidangelo.capstone.entities.tag.Tag;
+import tancredidangelo.capstone.entities.tag.TagService;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.BadRequestException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.specifications.AccountSpecification;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,12 +37,14 @@ public class AccountService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryService fileUploader;
+    private final TagService tagService;
 
-    public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder, CloudinaryService fileUploader) {
+    public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder, CloudinaryService fileUploader, TagService tagService) {
         this.accountRepository = accountRepository;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.fileUploader = fileUploader;
+        this.tagService = tagService;
     }
 
 
@@ -82,8 +87,17 @@ public class AccountService {
 
     /// FIND ACTIVE ACCOUNTS + FILTERS -> ADMIN
     @Transactional(readOnly = true)
-    public Page<PublicAccountResponseDTO> searchActiveAccounts(String country, String usernameMatch, List<String> tags, Pageable pageable) {
+    public Page<PublicAccountResponseDTO> searchActiveAccounts(String country, String usernameMatch, List<Long> tagIds, Pageable pageable) {
+        List<Tag> tags = new ArrayList<>();
+
+        if (tagIds != null && !tagIds.isEmpty()) {
+            tagIds.forEach(tagId -> {
+                Tag tag = this.tagService.findById(tagId);
+                tags.add(tag);});
+        }
+
         Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags);
+
         return this.accountRepository.findAll(spec, pageable).map(PublicAccountResponseDTO::fromEntity);
     }
 

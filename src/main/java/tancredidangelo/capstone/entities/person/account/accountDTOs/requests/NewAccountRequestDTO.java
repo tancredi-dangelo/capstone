@@ -4,6 +4,7 @@ package tancredidangelo.capstone.entities.person.account.accountDTOs.requests;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
+import tancredidangelo.capstone.entities.tag.Tag;
 import tancredidangelo.capstone.helpers.ForbiddenUsernamesList;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public record NewAccountRequestDTO(
 
         @NotNull Boolean isPrivate,
 
-        List<String> tags) {
+        List<Tag> tags) {
 
 
         // check if username is forbidden

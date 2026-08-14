@@ -4,9 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import tancredidangelo.capstone.entities.tag.tagDTO.request.CreateTagRequestDTO;
+import tancredidangelo.capstone.entities.tag.tagDTO.request.TagRequestDTO;
 import tancredidangelo.capstone.entities.tag.tagDTO.response.TagResponseDTO;
-import tancredidangelo.capstone.entities.tag.tagDTO.request.UpdateTagRequestDTO;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 
 import java.util.List;
@@ -25,10 +24,14 @@ public class TagService {
 
     /// methods
 
-    public TagResponseDTO save(CreateTagRequestDTO payload) {
+    public TagResponseDTO save(TagRequestDTO payload) {
         Tag newTag = new Tag(payload.title());
         Tag saved = this.tagRepository.save(newTag);
         return TagResponseDTO.fromEntity(saved);
+    }
+
+    public boolean existsByTitle(String title) {
+        return this.tagRepository.existsByTitle(title);
     }
 
     public Tag findById(Long id) {
@@ -50,7 +53,7 @@ public class TagService {
         return rawTagsPage.stream().map(TagResponseDTO::fromEntity).toList();
     }
 
-    public TagResponseDTO updateById(Long id, UpdateTagRequestDTO payload) {
+    public TagResponseDTO updateById(Long id, TagRequestDTO payload) {
         Tag found = findById(id);
         found.setTitle(payload.title());
         Tag saved = this.tagRepository.save(found);
