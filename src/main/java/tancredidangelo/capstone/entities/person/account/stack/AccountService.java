@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.cloudinary.CloudinaryService;
+import tancredidangelo.capstone.entities.person.account.AccountRoles;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.NewAccountRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdateAccountRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdatePasswordRequestDTO;
@@ -25,6 +26,7 @@ import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.specifications.AccountSpecification;
 
+import javax.management.relation.RoleStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -96,7 +98,8 @@ public class AccountService {
                 tags.add(tag);});
         }
 
-        Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags);
+        Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags)
+                .and((root, query, cb) -> cb.equal(root.get("role"), AccountRoles.USER));
 
         return this.accountRepository.findAll(spec, pageable).map(PublicAccountResponseDTO::fromEntity);
     }

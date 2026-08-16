@@ -86,6 +86,20 @@ public class PostController {
                 .toList();
     }
 
+
+    /// GET POSTS BY ACCOUNT USERNAME
+    @GetMapping("/accounts/{username}")
+    @PreAuthorize("isAuthenticated()")
+    public List<PostResponseDTO> getPostsByUsername(
+            @PathVariable String username
+    ) {
+        List<Post> posts = this.postService.getPostsByUsername(username);
+
+        return posts.stream()
+                .map(ConverterPostDTO::convertToDTO)
+                .toList();
+    }
+
     /// GET SINGLE POST -> GET "/posts/{id}"
     @GetMapping("/{id:\\d+}")
     @PreAuthorize("isAuthenticated()")

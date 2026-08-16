@@ -26,7 +26,7 @@ public class LikeController {
 
 
     /// LIKE POST
-    @PostMapping("/post/{postId}")
+    @PostMapping("/posts/{postId}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public LikeResponseDTO likePost(
@@ -39,7 +39,7 @@ public class LikeController {
 
 
     /// UNLIKE POST
-    @DeleteMapping("/post/{postId}")
+    @DeleteMapping("/posts/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")
     public void unlikePost(
@@ -52,7 +52,7 @@ public class LikeController {
 
 
     /// LIKE COMMENT
-    @PostMapping("/comment/{commentId}")
+    @PostMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public LikeResponseDTO likeComment(
@@ -65,7 +65,7 @@ public class LikeController {
 
 
     /// UNLIKE COMMENT
-    @DeleteMapping("/comment/{commentId}")
+    @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")
     public void unlikeComment(
@@ -78,7 +78,7 @@ public class LikeController {
 
 
     /// GET LIKE COUNT -> POST
-    @GetMapping("/post/{postId}/count")
+    @GetMapping("/posts/{postId}/count")
     public long getPostLikesCount(@PathVariable Long postId) {
         return this.likeService.getPostLikesCount(postId);
     }
@@ -86,7 +86,7 @@ public class LikeController {
 
 
     /// GET LIKE COUNT -> COMMENT
-    @GetMapping("/comment/{commentId}/count")
+    @GetMapping("/comments/{commentId}/count")
     public long getCommentLikesCount(@PathVariable Long commentId) {
         return this.likeService.getCommentLikesCount(commentId);
     }

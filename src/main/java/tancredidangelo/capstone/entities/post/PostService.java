@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.adminActions.ban.Ban;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.postDTO.requests.update.UpdatePostRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.responses.*;
@@ -53,6 +54,16 @@ public class PostService {
             throw new BannedAccountException("This account has been banned and is currently unavailable.");
         }
         return this.postRepository.findByAuthorIdOrderByTimestampDesc(authorId);
+    }
+
+
+    /// Get posts by username
+    public List<Post> getPostsByUsername(String username) {
+        Account found = this.accountService.findByUsername(username);
+        if (found.getIsBanned() == true) {
+            throw new BannedAccountException("This account has been banned and is currently unavailable.");
+        }
+        return this.postRepository.findByAuthorIdOrderByTimestampDesc(found.getId());
     }
 
 
