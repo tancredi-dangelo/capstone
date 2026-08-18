@@ -2,6 +2,7 @@ package tancredidangelo.capstone.errorHandling;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tancredidangelo.capstone.exceptions.*;
 
@@ -126,11 +128,18 @@ public class ErrorHandler {
         return new ErrorDTO("Username invalid: Reserved words.", LocalDateTime.now());
     }
 
-    // 11. Banned Account  Exception
+    // 11. Banned Account Exception
     @ExceptionHandler(BannedAccountException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDTO handleBannedAccount(BannedAccountException ex) {
         ex.printStackTrace();
         return new ErrorDTO("This account has been banned and is currently unavailable.", LocalDateTime.now());
+    }
+
+    // 12. Type Mismatch
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String errorMessage = String.format("Parameter '%s' must be a valid identifier (ID)", ex.getName());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 }

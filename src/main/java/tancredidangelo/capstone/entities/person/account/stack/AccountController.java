@@ -60,7 +60,7 @@ public class AccountController {
     }
 
     /// GET ACCOUNT BY USERNAME
-    @GetMapping("/{username}")
+    @GetMapping("/username/{username}")
     @PreAuthorize(("isAuthenticated()"))
     public PublicAccountResponseDTO getByUsername(@PathVariable String username) {
         Account found = this.accountService.findByUsername(username);

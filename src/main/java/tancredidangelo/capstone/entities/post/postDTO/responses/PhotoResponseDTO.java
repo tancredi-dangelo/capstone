@@ -11,7 +11,7 @@ public record PhotoResponseDTO(
 
         @NotNull Long id,
         @NotNull String authorUsername,
-        @NotBlank @URL(message = "Url must be valid") String photoUrl,
+        @NotBlank @URL(message = "Url must be valid") String profilePicUrl,
         @Size(max = 2200, message = "Caption shouldn't exceed 2200 characters.") String caption,
         @NotNull @PastOrPresent LocalDateTime timestamp,
         @Min(0) int likes,

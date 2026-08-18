@@ -1,9 +1,6 @@
 package tancredidangelo.capstone.entities.post;
 
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +20,7 @@ import tancredidangelo.capstone.entities.post.postSubclasses.writing.WritingServ
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
 import tancredidangelo.capstone.helpers.ConverterPostDTO;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -66,6 +63,7 @@ public class PostController {
             Authentication authentication
     ) {
         Account ownAccount = (Account) authentication.getPrincipal();
+        assert ownAccount != null;
         List<Post> posts = this.postService.getPostsByAccountId(ownAccount.getId());
 
         return posts.stream()
@@ -88,7 +86,7 @@ public class PostController {
 
 
     /// GET POSTS BY ACCOUNT USERNAME
-    @GetMapping("/accounts/{username}")
+    @GetMapping("/accounts/username/{username}")
     @PreAuthorize("isAuthenticated()")
     public List<PostResponseDTO> getPostsByUsername(
             @PathVariable String username
@@ -108,8 +106,11 @@ public class PostController {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
         Account author = found.getAuthor();
 
-        if (author.getIsPrivate() && !author.getFollowers().contains(authenticatedAccount) && !authenticatedAccount.getRole().name().equals("ROLE_ADMIN")) {
-            throw new UnauthorizedException("This account is private. Request follow to see its contents.");
+        if (author.getIsPrivate() && author.getFollowers() != null && !author.getFollowers().contains(authenticatedAccount)) {
+            assert authenticatedAccount != null;
+            if (!authenticatedAccount.getRole().name().equals("ROLE_ADMIN")) {
+                throw new UnauthorizedException("This account is private. Request follow to see its contents.");
+            }
         }
 
         return ConverterPostDTO.convertToDTO(found);
@@ -128,6 +129,7 @@ public class PostController {
             Authentication authentication
     ) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
+        assert authenticatedAccount != null;
         return this.writingService.createWriting(authenticatedAccount.getId(), payload);
     }
 
@@ -142,6 +144,7 @@ public class PostController {
             Authentication authentication
     ) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
+        assert authenticatedAccount != null;
         return this.photoService.createPhoto(authenticatedAccount.getId(), payload);
     }
 
@@ -156,6 +159,7 @@ public class PostController {
             Authentication authentication
     ) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
+        assert authenticatedAccount != null;
         return this.carouselService.createCarousel(authenticatedAccount.getId(), payload);
     }
 
@@ -170,6 +174,7 @@ public class PostController {
             Authentication authentication
     ) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
+        assert authenticatedAccount != null;
         return this.videoService.createVideo(authenticatedAccount.getId(), payload);
     }
 

@@ -2,7 +2,6 @@ package tancredidangelo.capstone.entities.post.postDTO.responses;
 
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
-import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.post.postSubclasses.video.Video;
 
 import java.time.LocalDateTime;
@@ -11,6 +10,7 @@ public record VideoResponseDTO(
 
         @NotNull Long id,
         @NotNull String authorUsername,
+        @NotBlank String profilePicUrl,
         @NotBlank @URL(message = "Url must be valid.") String videoUrl,
         @Size(max = 2200) String caption,
         @Positive int durationSeconds,
@@ -25,6 +25,7 @@ public record VideoResponseDTO(
         return new VideoResponseDTO(
                 video.getId(),
                 video.getAuthor().getUsername(),
+                video.getAuthor().getProfilePicUrl(),
                 video.getVideoUrl(),
                 video.getCaption(),
                 video.getDurationSeconds(),
