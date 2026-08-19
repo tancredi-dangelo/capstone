@@ -58,4 +58,13 @@ public class SavedPostController {
     public void unsavePostById(@PathVariable Long id, Authentication authentication) {
         this.savedPostService.deleteById(id, authentication);
     }
+
+
+    /// CHECK IS POST SAVED BY AUTHENTICATED ACCOUNT
+    @GetMapping("/check")
+    @PreAuthorize("isAuthenticated()")
+    public boolean isPostSavedByAuthenticatedAccount(@RequestParam Long postId, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.savedPostService.isPostSavedByAuthenticatedAccount(postId, authenticatedAccount.getId());
+    }
 }

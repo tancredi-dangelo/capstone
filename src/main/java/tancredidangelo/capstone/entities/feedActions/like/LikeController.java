@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.request.LikeCommentRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.request.LikePostRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.response.LikeResponseDTO;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 
 @RestController
 @RequestMapping("/likes")
@@ -36,6 +37,14 @@ public class LikeController {
         return this.likeService.likePost(postId, authentication);
     }
 
+
+    /// CHECK POST IS LIKED BY AUTHENTICATED ACCOUNT
+    @GetMapping("/check")
+    @PreAuthorize("isAuthenticated()")
+    public boolean isPostLikedByAuthenticatedAccount(@RequestParam Long postId, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.likeService.isPostLikedByAuthenticatedAccount(postId, authenticatedAccount.getId());
+    }
 
 
     /// UNLIKE POST

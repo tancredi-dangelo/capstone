@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.PostService;
 import tancredidangelo.capstone.entities.savedPost.savedPostDTO.requests.SavedPostRequestDTO;
@@ -21,10 +22,12 @@ public class SavedPostService {
 
     private final SavedPostRepository savedPostRepository;
     private final PostService postService;
+    private final AccountService accountService;
 
-    public SavedPostService(SavedPostRepository savedPostRepository, PostService postService) {
+    public SavedPostService(SavedPostRepository savedPostRepository, PostService postService, AccountService accountService) {
         this.savedPostRepository = savedPostRepository;
         this.postService = postService;
+        this.accountService = accountService;
     }
 
     /// SAVE POST
@@ -50,6 +53,12 @@ public class SavedPostService {
     public SavedPost findById(Long id) {
         return this.savedPostRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Saved post with ID " + id + " not found."));
+    }
+
+    /// IS POST SAVED BY AUTHENTICATED ACCOUNT
+    public boolean isPostSavedByAuthenticatedAccount(Long postId, Long accountId) {
+        Account managedAccount = this.accountService.findById(accountId);
+        return this.savedPostRepository.existsByAccountIdAndPostId(managedAccount.getId(), postId);
     }
 
     /// GET SAVED POSTS LIST OF A SPECIFIC ACCOUNT

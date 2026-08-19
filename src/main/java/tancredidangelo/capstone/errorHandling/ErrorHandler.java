@@ -1,6 +1,7 @@
 package tancredidangelo.capstone.errorHandling;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.LazyInitializationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -138,8 +139,17 @@ public class ErrorHandler {
 
     // 12. Type Mismatch
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<String> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDTO handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String errorMessage = String.format("Parameter '%s' must be a valid identifier (ID)", ex.getName());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+        return new ErrorDTO(errorMessage, LocalDateTime.now());
+    }
+
+
+    // 13. Lazy Initialization
+    @ExceptionHandler(LazyInitializationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDTO handleLazyInitialization(LazyInitializationException ex) {;
+        return new ErrorDTO(ex.getMessage(), LocalDateTime.now());
     }
 }

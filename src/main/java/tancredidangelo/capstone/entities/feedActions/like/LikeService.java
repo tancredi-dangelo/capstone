@@ -10,10 +10,13 @@ import tancredidangelo.capstone.entities.feedActions.like.likeDTO.request.LikeCo
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.request.LikePostRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.response.LikeResponseDTO;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
+import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.PostService;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -24,11 +27,13 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final PostService postService;
     private final CommentService commentService;
+    private final AccountService accountService;
 
-    public LikeService(LikeRepository likeRepository, PostService postService, CommentService commentService) {
+    public LikeService(LikeRepository likeRepository, PostService postService, CommentService commentService, AccountService accountService) {
         this.likeRepository = likeRepository;
         this.postService = postService;
         this.commentService = commentService;
+        this.accountService = accountService;
     }
 
     // ------------------- METHODS ---------------------------------------------
@@ -89,6 +94,13 @@ public class LikeService {
 
         log.info("Post ID {} unliked by Account ID {}.", postId, author.getId());
 
+    }
+
+
+    /// CHECK POST IS LIKED BY AUTHENTICATED ACCOUNT
+    public boolean isPostLikedByAuthenticatedAccount(Long postId, Long accountId) {
+        Account managedAccount = this.accountService.findById(accountId);
+        return this.likeRepository.existsByAuthorIdAndPostId(managedAccount.getId(), postId);
     }
 
 

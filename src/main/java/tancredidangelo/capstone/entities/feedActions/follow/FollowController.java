@@ -14,6 +14,7 @@ import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.F
 
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResolvedResponseDTO;
+import tancredidangelo.capstone.entities.person.account.stack.Account;
 
 @RestController
 @RequestMapping("/follows")
@@ -27,8 +28,24 @@ public class FollowController {
 
     // ---------------------- ENDPOINTS ------------------------------------------
 
+    /// CHECK FOLLOW EXISTS BY FOLLOWER ID AND FOLLOWED ID
+    @GetMapping("/check")
+    @PreAuthorize("isAuthenticated()")
+    public boolean followExists(@RequestParam Long followerId,
+                                @RequestParam Long followedId) {
+        return this.followService.existsByFollowerAndFollowed(followerId, followedId);
+    }
+
+    /// CHECK FOLLOW EXISTS BY TARGET USERNAME
+    @GetMapping("/check/username")
+    @PreAuthorize("isAuthenticated()")
+    public boolean followExistsByTargetUsername(@RequestParam String targetUsername, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return this.followService.isAccountFollowed(authenticatedAccount.getId(), targetUsername);
+    }
+
     /// FOLLOW PUBLIC ACCOUNT
-    @PostMapping("/follow")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public FollowResponseDTO follow(

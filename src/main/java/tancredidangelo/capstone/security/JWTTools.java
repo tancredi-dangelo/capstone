@@ -21,9 +21,11 @@ public class JWTTools {
 
 
     public String generateToken(Account account) {
+        long now = System.currentTimeMillis();
+        long expirationTime = 1000L * 60 * 60 * 24;
         return Jwts.builder()
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()* 1000 * 60 * 60))
+                .expiration(new Date(now + expirationTime))
                 .subject(String.valueOf(account.getId()))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
                 .compact();

@@ -1,6 +1,7 @@
 package tancredidangelo.capstone.entities.feedActions.follow;
 
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional; // Usa Spring Transactional
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +39,9 @@ public class FollowService {
     @Transactional
     public FollowResponseDTO followPublicAccount(FollowRequestDTO payload, Authentication authentication) {
 
-        Account follower = (Account) authentication.getPrincipal();
+        Account principal = (Account) authentication.getPrincipal();
+
+        Account follower = this.accountService.findById(principal.getId());
 
         if (follower.getId().equals(payload.followedId())) {
             throw new BadRequestException("An account cannot follow itself.");
@@ -66,7 +69,9 @@ public class FollowService {
     @Transactional
     public FollowPendingResponseDTO requestFollow(FollowRequestDTO payload, Authentication authentication) {
 
-        Account follower = (Account) authentication.getPrincipal();
+        Account principal = (Account) authentication.getPrincipal();
+
+        Account follower = this.accountService.findById(principal.getId());
 
         if (follower.getId().equals(payload.followedId())) {
             throw new BadRequestException("An account cannot follow itself.");
@@ -132,14 +137,29 @@ public class FollowService {
 
 
     /// FIND BY ID
+    @Transactional(readOnly = true)
     public Follow findById(Long id) {
         return this.followRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Follow with ID " + id + " not found."));
     }
 
 
+    /// EXISTS BY FOLLOWER ID AND FOLLOWED ID
+    public boolean existsByFollowerAndFollowed(Long followerId, Long followedId) {
+        return this.followRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
+    }
+
+
+    /// IS ACCOUNT FOLLOWED BY USERNAME
+    public boolean isAccountFollowed(Long authenticatedAccountId, String targetUsername) {
+        Account targetAccount = this.accountService.findByUsername(targetUsername);
+        return existsByFollowerAndFollowed(authenticatedAccountId, targetAccount.getId());
+    }
+
+
 
     /// GET FOLLOWERS
+    @Transactional(readOnly = true)
     public Page<FollowResponseDTO> getFollowers(Long accountId, Pageable pageable) {
         return this.followRepository
                 .findByFollowedIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable)
@@ -149,6 +169,7 @@ public class FollowService {
 
 
     /// GET FOLLOWING
+    @Transactional(readOnly = true)
     public Page<FollowResponseDTO> getFollowing(Long accountId, Pageable pageable) {
         return this.followRepository
                 .findByFollowerIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable)
