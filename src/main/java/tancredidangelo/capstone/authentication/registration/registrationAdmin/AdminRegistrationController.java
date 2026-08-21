@@ -7,7 +7,7 @@ import tancredidangelo.capstone.authentication.registration.registrationAdmin.ad
 import tancredidangelo.capstone.authentication.registration.registrationAdmin.adminRegistrationDTO.AdminRegistrationResponseDTO;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/auth")
 public class AdminRegistrationController {
 
     /// dependency injection
@@ -22,7 +22,7 @@ public class AdminRegistrationController {
     // ------------------ ENDPOINTS ------------------------------------------------------------
 
     /// ADMIN FIRST REGISTRATION
-    @PostMapping("/registration")
+    @PostMapping("/admin/registration")
     @ResponseStatus(HttpStatus.CREATED)
     public AdminRegistrationResponseDTO registerAdmin(@RequestBody @Valid AdminRegistrationRequestDTO payload) {
         return this.adminRegistrationService.registerNewAdmin(payload);

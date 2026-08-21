@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.tag.tagDTO.request.TagRequestDTO;
 import tancredidangelo.capstone.entities.tag.tagDTO.response.TagResponseDTO;
+import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class TagService {
     /// methods
 
     public TagResponseDTO save(TagRequestDTO payload) {
+        if (existsByTitle(payload.title())) { throw new AlreadyExistsException("A Tag with this title already exists!");}
         Tag newTag = new Tag(payload.title());
         Tag saved = this.tagRepository.save(newTag);
         return TagResponseDTO.fromEntity(saved);

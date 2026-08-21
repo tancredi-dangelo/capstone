@@ -2,6 +2,7 @@ package tancredidangelo.capstone.errorHandling;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.LazyInitializationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -159,6 +160,13 @@ public class ErrorHandler {
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorDTO handleForbidden(ForbiddenException ex) {;
+        return new ErrorDTO(ex.getMessage(), LocalDateTime.now());
+    }
+
+    // 15. Data Integrity Violation
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDTO handleDataIntegrityViolation(DataIntegrityViolationException ex) {;
         return new ErrorDTO(ex.getMessage(), LocalDateTime.now());
     }
 
