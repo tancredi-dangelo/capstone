@@ -25,8 +25,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     @Query("""
     SELECT p FROM Post p
     WHERE p.author.id IN (
-        SELECT f.followed.id FROM Follow f 
-        WHERE f.follower.id = :accountId 
+        SELECT f.followed.id FROM Follow f
+        WHERE f.follower.id = :accountId
         AND f.followed.isBanned = FALSE
     )
     AND p.timestamp >= :since

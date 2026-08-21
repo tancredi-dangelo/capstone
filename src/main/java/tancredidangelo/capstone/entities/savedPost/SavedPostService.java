@@ -13,8 +13,11 @@ import tancredidangelo.capstone.entities.post.PostService;
 import tancredidangelo.capstone.entities.savedPost.savedPostDTO.requests.SavedPostRequestDTO;
 import tancredidangelo.capstone.entities.savedPost.savedPostDTO.responses.SavedPostResponseDTO;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
+import tancredidangelo.capstone.exceptions.ForbiddenException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -62,19 +65,20 @@ public class SavedPostService {
     }
 
     /// GET SAVED POSTS LIST OF A SPECIFIC ACCOUNT
-    public Page<SavedPostResponseDTO> findByAccountId(Long id, Pageable pageable) {
-        Page<SavedPost> rawPosts = this.savedPostRepository.findByAccountId(id, pageable);
-        return rawPosts.map(SavedPostResponseDTO::fromEntity);
+    public List<SavedPostResponseDTO> findByAccountId(Long id) {
+        Account managedAccount = this.accountService.findById(id);
+        List<SavedPost> rawPosts = this.savedPostRepository.findByAccountId(managedAccount.getId());
+        return rawPosts.stream().map(SavedPostResponseDTO::fromEntity).toList();
     }
 
     /// DELETE BY SAVED_POST ID
     @Transactional
-    public void deleteById(Long id, Authentication authentication) {
-        Account authenticatedAccount = (Account) authentication.getPrincipal();
+    public void deleteById(Long id, Long authenticatedAccountId) {
+        Account managedAccount = this.accountService.findById(authenticatedAccountId);
         SavedPost found = findById(id);
 
-        if (!found.getAccount().getId().equals(authenticatedAccount.getId())) {
-            throw new UnauthorizedException("You don't have authorization to perform this action.");
+        if (!found.getAccount().getId().equals(managedAccount.getId())) {
+            throw new ForbiddenException("You don't have authorization to perform this action.");
         }
 
         this.savedPostRepository.delete(found);

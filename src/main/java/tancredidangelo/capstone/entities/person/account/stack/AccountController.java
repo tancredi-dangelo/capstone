@@ -16,7 +16,6 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.Upd
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.AdminAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.OwnAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
-import tancredidangelo.capstone.entities.tag.Tag;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,8 +23,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
-
-    /// dependency injection
 
     private final AccountService accountService;
 
@@ -35,7 +32,7 @@ public class AccountController {
 
     // ------------------------- PUBLIC / AUTHENTICATED METHODS -------------------------
 
-    /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "/accounts/browse"
+    /// SEARCH ACTIVE ACCOUNTS WITH FILTERS -> GET "/accounts/explore"
     @GetMapping("/explore")
     @PreAuthorize("isAuthenticated()")
     public Page<PublicAccountResponseDTO> getActiveAccountsAndFilter(
@@ -49,24 +46,20 @@ public class AccountController {
         return this.accountService.searchActiveAccounts(country, usernameMatch, tagIds, pageable);
     }
 
-
     /// OWNER -> GET CURRENT LOGGED ACCOUNT PROFILE -> GET "/accounts/me"
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public OwnAccountResponseDTO getOwnAccount(Authentication authentication) {
         Account currentAccount = (Account) authentication.getPrincipal();
-        Account freshAccount = this.accountService.findById(currentAccount.getId());
-        return OwnAccountResponseDTO.fromEntity(freshAccount);
+        return this.accountService.findOwnAccountById(currentAccount.getId());
     }
 
-    /// GET ACCOUNT BY USERNAME
+    /// GET ACCOUNT BY USERNAME -> GET "/accounts/username/{username}"
     @GetMapping("/username/{username}")
-    @PreAuthorize(("isAuthenticated()"))
+    @PreAuthorize("isAuthenticated()")
     public PublicAccountResponseDTO getByUsername(@PathVariable String username) {
-        Account found = this.accountService.findByUsername(username);
-        return PublicAccountResponseDTO.fromEntity(found);
+        return this.accountService.findPublicAccountByUsername(username);
     }
-
 
     /// OWNER -> AUTHENTICATED ACCOUNT REGISTERS NEW ACCOUNT -> POST "/accounts/create"
     @PostMapping("/create")
@@ -78,7 +71,6 @@ public class AccountController {
         return this.accountService.save(userId, payload);
     }
 
-
     /// OWNER -> UPDATE ACCOUNT -> PUT "/accounts/me"
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -87,7 +79,6 @@ public class AccountController {
         return this.accountService.updateById(ownerAccount.getId(), payload);
     }
 
-
     /// OWNER -> UPDATE PASSWORD -> PUT "/accounts/me/password"
     @PutMapping("/me/password")
     @PreAuthorize("isAuthenticated()")
@@ -95,7 +86,6 @@ public class AccountController {
         Account ownerAccount = (Account) authentication.getPrincipal();
         return this.accountService.updatePasswordById(ownerAccount.getId(), payload);
     }
-
 
     /// OWNER -> UPDATE PROFILE PIC -> PATCH "/accounts/me/avatar"
     @PatchMapping("/me/avatar")
@@ -107,7 +97,7 @@ public class AccountController {
 
     // ------------------------- ADMIN METHODS -------------------------
 
-    /// ADMIN -> FIND ACCOUNT BY ID -> GET "/accounts/{id}"
+    /// ADMIN -> FIND ACCOUNT BY ID -> GET "/accounts/id/{id}"
     @GetMapping("/id/{id}")
     @PreAuthorize("@authConfig.isAdmin(authentication)")
     public AdminAccountResponseDTO getAccountById(@PathVariable Long id) {

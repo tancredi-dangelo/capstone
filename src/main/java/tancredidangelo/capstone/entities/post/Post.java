@@ -33,7 +33,7 @@ public abstract class Post {
     @JoinColumn(name = "author_id", nullable = false)
     private Account author;
 
-    @Column
+    @Column(length = 2000)
     private String caption;
 
     @Column(nullable = false)

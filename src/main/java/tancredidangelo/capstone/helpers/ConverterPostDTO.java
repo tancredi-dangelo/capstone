@@ -1,5 +1,6 @@
 package tancredidangelo.capstone.helpers;
 
+import org.hibernate.Hibernate;
 import tancredidangelo.capstone.entities.post.Post;
 import tancredidangelo.capstone.entities.post.postDTO.responses.*;
 import tancredidangelo.capstone.entities.post.postSubclasses.carousel.Carousel;
@@ -10,7 +11,11 @@ import tancredidangelo.capstone.entities.post.postSubclasses.writing.Writing;
 public class ConverterPostDTO {
     /// Polymorphic mapper for Post subclasses
     public static PostResponseDTO convertToDTO(Post post) {
-        return switch (post) {
+
+        // unwrap entity from Hibernate proxy
+        Object unproxied = Hibernate.unproxy(post);
+
+        return switch (unproxied) {
             case Writing writing   -> WritingResponseDTO.fromEntity(writing);
             case Photo photo       -> PhotoResponseDTO.fromEntity(photo);
             case Carousel carousel -> CarouselResponseDTO.fromEntity(carousel);

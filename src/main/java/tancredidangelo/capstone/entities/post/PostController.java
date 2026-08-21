@@ -17,6 +17,7 @@ import tancredidangelo.capstone.entities.post.postSubclasses.carousel.CarouselSe
 import tancredidangelo.capstone.entities.post.postSubclasses.photo.PhotoService;
 import tancredidangelo.capstone.entities.post.postSubclasses.video.VideoService;
 import tancredidangelo.capstone.entities.post.postSubclasses.writing.WritingService;
+import tancredidangelo.capstone.exceptions.ForbiddenException;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
 import tancredidangelo.capstone.helpers.ConverterPostDTO;
 
@@ -109,7 +110,7 @@ public class PostController {
         if (author.getIsPrivate() && author.getFollowers() != null && !author.getFollowers().contains(authenticatedAccount)) {
             assert authenticatedAccount != null;
             if (!authenticatedAccount.getRole().name().equals("ROLE_ADMIN")) {
-                throw new UnauthorizedException("This account is private. Request follow to see its contents.");
+                throw new ForbiddenException("This account is private. Request follow to see its contents.");
             }
         }
 

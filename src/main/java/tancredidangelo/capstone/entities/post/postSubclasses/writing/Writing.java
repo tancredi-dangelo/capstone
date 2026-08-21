@@ -20,7 +20,7 @@ public class Writing extends Post {
 
     /// attributes
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2500)
     private String text;
 
 

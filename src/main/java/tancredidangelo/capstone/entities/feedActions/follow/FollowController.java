@@ -15,7 +15,6 @@ import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.F
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResolvedResponseDTO;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
-
 @RestController
 @RequestMapping("/follows")
 public class FollowController {
@@ -26,84 +25,62 @@ public class FollowController {
         this.followService = followService;
     }
 
-    // ---------------------- ENDPOINTS ------------------------------------------
-
-    /// CHECK FOLLOW EXISTS BY FOLLOWER ID AND FOLLOWED ID
-    @GetMapping("/check")
-    @PreAuthorize("isAuthenticated()")
-    public boolean followExists(@RequestParam Long followerId,
-                                @RequestParam Long followedId) {
-        return this.followService.existsByFollowerAndFollowed(followerId, followedId);
-    }
-
-    /// CHECK FOLLOW EXISTS BY TARGET USERNAME
-    @GetMapping("/check/username")
-    @PreAuthorize("isAuthenticated()")
-    public boolean followExistsByTargetUsername(@RequestParam String targetUsername, Authentication authentication) {
-        Account authenticatedAccount = (Account) authentication.getPrincipal();
-        return this.followService.isAccountFollowed(authenticatedAccount.getId(), targetUsername);
-    }
-
-    /// FOLLOW PUBLIC ACCOUNT
-    @PostMapping()
+    /// FOLLOW / REQUEST FOLLOW
+    @PostMapping("/follow-request")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public FollowResponseDTO follow(
             @RequestBody @Valid FollowRequestDTO payload,
             Authentication authentication
     ) {
-        return this.followService.followPublicAccount(payload, authentication);
+        return this.followService.follow(payload, authentication);
     }
 
-    /// REQUEST FOLLOW PRIVATE ACCOUNT
-    @PostMapping("/request")
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated()")
-    public FollowPendingResponseDTO requestFollow(
-            @RequestBody @Valid FollowRequestDTO payload,
-            Authentication authentication
-    ) {
-        return this.followService.requestFollow(payload, authentication);
-    }
-
-    /// ANSWER FOLLOW REQUEST PRIVATE ACCOUNT
-    @PutMapping("/{followId}/respond")
-    @PreAuthorize("isAuthenticated()")
-    public FollowResolvedResponseDTO respondToFollowRequest(
-            @PathVariable Long followId,
-            @RequestBody @Valid FollowResolveRequestDTO payload,
-            Authentication authentication
-    ) {
-        return this.followService.respondToFollowRequest(followId, payload, authentication);
-    }
-
-    /// UNFOLLOW
-    @DeleteMapping("/unfollow/{targetAccountId}")
+    /// UNFOLLOW / CANCEL REQUEST
+    @DeleteMapping("/unfollow-request/{targetAccountId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")
     public void unfollow(@PathVariable Long targetAccountId, Authentication authentication) {
         this.followService.unfollow(targetAccountId, authentication);
     }
 
-    /// GET ACCOUNT FOLLOWERS
+    /// GET FOLLOW STATUS
+    @GetMapping("/status/{targetAccountId}")
+    @PreAuthorize("isAuthenticated()")
+    public String getFollowStatus(
+            @PathVariable Long targetAccountId,
+            Authentication authentication
+    ) {
+        return this.followService.getFollowStatus(targetAccountId, authentication);
+    }
+
+    /// RESPOND FOLLOW REQUEST
+    @PutMapping("/follow-requests/respond")
+    @PreAuthorize("isAuthenticated()")
+    public FollowResolvedResponseDTO respondToFollowRequest(
+            @RequestBody @Valid FollowResolveRequestDTO payload,
+            Authentication authentication
+    ) {
+        return this.followService.respondToFollowRequest(payload, authentication);
+    }
+
+    /// GET FOLLOWERS
     @GetMapping("/followers/{accountId}")
     public Page<FollowResponseDTO> getFollowers(
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        return this.followService.getFollowers(accountId, pageable);
+        return this.followService.getFollowers(accountId, PageRequest.of(page, size));
     }
 
-    /// GET ACCOUNT FOLLOWING
+    /// GET FOLLOWING
     @GetMapping("/following/{accountId}")
     public Page<FollowResponseDTO> getFollowing(
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        return this.followService.getFollowing(accountId, pageable);
+        return this.followService.getFollowing(accountId, PageRequest.of(page, size));
     }
 }

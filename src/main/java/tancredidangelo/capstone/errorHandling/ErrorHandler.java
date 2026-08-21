@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tancredidangelo.capstone.exceptions.*;
@@ -152,4 +153,13 @@ public class ErrorHandler {
     public ErrorDTO handleLazyInitialization(LazyInitializationException ex) {;
         return new ErrorDTO(ex.getMessage(), LocalDateTime.now());
     }
+
+
+    // 14. Forbidden 403
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDTO handleForbidden(ForbiddenException ex) {;
+        return new ErrorDTO(ex.getMessage(), LocalDateTime.now());
+    }
+
 }

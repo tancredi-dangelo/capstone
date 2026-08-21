@@ -26,7 +26,6 @@ import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.specifications.AccountSpecification;
 
-import javax.management.relation.RoleStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,10 +48,7 @@ public class AccountService {
         this.tagService = tagService;
     }
 
-
-
     // -------------------------- USER METHODS -------------------------------------------------------------------------
-
 
     /// CREATE NEW ACCOUNT
     @Transactional
@@ -62,11 +58,10 @@ public class AccountService {
         }
 
         User userFound = this.userService.findById(userId);
-
         String profilePicUrl = null;
 
         if (payload.file() != null && !payload.file().isEmpty()) {
-            profilePicUrl = this.fileUploader.uploadMedia(payload.file(), ("/avatar"));
+            profilePicUrl = this.fileUploader.uploadMedia(payload.file(), "/avatar");
         }
 
         Account newAccount = new Account(
@@ -85,9 +80,21 @@ public class AccountService {
         return OwnAccountResponseDTO.fromEntity(saved);
     }
 
+    /// FIND OWN DTO BY ID -> OWNER
+    @Transactional(readOnly = true)
+    public OwnAccountResponseDTO findOwnAccountById(Long id) {
+        Account account = findById(id);
+        return OwnAccountResponseDTO.fromEntity(account);
+    }
 
+    /// FIND PUBLIC DTO BY USERNAME -> PUBLIC / AUTHENTICATED
+    @Transactional(readOnly = true)
+    public PublicAccountResponseDTO findPublicAccountByUsername(String username) {
+        Account account = findByUsername(username);
+        return PublicAccountResponseDTO.fromEntity(account);
+    }
 
-    /// FIND ACTIVE ACCOUNTS + FILTERS -> ADMIN
+    /// FIND ACTIVE ACCOUNTS + FILTERS -> EXPLORE
     @Transactional(readOnly = true)
     public Page<PublicAccountResponseDTO> searchActiveAccounts(String country, String usernameMatch, List<Long> tagIds, Pageable pageable) {
         List<Tag> tags = new ArrayList<>();
@@ -95,7 +102,8 @@ public class AccountService {
         if (tagIds != null && !tagIds.isEmpty()) {
             tagIds.forEach(tagId -> {
                 Tag tag = this.tagService.findById(tagId);
-                tags.add(tag);});
+                tags.add(tag);
+            });
         }
 
         Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags)
@@ -103,8 +111,6 @@ public class AccountService {
 
         return this.accountRepository.findAll(spec, pageable).map(PublicAccountResponseDTO::fromEntity);
     }
-
-
 
     /// UPDATE ACCOUNT -> OWNER
     @Transactional
@@ -123,8 +129,6 @@ public class AccountService {
 
         return OwnAccountResponseDTO.fromEntity(found);
     }
-
-
 
     /// UPDATE PASSWORD -> OWNER
     @Transactional
@@ -145,27 +149,24 @@ public class AccountService {
         return OwnAccountResponseDTO.fromEntity(found);
     }
 
-
-
     /// UPLOAD PROFILE PICTURE FOR EXISTING ACCOUNT
     @Transactional
     public String updateAvatar(Long accountId, MultipartFile file) {
-
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("The uploaded file is empty or missing.");
         }
 
         Account account = findById(accountId);
 
-        String oldMediaPublicId = this.fileUploader.extractPublicIdFromUrl(account.getProfilePicUrl());
-        this.fileUploader.deleteMedia(oldMediaPublicId, "Photo");
+        if (account.getProfilePicUrl() != null) {
+            String oldMediaPublicId = this.fileUploader.extractPublicIdFromUrl(account.getProfilePicUrl());
+            this.fileUploader.deleteMedia(oldMediaPublicId, "Photo");
+        }
 
-        String url = this.fileUploader.uploadMedia(file, ("/avatar"));
-
+        String url = this.fileUploader.uploadMedia(file, "/avatar");
         account.setProfilePicUrl(url);
         return url;
     }
-
 
     /// DELETE ACCOUNT -> OWNER / ADMIN
     @Transactional
@@ -183,13 +184,11 @@ public class AccountService {
                 .orElseThrow(() -> new NotFoundException("Account with ID " + id + " not found."));
     }
 
-
-    /// FIND PUBLIC DTO BY ID -> PUBLIC
+    /// FIND ADMIN DTO BY ID -> ADMIN
     @Transactional(readOnly = true)
     public AdminAccountResponseDTO findAccountById(Long id) {
         return AdminAccountResponseDTO.fromEntity(findById(id));
     }
-
 
     /// FIND BY USERNAME -> ADMIN, IT
     @Transactional(readOnly = true)
@@ -197,7 +196,6 @@ public class AccountService {
         return this.accountRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Account with username " + username + " not found."));
     }
-
 
     /// FIND ACCOUNTS BY USER ID
     @Transactional(readOnly = true)
@@ -207,13 +205,11 @@ public class AccountService {
                 .toList();
     }
 
-
     /// EXISTS BY USERNAME -> IT, ADMIN
     @Transactional(readOnly = true)
     public boolean existsByUsername(String username) {
         return this.accountRepository.existsByUsername(username);
     }
-
 
     /// FIND BANNED ACCOUNTS -> ADMIN
     @Transactional(readOnly = true)
@@ -221,6 +217,4 @@ public class AccountService {
         Specification<Account> spec = AccountSpecification.filterAccounts(country, usernameMatch, isBanned);
         return this.accountRepository.findAll(spec, pageable).map(AdminAccountResponseDTO::fromEntity);
     }
-
-
 }

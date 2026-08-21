@@ -13,6 +13,8 @@ import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.savedPost.savedPostDTO.requests.SavedPostRequestDTO;
 import tancredidangelo.capstone.entities.savedPost.savedPostDTO.responses.SavedPostResponseDTO;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/saved")
@@ -36,19 +38,9 @@ public class SavedPostController {
     /// VIEW PERSONAL SAVED POSTS
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public Page<SavedPostResponseDTO> getOwnSavedPosts(
-            Authentication authentication,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "timestamp") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
-
+    public List<SavedPostResponseDTO> getOwnSavedPosts(Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-
-        Sort sort = sortDirection.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        return this.savedPostService.findByAccountId(authenticatedAccount.getId(), pageable);
+        return this.savedPostService.findByAccountId(authenticatedAccount.getId());
     }
 
     /// REMOVE POST FROM LIST
@@ -56,7 +48,8 @@ public class SavedPostController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")
     public void unsavePostById(@PathVariable Long id, Authentication authentication) {
-        this.savedPostService.deleteById(id, authentication);
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        this.savedPostService.deleteById(id, authenticatedAccount.getId());
     }
 
 

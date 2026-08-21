@@ -63,7 +63,7 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     private AccountRoles role = AccountRoles.USER;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "account_id")
     private List<Tag> tags = new ArrayList<>();
 
