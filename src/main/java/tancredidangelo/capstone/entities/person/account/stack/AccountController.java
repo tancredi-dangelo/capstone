@@ -54,6 +54,14 @@ public class AccountController {
         return this.accountService.findOwnAccountById(currentAccount.getId());
     }
 
+    /// GET ACCOUNT BY ID
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public PublicAccountResponseDTO getById(@PathVariable Long id) {
+        Account found = this.accountService.findById(id);
+        return PublicAccountResponseDTO.fromEntity(found);
+    }
+
     /// GET ACCOUNT BY USERNAME -> GET "/accounts/username/{username}"
     @GetMapping("/username/{username}")
     @PreAuthorize("isAuthenticated()")
@@ -85,6 +93,14 @@ public class AccountController {
     public OwnAccountResponseDTO updatePasswordById(@RequestBody @Valid UpdatePasswordRequestDTO payload, Authentication authentication) {
         Account ownerAccount = (Account) authentication.getPrincipal();
         return this.accountService.updatePasswordById(ownerAccount.getId(), payload);
+    }
+
+    /// OWNER -> CHECK PASSWORD -> GET "/accounts/me/password/check"
+    @GetMapping("me/password/check")
+    @PreAuthorize(("isAuthenticated()"))
+    public boolean passwordCorrect(@RequestParam String password, Authentication authentication) {
+        Account authenticatedAccount = (Account) authentication.getPrincipal();
+        return (password != null && password.equals(authenticatedAccount.getPassword()));
     }
 
     /// OWNER -> UPDATE PROFILE PIC -> PATCH "/accounts/me/avatar"

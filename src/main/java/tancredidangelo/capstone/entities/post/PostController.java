@@ -6,6 +6,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import tancredidangelo.capstone.entities.feedActions.follow.FollowService;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreateCarouselRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreatePhotoRequestDTO;
@@ -36,13 +38,15 @@ public class PostController {
     private final PhotoService photoService;
     private final VideoService videoService;
     private final CarouselService carouselService;
+    private final FollowService followService;
 
-    public PostController(PostService postService, WritingService writingService, PhotoService photoService, VideoService videoService, CarouselService carouselService) {
+    public PostController(PostService postService, WritingService writingService, PhotoService photoService, VideoService videoService, CarouselService carouselService, FollowService followService) {
         this.postService = postService;
         this.writingService = writingService;
         this.photoService = photoService;
         this.videoService = videoService;
         this.carouselService = carouselService;
+        this.followService = followService;
     }
 
     // -------------------------------- GET --------------------------------
@@ -107,8 +111,9 @@ public class PostController {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
         Account author = found.getAuthor();
 
-        if (author.getIsPrivate() && author.getFollowers() != null && !author.getFollowers().contains(authenticatedAccount)) {
-            assert authenticatedAccount != null;
+        boolean ifFollower = this.followService.existsByFollowerIdAndFollowedId(authenticatedAccount.getId(), authenticatedAccount.getId());
+
+        if (!author.getId().equals(authenticatedAccount.getId()) && author.getIsPrivate() && author.getFollowers() != null && ifFollower) {
             if (!authenticatedAccount.getRole().name().equals("ROLE_ADMIN")) {
                 throw new ForbiddenException("This account is private. Request follow to see its contents.");
             }

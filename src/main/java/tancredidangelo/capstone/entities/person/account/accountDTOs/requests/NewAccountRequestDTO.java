@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.entities.tag.Tag;
+import tancredidangelo.capstone.entities.tag.tagDTO.request.TagRequestDTO;
+import tancredidangelo.capstone.entities.tag.tagDTO.response.TagResponseDTO;
 import tancredidangelo.capstone.helpers.ForbiddenUsernamesList;
 
 import java.util.List;
@@ -22,13 +24,12 @@ public record NewAccountRequestDTO(
         )
         String password,
 
-        MultipartFile file,
 
         @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,
 
         @NotNull Boolean isPrivate,
 
-        List<Tag> tags) {
+        List<TagResponseDTO> tags) {
 
 
         // check if username is forbidden

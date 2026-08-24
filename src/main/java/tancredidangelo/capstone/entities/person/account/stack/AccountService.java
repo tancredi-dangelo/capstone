@@ -58,20 +58,15 @@ public class AccountService {
         }
 
         User userFound = this.userService.findById(userId);
-        String profilePicUrl = null;
-
-        if (payload.file() != null && !payload.file().isEmpty()) {
-            profilePicUrl = this.fileUploader.uploadMedia(payload.file(), "/avatar");
-        }
 
         Account newAccount = new Account(
                 userFound,
                 payload.username(),
                 passwordEncoder.encode(payload.password()),
-                profilePicUrl,
+                null,
                 payload.bio(),
                 payload.isPrivate(),
-                payload.tags()
+                payload.tags().stream().map(tagResponseDTO -> this.tagService.findById(tagResponseDTO.id())).toList()
         );
 
         Account saved = this.accountRepository.save(newAccount);

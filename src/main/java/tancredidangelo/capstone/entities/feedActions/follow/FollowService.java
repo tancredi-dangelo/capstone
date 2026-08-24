@@ -117,4 +117,9 @@ public class FollowService {
         return followRepository.findByFollowerIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable)
                 .map(FollowResponseDTO::fromEntity);
     }
+
+
+    public boolean existsByFollowerIdAndFollowedId(Long followerId, Long followedId) {
+        return this.followRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
+    }
 }
