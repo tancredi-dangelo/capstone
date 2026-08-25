@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.OwnAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateEmailRequestDTO;
 import tancredidangelo.capstone.entities.person.user.userDTOs.requests.UpdateFlagRequestDTO;
@@ -49,7 +50,7 @@ public class UserController {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
         return this.userService.updateById(authenticatedAccount.getUser().getId(), payload);
     }
-
+    
 
     /// OWNER -> UPDATE USER EMAIL -> PUT "/users/me/email"
     @PutMapping("/me/email")

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.NewAccountRequestDTO;
@@ -25,9 +26,11 @@ import java.util.UUID;
 public class AccountController {
 
     private final AccountService accountService;
+    private final PasswordEncoder passwordEncoder;
 
-    public AccountController(AccountService accountService) {
+    public AccountController(AccountService accountService, PasswordEncoder passwordEncoder) {
         this.accountService = accountService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // ------------------------- PUBLIC / AUTHENTICATED METHODS -------------------------
@@ -100,7 +103,7 @@ public class AccountController {
     @PreAuthorize(("isAuthenticated()"))
     public boolean passwordCorrect(@RequestParam String password, Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-        return (password != null && password.equals(authenticatedAccount.getPassword()));
+        return (this.passwordEncoder.matches(password, authenticatedAccount.getPassword()));
     }
 
     /// OWNER -> UPDATE PROFILE PIC -> PATCH "/accounts/me/avatar"
@@ -156,4 +159,6 @@ public class AccountController {
     public void deleteAccountById(@PathVariable Long id) {
         this.accountService.deleteById(id);
     }
+
+    
 }
