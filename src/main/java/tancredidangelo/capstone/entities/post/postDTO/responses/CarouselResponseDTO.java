@@ -17,8 +17,8 @@ public record CarouselResponseDTO(
         @Size(min = 2, max = 10) List<@NotBlank @URL String> mediaUrls,
         @Min(2) @Max(10) int length,
         @NotNull @PastOrPresent LocalDateTime timestamp,
-        @Min(0) int likes,
-        @Min(0) int comments,
+        @Min(0) int likesCount,
+        @Min(0) int commentsCount,
         boolean isUpdated
 
 ) implements PostResponseDTO {

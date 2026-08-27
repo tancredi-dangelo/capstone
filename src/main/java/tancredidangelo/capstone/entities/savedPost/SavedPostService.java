@@ -58,6 +58,11 @@ public class SavedPostService {
                 .orElseThrow(() -> new NotFoundException("Saved post with ID " + id + " not found."));
     }
 
+    /// FIND BY POST ID
+    public SavedPost findByPostId(Long postId) {
+        return this.savedPostRepository.findByPostId(postId).orElseThrow(() -> new NotFoundException("Saved post with PostID " + postId + " not found."));
+    }
+
     /// IS POST SAVED BY AUTHENTICATED ACCOUNT
     public boolean isPostSavedByAuthenticatedAccount(Long postId, Long accountId) {
         Account managedAccount = this.accountService.findById(accountId);
@@ -73,9 +78,10 @@ public class SavedPostService {
 
     /// DELETE BY SAVED_POST ID
     @Transactional
-    public void deleteById(Long id, Long authenticatedAccountId) {
+    public void deleteById(Long postId, Long authenticatedAccountId) {
         Account managedAccount = this.accountService.findById(authenticatedAccountId);
-        SavedPost found = findById(id);
+
+        SavedPost found = findByPostId(postId);
 
         if (!found.getAccount().getId().equals(managedAccount.getId())) {
             throw new ForbiddenException("You don't have authorization to perform this action.");

@@ -90,21 +90,15 @@ public class AccountService {
     }
 
     /// FIND ACTIVE ACCOUNTS + FILTERS -> EXPLORE
+    /// FIND ACTIVE ACCOUNTS + FILTERS -> EXPLORE
     @Transactional(readOnly = true)
     public Page<PublicAccountResponseDTO> searchActiveAccounts(String country, String usernameMatch, List<Long> tagIds, Pageable pageable) {
-        List<Tag> tags = new ArrayList<>();
 
-        if (tagIds != null && !tagIds.isEmpty()) {
-            tagIds.forEach(tagId -> {
-                Tag tag = this.tagService.findById(tagId);
-                tags.add(tag);
-            });
-        }
-
-        Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tags)
+        Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tagIds)
                 .and((root, query, cb) -> cb.equal(root.get("role"), AccountRoles.USER));
 
-        return this.accountRepository.findAll(spec, pageable).map(PublicAccountResponseDTO::fromEntity);
+        return this.accountRepository.findAll(spec, pageable)
+                .map(PublicAccountResponseDTO::fromEntity);
     }
 
     /// UPDATE ACCOUNT -> OWNER
@@ -153,9 +147,16 @@ public class AccountService {
 
         Account account = findById(accountId);
 
-        if (account.getProfilePicUrl() != null) {
+        if (account.getProfilePicUrl() != null && !account.getProfilePicUrl().isBlank()) {
             String oldMediaPublicId = this.fileUploader.extractPublicIdFromUrl(account.getProfilePicUrl());
-            this.fileUploader.deleteMedia(oldMediaPublicId, "Photo");
+
+            if (oldMediaPublicId != null && !oldMediaPublicId.isBlank()) {
+                try {
+                    this.fileUploader.deleteMedia(oldMediaPublicId, "image");
+                } catch (Exception e) {
+                    log.warn("Failed to delete old avatar from Cloudinary (publicId: {}): {}", oldMediaPublicId, e.getMessage());
+                }
+            }
         }
 
         String url = this.fileUploader.uploadMedia(file, "/avatar");

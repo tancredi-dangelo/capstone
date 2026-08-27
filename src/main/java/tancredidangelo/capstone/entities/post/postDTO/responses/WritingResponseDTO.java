@@ -14,8 +14,8 @@ public record WritingResponseDTO(
         @NotNull @URL String profilePicUrl,
         @NotBlank @Size(max = 2200, message = "Il testo non può superare i 2200 caratteri") String text,
         @NotNull @PastOrPresent LocalDateTime timestamp,
-        @Min(0) int likes,
-        @Min(0) int comments,
+        @Min(0) int likesCount,
+        @Min(0) int commentsCount,
         boolean isUpdated
 
 ) implements PostResponseDTO {

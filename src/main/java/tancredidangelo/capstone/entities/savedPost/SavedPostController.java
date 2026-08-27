@@ -44,12 +44,12 @@ public class SavedPostController {
     }
 
     /// REMOVE POST FROM LIST
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")
-    public void unsavePostById(@PathVariable Long id, Authentication authentication) {
+    public void unsavePostById(@PathVariable Long postId, Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-        this.savedPostService.deleteById(id, authenticatedAccount.getId());
+        this.savedPostService.deleteById(postId, authenticatedAccount.getId());
     }
 
 

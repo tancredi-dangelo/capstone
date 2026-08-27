@@ -15,8 +15,8 @@ public record VideoResponseDTO(
         @Size(max = 2200) String caption,
         @Positive int durationSeconds,
         @NotNull @PastOrPresent LocalDateTime timestamp,
-        @Min(0) int likes,
-        @Min(0) int comments,
+        @Min(0) int likesCount,
+        @Min(0) int commentsCount,
         boolean isUpdated
 
 ) implements PostResponseDTO {

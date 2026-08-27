@@ -12,10 +12,11 @@ public record PhotoResponseDTO(
         @NotNull Long id,
         @NotNull String authorUsername,
         @NotBlank @URL(message = "Url must be valid") String profilePicUrl,
+        @NotBlank @URL(message = "Url must be valid") String photoUrl,
         @Size(max = 2200, message = "Caption shouldn't exceed 2200 characters.") String caption,
         @NotNull @PastOrPresent LocalDateTime timestamp,
-        @Min(0) int likes,
-        @Min(0) int comments,
+        @Min(0) int likesCount,
+        @Min(0) int commentsCount,
         boolean isUpdated
 
 ) implements PostResponseDTO {
@@ -24,6 +25,7 @@ public record PhotoResponseDTO(
         return new PhotoResponseDTO(
                 photo.getId(),
                 photo.getAuthor().getUsername(),
+                photo.getAuthor().getProfilePicUrl(),
                 photo.getPhotoUrl(),
                 photo.getCaption(),
                 photo.getTimestamp(),

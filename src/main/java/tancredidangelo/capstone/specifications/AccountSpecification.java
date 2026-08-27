@@ -1,4 +1,3 @@
-
 package tancredidangelo.capstone.specifications;
 
 import jakarta.persistence.criteria.Join;
@@ -16,10 +15,8 @@ public class AccountSpecification {
 
     /// FILTER ONLY NON BANNED ACCOUNTS
     public static Specification<Account> isNotBanned() {
-        return (root, query, cb) ->
-                cb.isFalse(root.get("isBanned"));
+        return (root, query, cb) -> cb.isFalse(root.get("isBanned"));
     }
-
 
     /// FILTER ACCOUNTS BY BANNED OR NOT (ADMIN)
     public static Specification<Account> isBanned(Boolean banned) {
@@ -31,7 +28,6 @@ public class AccountSpecification {
         };
     }
 
-
     /// FILTER COUNTRY
     public static Specification<Account> hasCountry(String country) {
         return (root, query, cb) -> {
@@ -39,12 +35,14 @@ public class AccountSpecification {
                 return cb.conjunction();
             }
 
-            // join User to get country
+            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
+                query.distinct(true);
+            }
+
             Join<Account, User> userJoin = root.join("user", JoinType.INNER);
             return cb.equal(cb.lower(userJoin.get("country")), country.trim().toLowerCase());
         };
     }
-
 
     /// FILTER USERNAME MATCH
     public static Specification<Account> usernameMatches(String usernameMatch) {
@@ -57,63 +55,47 @@ public class AccountSpecification {
         };
     }
 
-
-
     /// FILTER TAGS
-    public static Specification<Account> hasAllTags(List<Tag> tags) {
+    public static Specification<Account> hasAllTagIds(List<Long> tagIds) {
         return (root, query, cb) -> {
-
-            if (tags == null || tags.isEmpty()) {
+            if (tagIds == null || tagIds.isEmpty()) {
                 return cb.conjunction();
             }
 
-            List<Long> tagIds = tags.stream()
-                    .map(Tag::getId)
-                    .toList();
+            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
+                query.distinct(true);
+            }
 
-            // create subquery for counting matching tags
             Subquery<Long> subquery = query.subquery(Long.class);
             Root<Account> subRoot = subquery.from(Account.class);
             Join<Account, Tag> tagJoin = subRoot.join("tags", JoinType.INNER);
 
-            subquery.select(cb.countDistinct(tagJoin.get("id")));
+            subquery.select(subRoot.get("id"));
             subquery.where(
                     cb.equal(subRoot.get("id"), root.get("id")),
                     tagJoin.get("id").in(tagIds)
             );
+            subquery.groupBy(subRoot.get("id"));
+            subquery.having(cb.equal(cb.countDistinct(tagJoin.get("id")), (long) tagIds.size()));
 
-            return cb.equal(subquery, (long) tagIds.size());
+            return cb.exists(subquery);
         };
     }
 
-
-
-    /// ------------ FINAL COMBINATION METHOD (USER + ADMIN)-------------------------------------------------------
-
-    public static Specification<Account> filterActiveAccounts(String country, String usernameMatch, List<Tag> tags) {
+    /// COMBINATION METHOD (USER)
+    public static Specification<Account> filterActiveAccounts(String country, String usernameMatch, List<Long> tagIds) {
         return Specification
                 .where(isNotBanned())
                 .and(usernameMatches(usernameMatch))
                 .and(hasCountry(country))
-                .and(hasAllTags(tags));
+                .and(hasAllTagIds(tagIds));
     }
 
-
-    /// ------------ FINAL COMBINATION METHOD (ADMIN)-------------------------------------------------------
-
+    /// COMBINATION METHOD (ADMIN)
     public static Specification<Account> filterAccounts(String country, String usernameMatch, Boolean isBanned) {
         return Specification
                 .where(isBanned(isBanned))
                 .and(hasCountry(country))
-                .and(usernameMatches(usernameMatch))
-                ;
+                .and(usernameMatches(usernameMatch));
     }
-
-
-
-
-
 }
-
-
-
