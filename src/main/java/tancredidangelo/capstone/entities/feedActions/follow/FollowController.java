@@ -19,10 +19,24 @@ import tancredidangelo.capstone.entities.person.account.stack.Account;
 @RequestMapping("/follows")
 public class FollowController {
 
+    /// dependency injection
+
     private final FollowService followService;
 
     public FollowController(FollowService followService) {
         this.followService = followService;
+    }
+
+
+    // ------------------- ENDPOINTS --------------------------------------------------
+
+    /// GET FOLLOW BY ID
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public FollowResponseDTO getFollowById(
+            @RequestParam Long id
+    ) {
+        return FollowResponseDTO.fromEntity(this.followService.findById(id));
     }
 
     /// FOLLOW / REQUEST FOLLOW

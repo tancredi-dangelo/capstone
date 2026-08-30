@@ -44,13 +44,6 @@ public class Notification {
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "regarding_comment_id")
-    private Comment comment;
-
-    @Column(name = "comment_text")
-    private String text;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follow_id")
     private Follow follow;
 
@@ -63,40 +56,11 @@ public class Notification {
 
 
     /// constructor LIKE TO POST
-    public Notification(Account sender, Account recipient, Post post) {
-        this.notificationType = NotificationType.LIKE_TO_POST;
+    public Notification(NotificationType notificationType, Account sender, Account recipient, Post post) {
+        this.notificationType = notificationType;
         this.sender = sender;
         this.recipient = recipient;
         this.post = post;
-        this.comment = null;
-        this.text = null;
-        this.follow = null;
-        this.timestamp = LocalDateTime.now();
-        this.isRead = false;
-    }
-
-    /// constructor LIKE TO COMMENT
-    public Notification(Account sender, Account recipient, Comment comment) {
-        this.notificationType = NotificationType.LIKE_TO_COMMENT;
-        this.sender = sender;
-        this.recipient = recipient;
-        this.post = null;
-        this.comment = comment;
-        this.text = null;
-        this.follow = null;
-        this.timestamp = LocalDateTime.now();
-        this.isRead = false;
-    }
-
-
-    /// constructor COMMENT TO POST
-    public Notification(Account sender, Account recipient, Post post, String text) {
-        this.notificationType = NotificationType.COMMENT;
-        this.sender = sender;
-        this.recipient = recipient;
-        this.post = post;
-        this.comment = null;
-        this.text = text;
         this.follow = null;
         this.timestamp = LocalDateTime.now();
         this.isRead = false;
@@ -104,13 +68,11 @@ public class Notification {
 
 
     /// constructor FOLLOW
-    public Notification(Account sender, Account recipient, Follow follow) {
-        this.notificationType = NotificationType.FOLLOW;
+    public Notification(NotificationType notificationType, Account sender, Account recipient, Follow follow) {
+        this.notificationType = notificationType;
         this.sender = sender;
         this.recipient = recipient;
         this.post = null;
-        this.comment = null;
-        this.text = null;
         this.follow = follow;
         this.timestamp = LocalDateTime.now();
         this.isRead = false;
@@ -127,6 +89,8 @@ public class Notification {
                 ", type=" + notificationType +
                 ", senderId=" + (sender != null ? sender.getId() : null) +
                 ", recipientId=" + (recipient != null ? recipient.getId() : null) +
+                ", postId=" + (post != null ? post.getId() : null) +
+                ", followId=" + (follow != null ? follow.getId() : null) +
                 ", isRead=" + isRead +
                 ", timestamp=" + timestamp +
                 '}';

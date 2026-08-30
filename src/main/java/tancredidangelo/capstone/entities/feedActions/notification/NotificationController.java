@@ -1,5 +1,6 @@
 package tancredidangelo.capstone.entities.feedActions.notification;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationRequestDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationResponseDTO;
 
 @RestController
 @RequestMapping("/notifications")
@@ -25,10 +28,19 @@ public class NotificationController {
     // --------------  ENDPOINTS  ----------------------------------------------------------
 
 
-    /// GET OWN NOTIFICATIONS
-    @GetMapping
+    /// CREATE NOTIFICATION
+    @PostMapping()
     @PreAuthorize("isAuthenticated()")
-    public Page<Notification> getOwnNotifications(
+    public NotificationResponseDTO createNotification(@RequestBody @Valid NotificationRequestDTO payload) {
+        Notification newNotification = this.notificationService.createNotification(payload);
+        return NotificationResponseDTO.fromEntity(newNotification);
+    }
+
+
+    /// GET OWN NOTIFICATIONS
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public Page<NotificationResponseDTO> getOwnNotifications(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

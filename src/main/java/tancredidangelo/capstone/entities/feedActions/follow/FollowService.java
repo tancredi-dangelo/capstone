@@ -37,6 +37,13 @@ public class FollowService {
 
     // ------------- METHODS -----------------------------------------------------------------
 
+    /// FIND BY ID
+    public Follow findById(Long id) {
+        return this.followRepository.findById(id).orElseThrow(() -> new NotFoundException("Follow not found."));
+    }
+
+
+    /// FOLLOW ACCOUNT
     @Transactional
     public FollowResponseDTO follow(FollowRequestDTO payload, Authentication authentication) {
         Account follower = (Account) authentication.getPrincipal();
@@ -63,6 +70,8 @@ public class FollowService {
         return FollowResponseDTO.fromEntity(saved);
     }
 
+
+    /// UNFOLLOW ACCOUNT
     @Transactional
     public void unfollow(Long targetAccountId, Authentication authentication) {
         Account follower = (Account) authentication.getPrincipal();
@@ -73,6 +82,9 @@ public class FollowService {
         followRepository.delete(follow);
     }
 
+
+
+    /// GET FOLLOW STATUS
     @Transactional(readOnly = true)
     public String getFollowStatus(Long targetAccountId, Authentication authentication) {
         Account follower = (Account) authentication.getPrincipal();
@@ -82,6 +94,8 @@ public class FollowService {
                 .orElse("NONE");
     }
 
+
+    /// RESPOND TO FOLLOW REQUEST
     @Transactional
     public FollowResolvedResponseDTO respondToFollowRequest(FollowResolveRequestDTO payload, Authentication authentication) {
 
@@ -105,6 +119,7 @@ public class FollowService {
     }
 
 
+    /// GET ACCOUNT FOLLOWERS
     @Transactional(readOnly = true)
     public Page<FollowResponseDTO> getFollowers(Long accountId, Pageable pageable) {
         return followRepository.findByFollowedIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable)
@@ -112,6 +127,7 @@ public class FollowService {
     }
 
 
+    /// GET ACCOUNT FOLLOWING
     @Transactional(readOnly = true)
     public Page<FollowResponseDTO> getFollowing(Long accountId, Pageable pageable) {
         return followRepository.findByFollowerIdAndFollowStatus(accountId, FollowStatus.ACCEPTED, pageable)
@@ -122,4 +138,15 @@ public class FollowService {
     public boolean existsByFollowerIdAndFollowedId(Long followerId, Long followedId) {
         return this.followRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
     }
+
+
+    /// UPDATE FOLLOW BY ID
+    public FollowResponseDTO updateFollowById(FollowResolveRequestDTO payload) {
+        Follow found = findById(payload.followId());
+        found.setFollowStatus(payload.value() ? FollowStatus.ACCEPTED: FollowStatus.REFUSED);
+        Follow saved = this.followRepository.save(found);
+        return FollowResponseDTO.fromEntity(saved);
+    }
+
+
 }
