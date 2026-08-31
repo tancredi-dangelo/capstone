@@ -28,15 +28,6 @@ public class NotificationController {
     // --------------  ENDPOINTS  ----------------------------------------------------------
 
 
-    /// CREATE NOTIFICATION
-    @PostMapping()
-    @PreAuthorize("isAuthenticated()")
-    public NotificationResponseDTO createNotification(@RequestBody @Valid NotificationRequestDTO payload) {
-        Notification newNotification = this.notificationService.createNotification(payload);
-        return NotificationResponseDTO.fromEntity(newNotification);
-    }
-
-
     /// GET OWN NOTIFICATIONS
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")

@@ -3,18 +3,15 @@ package tancredidangelo.capstone.entities.feedActions.follow;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowResolveRequestDTO;
-import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowPendingResponseDTO;
 
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
-import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResolvedResponseDTO;
-import tancredidangelo.capstone.entities.person.account.stack.Account;
+
 @RestController
 @RequestMapping("/follows")
 public class FollowController {
@@ -34,7 +31,7 @@ public class FollowController {
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public FollowResponseDTO getFollowById(
-            @RequestParam Long id
+            @PathVariable Long id
     ) {
         return FollowResponseDTO.fromEntity(this.followService.findById(id));
     }
@@ -71,7 +68,7 @@ public class FollowController {
     /// RESPOND FOLLOW REQUEST
     @PutMapping("/follow-requests/respond")
     @PreAuthorize("isAuthenticated()")
-    public FollowResolvedResponseDTO respondToFollowRequest(
+    public FollowResponseDTO respondToFollowRequest(
             @RequestBody @Valid FollowResolveRequestDTO payload,
             Authentication authentication
     ) {

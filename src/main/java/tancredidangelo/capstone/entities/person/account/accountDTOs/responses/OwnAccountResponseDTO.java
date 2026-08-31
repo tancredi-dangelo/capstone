@@ -51,7 +51,7 @@ public record OwnAccountResponseDTO(
                 account.getUsername(),
                 account.getProfilePicUrl(),
                 account.getBio(),
-                account.getIsPrivate(),
+                account.isPrivate(),
                 account.getRole(),
                 tags,
                 account.getDateOfRegistration(),

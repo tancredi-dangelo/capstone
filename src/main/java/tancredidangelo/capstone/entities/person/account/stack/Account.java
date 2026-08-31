@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,11 +55,11 @@ public class Account implements UserDetails {
     @Column(name = "bio")
     private String bio;
 
-    @Column(name = "is_private")
-    private Boolean isPrivate;
+    @Column(name = "is_private", nullable = false)
+    private boolean isPrivate;
 
     @Column(name = "is_banned", nullable = false)
-    private Boolean isBanned;
+    private boolean isBanned;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -74,12 +76,22 @@ public class Account implements UserDetails {
     private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("follow_status = 'ACCEPTED'")
     @Setter(AccessLevel.NONE)
     private List<Follow> followers = new ArrayList<>();
 
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("follow_status = 'ACCEPTED'")
     @Setter(AccessLevel.NONE)
     private List<Follow> following = new ArrayList<>();
+
+    @Setter(AccessLevel.NONE)
+    @Formula("(SELECT COUNT(*) FROM follows f WHERE f.followed_id = id AND f.follow_status = 'ACCEPTED')")
+    private long followersCount;
+
+    @Setter(AccessLevel.NONE)
+    @Formula("(SELECT COUNT(*) FROM follows f WHERE f.follower_id = id AND f.follow_status = 'ACCEPTED')")
+    private long followingCount;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @Setter(AccessLevel.NONE)
@@ -108,16 +120,17 @@ public class Account implements UserDetails {
         this.user = user;
         this.username = username;
         this.password = password;
-        this.profilePicUrl = null;
-        this.bio = null;
         this.isBanned = false;
         this.role = AccountRoles.ADMIN;
-        this.tags = null;
         this.dateOfRegistration = LocalDateTime.now();
-        this.posts = null;
-        this.followers = null;
-        this.following = null;
-        this.savedPosts = null;
+        // ----------------------------------------------
+        this.profilePicUrl = null;
+        this.bio = null;
+        this.tags = new ArrayList<>();
+        this.posts = new ArrayList<>();
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+        this.savedPosts = new ArrayList<>();
     }
 
 

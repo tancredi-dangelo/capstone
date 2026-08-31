@@ -45,7 +45,7 @@ public class BanService {
         Account targetAccount = accountService.findById(payload.accountId());
         Account adminAccount = (Account) authentication.getPrincipal();
 
-        targetAccount.setIsBanned(true);
+        targetAccount.setBanned(true);
         this.accountRepository.save(targetAccount);
 
         Ban newBan = new Ban(targetAccount, adminAccount, payload.reason(), false, payload.expiringDate());
@@ -65,7 +65,7 @@ public class BanService {
         Account targetAccount = accountService.findById(payload.accountId());
         Account adminAccount = (Account) authentication.getPrincipal();
 
-        targetAccount.setIsBanned(true);
+        targetAccount.setBanned(true);
         this.accountRepository.save(targetAccount);
 
         Ban newBan = new Ban(targetAccount, adminAccount, payload.reason(), true, null);
@@ -98,7 +98,7 @@ public class BanService {
 
         ban.setRevoked(true);
 
-        account.setIsBanned(true);
+        account.setBanned(true);
         this.accountRepository.save(account);
 
         Ban updated = banRepository.save(ban);

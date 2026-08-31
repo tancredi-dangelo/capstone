@@ -31,7 +31,7 @@ public class Follow {
     @JoinColumn(name = "followed_id", nullable = false)
     private Account followed;
 
-    @Column(nullable = false)
+    @Column(name = "follow_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private FollowStatus followStatus;
 

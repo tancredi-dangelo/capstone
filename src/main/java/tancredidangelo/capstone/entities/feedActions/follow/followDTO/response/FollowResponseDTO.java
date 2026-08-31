@@ -16,8 +16,6 @@ public record FollowResponseDTO(
 ) {
     public static FollowResponseDTO fromEntity(Follow follow) {
 
-        follow.setFollowStatus(FollowStatus.ACCEPTED);
-
         return new FollowResponseDTO(
                 PublicAccountResponseDTO.fromEntity(follow.getFollower()),
                 PublicAccountResponseDTO.fromEntity(follow.getFollowed()),

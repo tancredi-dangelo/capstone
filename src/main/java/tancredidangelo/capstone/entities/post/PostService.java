@@ -50,7 +50,7 @@ public class PostService {
 
     /// Get posts by account id
     public List<Post> getPostsByAccountId(Long authorId) {
-        if (this.accountService.findById(authorId).getIsBanned() == true) {
+        if (this.accountService.findById(authorId).isBanned()) {
             throw new BannedAccountException("This account has been banned and is currently unavailable.");
         }
         return this.postRepository.findByAuthorIdOrderByTimestampDesc(authorId);
@@ -60,7 +60,7 @@ public class PostService {
     /// Get posts by username
     public List<Post> getPostsByUsername(String username) {
         Account found = this.accountService.findByUsername(username);
-        if (found.getIsBanned() == true) {
+        if (found.isBanned()) {
             throw new BannedAccountException("This account has been banned and is currently unavailable.");
         }
         return this.postRepository.findByAuthorIdOrderByTimestampDesc(found.getId());

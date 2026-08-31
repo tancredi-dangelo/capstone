@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.cloudinary.CloudinaryService;
+import tancredidangelo.capstone.entities.feedActions.follow.FollowService;
 import tancredidangelo.capstone.entities.person.account.AccountRoles;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.NewAccountRequestDTO;
 import tancredidangelo.capstone.entities.person.account.accountDTOs.requests.UpdateAccountRequestDTO;
@@ -18,7 +19,6 @@ import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.Ow
 import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.user.stack.User;
 import tancredidangelo.capstone.entities.person.user.stack.UserService;
-import tancredidangelo.capstone.entities.tag.Tag;
 import tancredidangelo.capstone.entities.tag.TagService;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
 import tancredidangelo.capstone.exceptions.BadRequestException;
@@ -26,7 +26,6 @@ import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.ValidationException;
 import tancredidangelo.capstone.specifications.AccountSpecification;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +39,11 @@ public class AccountService {
     private final CloudinaryService fileUploader;
     private final TagService tagService;
 
-    public AccountService(AccountRepository accountRepository, UserService userService, PasswordEncoder passwordEncoder, CloudinaryService fileUploader, TagService tagService) {
+    public AccountService(AccountRepository accountRepository,
+                          UserService userService,
+                          PasswordEncoder passwordEncoder,
+                          CloudinaryService fileUploader,
+                          TagService tagService) {
         this.accountRepository = accountRepository;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -82,23 +85,23 @@ public class AccountService {
         return OwnAccountResponseDTO.fromEntity(account);
     }
 
-    /// FIND PUBLIC DTO BY USERNAME -> PUBLIC / AUTHENTICATED
+    /// GET PUBLIC ACCOUNT BY USERNAME -> PUBLIC / AUTHENTICATED
     @Transactional(readOnly = true)
     public PublicAccountResponseDTO findPublicAccountByUsername(String username) {
         Account account = findByUsername(username);
+
         return PublicAccountResponseDTO.fromEntity(account);
     }
 
-    /// FIND ACTIVE ACCOUNTS + FILTERS -> EXPLORE
-    /// FIND ACTIVE ACCOUNTS + FILTERS -> EXPLORE
+    /// GET ACTIVE ACCOUNTS + FILTERS -> EXPLORE
     @Transactional(readOnly = true)
     public Page<PublicAccountResponseDTO> searchActiveAccounts(String country, String usernameMatch, List<Long> tagIds, Pageable pageable) {
 
         Specification<Account> spec = AccountSpecification.filterActiveAccounts(country, usernameMatch, tagIds)
                 .and((root, query, cb) -> cb.equal(root.get("role"), AccountRoles.USER));
 
-        return this.accountRepository.findAll(spec, pageable)
-                .map(PublicAccountResponseDTO::fromEntity);
+        Page<Account> accounts = this.accountRepository.findAll(spec, pageable);
+        return accounts.map(PublicAccountResponseDTO::fromEntity);
     }
 
     /// UPDATE ACCOUNT -> OWNER
@@ -115,6 +118,8 @@ public class AccountService {
 
         if (payload.bio() != null) found.setBio(payload.bio());
         if (payload.tags() != null) found.setTags(payload.tags());
+
+        found.setPrivate(payload.isPrivate());
 
         return OwnAccountResponseDTO.fromEntity(found);
     }

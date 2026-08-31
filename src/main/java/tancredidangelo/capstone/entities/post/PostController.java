@@ -113,7 +113,7 @@ public class PostController {
 
         boolean ifFollower = this.followService.existsByFollowerIdAndFollowedId(authenticatedAccount.getId(), authenticatedAccount.getId());
 
-        if (!author.getId().equals(authenticatedAccount.getId()) && author.getIsPrivate() && author.getFollowers() != null && ifFollower) {
+        if (!author.getId().equals(authenticatedAccount.getId()) && author.isPrivate() && author.getFollowers() != null && ifFollower) {
             if (!authenticatedAccount.getRole().name().equals("ROLE_ADMIN")) {
                 throw new ForbiddenException("This account is private. Request follow to see its contents.");
             }

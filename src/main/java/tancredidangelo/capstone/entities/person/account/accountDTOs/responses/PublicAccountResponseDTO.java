@@ -1,5 +1,7 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs.responses;
 
+import tancredidangelo.capstone.entities.feedActions.follow.FollowService;
+import tancredidangelo.capstone.entities.feedActions.follow.FollowStatus;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.tag.Tag;
 import tancredidangelo.capstone.entities.tag.tagDTO.response.TagResponseDTO;
@@ -12,6 +14,8 @@ public record PublicAccountResponseDTO(
         String profilePicUrl,
         String bio,
         Boolean isPrivate,
+        long followersCount,
+        long followingCount,
         List<TagResponseDTO> tags
 ) {
     public static PublicAccountResponseDTO fromEntity(Account account) {
@@ -27,7 +31,9 @@ public record PublicAccountResponseDTO(
                 account.getUsername(),
                 account.getProfilePicUrl(),
                 account.getBio(),
-                account.getIsPrivate(),
+                account.isPrivate(),
+                account.getFollowersCount(),
+                account.getFollowingCount(),
                 tags
         );
     }

@@ -1,6 +1,7 @@
 package tancredidangelo.capstone.authentication.registration.registrationUser.UserRegistrationDTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.entities.tag.Tag;
@@ -43,7 +44,7 @@ public record UserRegistrationRequestDTO(
         )
         String password,
 
-        @NotNull Boolean isPrivate,
+        @JsonProperty("isPrivate") @NotNull Boolean isPrivate,
 
         @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,
 

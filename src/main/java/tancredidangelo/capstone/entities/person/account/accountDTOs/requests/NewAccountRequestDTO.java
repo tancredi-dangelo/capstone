@@ -2,6 +2,7 @@ package tancredidangelo.capstone.entities.person.account.accountDTOs.requests;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
 import tancredidangelo.capstone.entities.tag.Tag;
@@ -27,7 +28,7 @@ public record NewAccountRequestDTO(
 
         @Size(max = 150, message = "Your bio should be max.150 characters long.") String bio,
 
-        @NotNull Boolean isPrivate,
+        @JsonProperty("isPrivate") @NotNull Boolean isPrivate,
 
         List<TagResponseDTO> tags) {
 

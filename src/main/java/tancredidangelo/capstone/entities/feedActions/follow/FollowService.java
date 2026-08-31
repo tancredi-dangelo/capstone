@@ -1,6 +1,5 @@
 package tancredidangelo.capstone.entities.feedActions.follow;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional; // Usa Spring Transactional
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -9,9 +8,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowResolveRequestDTO;
-import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowPendingResponseDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
-import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResolvedResponseDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationRequestDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationService;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationType;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.exceptions.AlreadyExistsException;
@@ -28,10 +28,12 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final AccountService accountService;
+    private final NotificationService notificationService;
 
-    public FollowService(FollowRepository followRepository, AccountService accountService) {
+    public FollowService(FollowRepository followRepository, AccountService accountService, NotificationService notificationService) {
         this.followRepository = followRepository;
         this.accountService = accountService;
+        this.notificationService = notificationService;
     }
 
 
@@ -60,15 +62,25 @@ public class FollowService {
         Follow follow = new Follow(follower, followed);
 
 
-        if (followed.getIsPrivate()) {
+        if (followed.isPrivate()) {
             follow.setFollowStatus(FollowStatus.PENDING);
         } else {
             follow.setFollowStatus(FollowStatus.ACCEPTED);
         }
 
         Follow saved = followRepository.save(follow);
+
+        this.notificationService.createNotification(new NotificationRequestDTO(
+                NotificationType.FOLLOW.name(),
+                follower.getId(),
+                followed.getId(),
+                null,
+                saved.getId()
+                ));
+
         return FollowResponseDTO.fromEntity(saved);
     }
+
 
 
     /// UNFOLLOW ACCOUNT
@@ -97,7 +109,7 @@ public class FollowService {
 
     /// RESPOND TO FOLLOW REQUEST
     @Transactional
-    public FollowResolvedResponseDTO respondToFollowRequest(FollowResolveRequestDTO payload, Authentication authentication) {
+    public FollowResponseDTO respondToFollowRequest(FollowResolveRequestDTO payload, Authentication authentication) {
 
         Account authenticatedAccount = (Account) authentication.getPrincipal();
 
@@ -115,7 +127,7 @@ public class FollowService {
         follow.setFollowStatus(payload.value() ? FollowStatus.ACCEPTED : FollowStatus.REFUSED);
         follow.setResponseDate(LocalDateTime.now());
 
-        return FollowResolvedResponseDTO.fromEntity(followRepository.save(follow));
+        return FollowResponseDTO.fromEntity(followRepository.save(follow));
     }
 
 
@@ -135,12 +147,15 @@ public class FollowService {
     }
 
 
+
+    /// CHECK FOLLOW RELATIONSHIP EXISTS
     public boolean existsByFollowerIdAndFollowedId(Long followerId, Long followedId) {
         return this.followRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
     }
 
 
     /// UPDATE FOLLOW BY ID
+    @Transactional
     public FollowResponseDTO updateFollowById(FollowResolveRequestDTO payload) {
         Follow found = findById(payload.followId());
         found.setFollowStatus(payload.value() ? FollowStatus.ACCEPTED: FollowStatus.REFUSED);

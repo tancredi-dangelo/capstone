@@ -1,5 +1,6 @@
 package tancredidangelo.capstone.entities.person.account.accountDTOs.requests;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,7 +16,7 @@ public record UpdateAccountRequestDTO(
 
         String bio,
 
-        @NotNull Boolean isPrivate,
+        @JsonProperty("isPrivate") @NotNull Boolean isPrivate,
 
         List<Tag> tags
 ) {

@@ -61,23 +61,27 @@ public class NotificationService {
                     recipient,
                     follow
             );
-
+            System.out.println("Follow notification created");
             return this.notificationRepository.save(newNotification);
         }
 
 
         // case interaction with Post
-        if (payload.notificationType().equals(NotificationType.LIKE_TO_POST.name()) || payload.notificationType().equals(NotificationType.COMMENT_TO_POST.name())) {
+
+        boolean isLike = payload.notificationType().equals(NotificationType.LIKE_TO_POST.name());
+        boolean isComment = payload.notificationType().equals(NotificationType.COMMENT_TO_POST.name());
+
+        if ( isLike || isComment) {
             Account sender = this.accountService.findById(payload.senderId());
             Account recipient = this.accountService.findById(payload.recipientId());
             Post post = this.postService.findById(payload.postId());
             Notification newNotification = new Notification(
-                    payload.notificationType().equals(NotificationType.LIKE_TO_POST.name()) ? NotificationType.LIKE_TO_POST : NotificationType.COMMENT_TO_POST,
+                    isLike ? NotificationType.LIKE_TO_POST : NotificationType.COMMENT_TO_POST,
                     sender,
                     recipient,
                     post
             );
-
+            System.out.println("Post notification created");
             return this.notificationRepository.save(newNotification);
         }
 
