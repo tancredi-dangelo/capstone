@@ -1,13 +1,15 @@
 package tancredidangelo.capstone.entities.post;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tancredidangelo.capstone.entities.feedActions.follow.FollowService;
-import tancredidangelo.capstone.entities.person.account.accountDTOs.responses.PublicAccountResponseDTO;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreateCarouselRequestDTO;
 import tancredidangelo.capstone.entities.post.postDTO.requests.create.CreatePhotoRequestDTO;
@@ -20,7 +22,6 @@ import tancredidangelo.capstone.entities.post.postSubclasses.photo.PhotoService;
 import tancredidangelo.capstone.entities.post.postSubclasses.video.VideoService;
 import tancredidangelo.capstone.entities.post.postSubclasses.writing.WritingService;
 import tancredidangelo.capstone.exceptions.ForbiddenException;
-import tancredidangelo.capstone.exceptions.UnauthorizedException;
 import tancredidangelo.capstone.helpers.ConverterPostDTO;
 
 
@@ -54,11 +55,15 @@ public class PostController {
     /// GET HOME FEED -> GET "/posts/home"
     @GetMapping("/home")
     @PreAuthorize("isAuthenticated()")
-    public List<PostResponseDTO> getFeed(
-            Authentication authentication
+    public Page<PostResponseDTO> getFeed(
+            Authentication authentication,
+            @RequestParam (defaultValue = "0") int page,
+            @RequestParam (defaultValue = "20") int size
     ) {
+
+        Pageable pageable = PageRequest.of(page, size);
         Long accountId = ((Account) Objects.requireNonNull(authentication.getPrincipal())).getId();
-        return this.postService.getFeed(accountId);
+        return this.postService.getFeed(accountId, pageable);
     }
 
     /// GET OWN POSTS -> GET "/posts/accounts/me"

@@ -1,103 +1,87 @@
 package tancredidangelo.capstone.entities.feedActions.notification;
 
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tancredidangelo.capstone.entities.feedActions.follow.Follow;
-import tancredidangelo.capstone.entities.feedActions.follow.FollowService;
 import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationResponseDTO;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.Post;
-import tancredidangelo.capstone.entities.post.PostService;
 import tancredidangelo.capstone.exceptions.BadRequestException;
 import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
-
-import java.util.List;
 
 @Service
 @Slf4j
 public class NotificationService {
 
-    /// dependency injection
-
+    @PersistenceContext
+    private final EntityManager entityManager;
     private final NotificationRepository notificationRepository;
-    private final FollowService followService;
     private final AccountService accountService;
-    private final PostService postService;
 
-    public NotificationService(NotificationRepository notificationRepository, FollowService followService, AccountService accountService, PostService postService) {
+    public NotificationService(
+            EntityManager entityManager,
+            NotificationRepository notificationRepository,
+            AccountService accountService
+    ) {
+        this.entityManager = entityManager;
         this.notificationRepository = notificationRepository;
-        this.followService = followService;
         this.accountService = accountService;
-        this.postService = postService;
     }
 
-
-    // ------------------------  METHODS  --------------------------------------------
-
+    // ------------------------ METHODS --------------------------------------------
 
     /// CREATE NOTIFICATION
     @Transactional
-    public Notification createNotification(NotificationRequestDTO payload) {
+    public void createNotification(NotificationRequestDTO payload) {
 
         if (payload.senderId().equals(payload.recipientId())) {
             throw new BadRequestException("Cannot send a notification to yourself.");
         }
 
-        // case Follow
-        if (payload.notificationType().equals(NotificationType.FOLLOW.name())) {
-            Account sender = this.accountService.findById(payload.senderId());
-            Account recipient = this.accountService.findById(payload.recipientId());
-            Follow follow = this.followService.findById(payload.followId());
-            Notification newNotification = new Notification(
-                    NotificationType.FOLLOW,
+        Account sender = this.accountService.findById(payload.senderId());
+        Account recipient = this.accountService.findById(payload.recipientId());
+
+        // Lightweight proxies to avoid circular dependency queries
+        Post postRef = payload.postId() != null ? entityManager.getReference(Post.class, payload.postId()) : null;
+        Follow followRef = payload.followId() != null ? entityManager.getReference(Follow.class, payload.followId()) : null;
+
+        Notification newNotification = switch (payload.notificationType()) {
+            case FOLLOW, FOLLOW_ACCEPTED -> new Notification(
+                    payload.notificationType(),
                     sender,
                     recipient,
-                    follow
+                    null,
+                    followRef
             );
-            System.out.println("Follow notification created");
-            return this.notificationRepository.save(newNotification);
-        }
-
-
-        // case interaction with Post
-
-        boolean isLike = payload.notificationType().equals(NotificationType.LIKE_TO_POST.name());
-        boolean isComment = payload.notificationType().equals(NotificationType.COMMENT_TO_POST.name());
-
-        if ( isLike || isComment) {
-            Account sender = this.accountService.findById(payload.senderId());
-            Account recipient = this.accountService.findById(payload.recipientId());
-            Post post = this.postService.findById(payload.postId());
-            Notification newNotification = new Notification(
-                    isLike ? NotificationType.LIKE_TO_POST : NotificationType.COMMENT_TO_POST,
+            case LIKE_TO_POST, COMMENT_TO_POST -> new Notification(
+                    payload.notificationType(),
                     sender,
                     recipient,
-                    post
+                    postRef,
+                    null
             );
-            System.out.println("Post notification created");
-            return this.notificationRepository.save(newNotification);
-        }
+            default -> throw new BadRequestException("Invalid or unsupported notification type: " + payload.notificationType());
+        };
 
-        throw new BadRequestException("Invalid notification type.");
+        this.notificationRepository.save(newNotification);
     }
-
-
 
     /// GET OWN NOTIFICATIONS
+    @Transactional(readOnly = true)
     public Page<NotificationResponseDTO> getOwnNotifications(Authentication authentication, Pageable pageable) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-        return (this.notificationRepository.findByRecipientId(authenticatedAccount.getId(), pageable).map(NotificationResponseDTO::fromEntity));
+        return this.notificationRepository.findByRecipientId(authenticatedAccount.getId(), pageable)
+                .map(NotificationResponseDTO::fromEntity);
     }
-
-
-
 
     /// MARK NOTIFICATION AS READ
     @Transactional
@@ -113,8 +97,6 @@ public class NotificationService {
         notification.setRead(true);
         return this.notificationRepository.save(notification);
     }
-
-
 
     /// MARK ALL AS READ
     @Transactional

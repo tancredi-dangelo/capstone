@@ -40,7 +40,7 @@ public class Notification {
     private Account recipient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "regarding_post_id")
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,24 +55,12 @@ public class Notification {
 
 
 
-    /// constructor LIKE TO POST
-    public Notification(NotificationType notificationType, Account sender, Account recipient, Post post) {
+    /// constructor
+    public Notification(NotificationType notificationType, Account sender, Account recipient, Post post, Follow follow) {
         this.notificationType = notificationType;
         this.sender = sender;
         this.recipient = recipient;
         this.post = post;
-        this.follow = null;
-        this.timestamp = LocalDateTime.now();
-        this.isRead = false;
-    }
-
-
-    /// constructor FOLLOW
-    public Notification(NotificationType notificationType, Account sender, Account recipient, Follow follow) {
-        this.notificationType = notificationType;
-        this.sender = sender;
-        this.recipient = recipient;
-        this.post = null;
         this.follow = follow;
         this.timestamp = LocalDateTime.now();
         this.isRead = false;

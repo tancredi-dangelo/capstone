@@ -1,11 +1,11 @@
 package tancredidangelo.capstone.entities.feedActions.follow;
 
-import org.springframework.transaction.annotation.Transactional; // Usa Spring Transactional
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.request.FollowResolveRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.follow.followDTO.response.FollowResponseDTO;
@@ -20,11 +20,10 @@ import tancredidangelo.capstone.exceptions.NotFoundException;
 import tancredidangelo.capstone.exceptions.UnauthorizedException;
 
 import java.time.LocalDateTime;
+
 @Service
 @Slf4j
 public class FollowService {
-
-    /// dependency injection
 
     private final FollowRepository followRepository;
     private final AccountService accountService;
@@ -36,14 +35,14 @@ public class FollowService {
         this.notificationService = notificationService;
     }
 
-
     // ------------- METHODS -----------------------------------------------------------------
 
     /// FIND BY ID
+    @Transactional(readOnly = true)
     public Follow findById(Long id) {
-        return this.followRepository.findById(id).orElseThrow(() -> new NotFoundException("Follow not found."));
+        return this.followRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Follow not found."));
     }
-
 
     /// FOLLOW ACCOUNT
     @Transactional
@@ -61,27 +60,20 @@ public class FollowService {
         Account followed = accountService.findById(payload.followedId());
         Follow follow = new Follow(follower, followed);
 
-
-        if (followed.isPrivate()) {
-            follow.setFollowStatus(FollowStatus.PENDING);
-        } else {
-            follow.setFollowStatus(FollowStatus.ACCEPTED);
-        }
-
+        follow.setFollowStatus(followed.isPrivate() ? FollowStatus.PENDING : FollowStatus.ACCEPTED);
         Follow saved = followRepository.save(follow);
 
+        // Send follow or request notification
         this.notificationService.createNotification(new NotificationRequestDTO(
-                NotificationType.FOLLOW.name(),
+                NotificationType.FOLLOW,
                 follower.getId(),
                 followed.getId(),
                 null,
                 saved.getId()
-                ));
+        ));
 
         return FollowResponseDTO.fromEntity(saved);
     }
-
-
 
     /// UNFOLLOW ACCOUNT
     @Transactional
@@ -94,8 +86,6 @@ public class FollowService {
         followRepository.delete(follow);
     }
 
-
-
     /// GET FOLLOW STATUS
     @Transactional(readOnly = true)
     public String getFollowStatus(Long targetAccountId, Authentication authentication) {
@@ -106,11 +96,9 @@ public class FollowService {
                 .orElse("NONE");
     }
 
-
     /// RESPOND TO FOLLOW REQUEST
     @Transactional
     public FollowResponseDTO respondToFollowRequest(FollowResolveRequestDTO payload, Authentication authentication) {
-
         Account authenticatedAccount = (Account) authentication.getPrincipal();
 
         Follow follow = followRepository.findById(payload.followId())
@@ -127,9 +115,20 @@ public class FollowService {
         follow.setFollowStatus(payload.value() ? FollowStatus.ACCEPTED : FollowStatus.REFUSED);
         follow.setResponseDate(LocalDateTime.now());
 
-        return FollowResponseDTO.fromEntity(followRepository.save(follow));
-    }
+        // Send follow accepted notification
+        if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
+            this.notificationService.createNotification(new NotificationRequestDTO(
+                    NotificationType.FOLLOW_ACCEPTED,
+                    authenticatedAccount.getId(),
+                    follow.getFollower().getId(),
+                    null,
+                    follow.getId()
+            ));
+        }
 
+        Follow updatedFollow = this.followRepository.save(follow);
+        return FollowResponseDTO.fromEntity(updatedFollow);
+    }
 
     /// GET ACCOUNT FOLLOWERS
     @Transactional(readOnly = true)
@@ -138,7 +137,6 @@ public class FollowService {
                 .map(FollowResponseDTO::fromEntity);
     }
 
-
     /// GET ACCOUNT FOLLOWING
     @Transactional(readOnly = true)
     public Page<FollowResponseDTO> getFollowing(Long accountId, Pageable pageable) {
@@ -146,22 +144,9 @@ public class FollowService {
                 .map(FollowResponseDTO::fromEntity);
     }
 
-
-
     /// CHECK FOLLOW RELATIONSHIP EXISTS
+    @Transactional(readOnly = true)
     public boolean existsByFollowerIdAndFollowedId(Long followerId, Long followedId) {
         return this.followRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
     }
-
-
-    /// UPDATE FOLLOW BY ID
-    @Transactional
-    public FollowResponseDTO updateFollowById(FollowResolveRequestDTO payload) {
-        Follow found = findById(payload.followId());
-        found.setFollowStatus(payload.value() ? FollowStatus.ACCEPTED: FollowStatus.REFUSED);
-        Follow saved = this.followRepository.save(found);
-        return FollowResponseDTO.fromEntity(saved);
-    }
-
-
 }

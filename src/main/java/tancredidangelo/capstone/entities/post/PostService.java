@@ -68,13 +68,13 @@ public class PostService {
 
 
     /// Get Feed
-    public List<PostResponseDTO> getFeed(Long accountId) {
+    public Page<PostResponseDTO> getFeed(Long accountId, Pageable pageable) {
 
         LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
 
-        List<Post> rawPosts = this.postRepository.findFeedForAccount(accountId, twentyFourHoursAgo);
+        Page<Post> rawPosts = this.postRepository.findFeedIncludingOwnPosts(accountId, twentyFourHoursAgo, pageable);
 
-        return rawPosts.stream().map(ConverterPostDTO::convertToDTO).toList();
+        return rawPosts.map(ConverterPostDTO::convertToDTO);
     }
 
 

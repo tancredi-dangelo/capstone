@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.requests.CommentRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.requests.UpdateCommentRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.comment.commentDTO.responses.CommentResponseDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationRequestDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationService;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationType;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.Post;
@@ -22,16 +25,18 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostService postService;
     private final AccountService accountService;
+    private final NotificationService notificationService;
 
-    public CommentService(CommentRepository commentRepository, PostService postService, AccountService accountService) {
+    public CommentService(CommentRepository commentRepository, PostService postService, AccountService accountService, NotificationService notificationService) {
         this.commentRepository = commentRepository;
         this.postService = postService;
         this.accountService = accountService;
+        this.notificationService = notificationService;
     }
 
     /// CREATE COMMENT
     @Transactional
-    public CommentResponseDTO save(Long authorId, Long postId, CommentRequestDTO payload) {
+    public CommentResponseDTO createComment(Long authorId, Long postId, CommentRequestDTO payload) {
 
         Account author = this.accountService.findById(authorId);
         Post post = this.postService.findById(postId);
@@ -39,7 +44,15 @@ public class CommentService {
         Comment newComment = new Comment(author, post, payload.text().trim());
         Comment savedComment = this.commentRepository.save(newComment);
 
-        log.info("Comment created.");
+        this.notificationService.createNotification(new NotificationRequestDTO(
+                NotificationType.COMMENT_TO_POST,
+                author.getId(),
+                post.getAuthor().getId(),
+                post.getId(),
+                null
+        ));
+
+        log.info("Comment created on post ID {}.", post.getId());
 
         return CommentResponseDTO.fromEntity(savedComment);
     }

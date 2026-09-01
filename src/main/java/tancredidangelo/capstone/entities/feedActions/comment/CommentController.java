@@ -36,7 +36,7 @@ public class CommentController {
     @PreAuthorize("isAuthenticated()")
     public CommentResponseDTO createComment(@PathVariable Long postId, @RequestBody @Valid CommentRequestDTO payload, Authentication authentication) {
         Account authenticatedAccount = (Account) authentication.getPrincipal();
-        return this.commentService.save(authenticatedAccount.getId(), postId, payload);
+        return this.commentService.createComment(authenticatedAccount.getId(), postId, payload);
     }
 
 

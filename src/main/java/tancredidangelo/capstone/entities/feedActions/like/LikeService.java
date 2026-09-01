@@ -9,6 +9,9 @@ import tancredidangelo.capstone.entities.feedActions.comment.CommentService;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.request.LikeCommentRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.request.LikePostRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.response.LikeResponseDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationRequestDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationService;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationType;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
 import tancredidangelo.capstone.entities.person.account.stack.AccountService;
 import tancredidangelo.capstone.entities.post.Post;
@@ -26,14 +29,14 @@ public class LikeService {
 
     private final LikeRepository likeRepository;
     private final PostService postService;
-    private final CommentService commentService;
     private final AccountService accountService;
+    private final NotificationService notificationService;
 
-    public LikeService(LikeRepository likeRepository, PostService postService, CommentService commentService, AccountService accountService) {
+    public LikeService(LikeRepository likeRepository, PostService postService, CommentService commentService, AccountService accountService, NotificationService notificationService) {
         this.likeRepository = likeRepository;
         this.postService = postService;
-        this.commentService = commentService;
         this.accountService = accountService;
+        this.notificationService = notificationService;
     }
 
     // ------------------- METHODS ---------------------------------------------
@@ -51,28 +54,17 @@ public class LikeService {
         Post post = this.postService.findById(postId);
         Like like = new Like(author, post);
 
+        this.notificationService.createNotification(new NotificationRequestDTO(
+                NotificationType.LIKE_TO_POST,
+                author.getId(),
+                post.getAuthor().getId(),
+                post.getId(),
+                null
+        ));
+
+
         log.info("Post ID {} liked by Account ID {}.", postId, author.getId());
-        Like saved = this.likeRepository.save(like);
-
-        return LikeResponseDTO.fromEntity(saved);
-    }
-
-
-
-
-    /// LIKE COMMENT
-    @Transactional
-    public LikeResponseDTO likeComment(Long commentId, Authentication authentication) {
-        Account author = (Account) authentication.getPrincipal();
-
-        if (this.likeRepository.existsByAuthorIdAndCommentId(author.getId(), commentId)) {
-            throw new AlreadyExistsException("You have already liked this comment.");
-        }
-
-        Comment comment = this.commentService.findById(commentId);
-        Like like = new Like(author, comment);
-
-        log.info("Comment ID {} liked by Account ID {}.", commentId, author.getId());
+        log.info("Notification sent to Account ID {}.", post.getAuthor().getId());
         Like saved = this.likeRepository.save(like);
 
         return LikeResponseDTO.fromEntity(saved);
@@ -105,21 +97,6 @@ public class LikeService {
 
 
 
-    /// UNLIKE COMMENT
-    @Transactional
-    public void unlikeComment(Long commentId, Authentication authentication) {
-        Account author = (Account) authentication.getPrincipal();
-
-        Like like = this.likeRepository.findByAuthorIdAndCommentId(author.getId(), commentId)
-                .orElseThrow(() -> new NotFoundException("Like not found on this comment."));
-
-        this.likeRepository.delete(like);
-
-        log.info("Comment ID {} unliked by Account ID {}.", commentId, author.getId());
-    }
-
-
-
 
     /// GET LIKES COUNT
     public long getPostLikesCount(Long postId) {
@@ -127,8 +104,8 @@ public class LikeService {
     }
 
 
-    /// GET COMMENT COUNT
 
+    /// GET COMMENT COUNT
     public long getCommentLikesCount(Long commentId) {
         return this.likeRepository.countByCommentId(commentId);
     }

@@ -59,33 +59,6 @@ public class LikeController {
     }
 
 
-
-    /// LIKE COMMENT
-    @PostMapping("/comments/{commentId}")
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated()")
-    public LikeResponseDTO likeComment(
-            @PathVariable Long commentId,
-            Authentication authentication
-    ) {
-        return this.likeService.likeComment(commentId, authentication);
-    }
-
-
-
-    /// UNLIKE COMMENT
-    @DeleteMapping("/comments/{commentId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("isAuthenticated()")
-    public void unlikeComment(
-            @PathVariable Long commentId,
-            Authentication authentication
-    ) {
-        this.likeService.unlikeComment(commentId, authentication);
-    }
-
-
-
     /// GET LIKE COUNT -> POST
     @GetMapping("/posts/{postId}/count")
     public long getPostLikesCount(@PathVariable Long postId) {
