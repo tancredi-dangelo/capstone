@@ -56,7 +56,7 @@ public class LikeService {
         Post post = this.postService.findById(postId);
         Like like = new Like(author, post);
 
-        if (author.getId().equals(post.getAuthor().getId())) {
+        if (!author.getId().equals(post.getAuthor().getId())) {
 
             NotificationRequestDTO newNotification = new NotificationRequestDTO(
                     NotificationType.LIKE_TO_POST,

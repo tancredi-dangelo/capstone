@@ -44,7 +44,7 @@ public class CommentService {
         Comment newComment = new Comment(author, post, payload.text().trim());
         Comment savedComment = this.commentRepository.save(newComment);
 
-        if (authorId.equals(post.getAuthor().getId())) {
+        if (!authorId.equals(post.getAuthor().getId())) {
             NotificationRequestDTO newNotification = new NotificationRequestDTO(
                     NotificationType.COMMENT_TO_POST,
                     author.getId(),
