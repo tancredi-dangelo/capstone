@@ -55,15 +55,11 @@ public class PostController {
     /// GET HOME FEED -> GET "/posts/home"
     @GetMapping("/home")
     @PreAuthorize("isAuthenticated()")
-    public Page<PostResponseDTO> getFeed(
-            Authentication authentication,
-            @RequestParam (defaultValue = "0") int page,
-            @RequestParam (defaultValue = "20") int size
+    public List<PostResponseDTO> getFeed(
+            Authentication authentication
     ) {
-
-        Pageable pageable = PageRequest.of(page, size);
         Long accountId = ((Account) Objects.requireNonNull(authentication.getPrincipal())).getId();
-        return this.postService.getFeed(accountId, pageable);
+        return this.postService.getFeed(accountId);
     }
 
     /// GET OWN POSTS -> GET "/posts/accounts/me"

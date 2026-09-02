@@ -9,6 +9,7 @@ import tancredidangelo.capstone.entities.post.postSubclasses.video.Video;
 import tancredidangelo.capstone.entities.post.postSubclasses.writing.Writing;
 
 public class ConverterPostDTO {
+
     /// Polymorphic mapper for Post subclasses
     public static PostResponseDTO convertToDTO(Post post) {
 

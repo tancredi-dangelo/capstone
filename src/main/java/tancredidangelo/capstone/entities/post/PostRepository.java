@@ -35,10 +35,9 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     AND p.timestamp >= :since
     ORDER BY p.timestamp DESC
     """)
-    Page<Post> findFeedIncludingOwnPosts(
+    List<Post> findFeedIncludingOwnPosts(
             @Param("accountId") Long accountId,
-            @Param("since") LocalDateTime since,
-            Pageable pageable
+            @Param("since") LocalDateTime since
     );
 
     /// FIND POST BY ACCOUNT AND ORDER BY DATE (ACCOUNT PAGE)

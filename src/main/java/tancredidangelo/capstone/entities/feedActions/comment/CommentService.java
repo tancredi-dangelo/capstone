@@ -44,13 +44,16 @@ public class CommentService {
         Comment newComment = new Comment(author, post, payload.text().trim());
         Comment savedComment = this.commentRepository.save(newComment);
 
-        this.notificationService.createNotification(new NotificationRequestDTO(
-                NotificationType.COMMENT_TO_POST,
-                author.getId(),
-                post.getAuthor().getId(),
-                post.getId(),
-                null
-        ));
+        if (authorId.equals(post.getAuthor().getId())) {
+            NotificationRequestDTO newNotification = new NotificationRequestDTO(
+                    NotificationType.COMMENT_TO_POST,
+                    author.getId(),
+                    post.getAuthor().getId(),
+                    post.getId(),
+                    null);
+
+            this.notificationService.createNotification(newNotification);
+        }
 
         log.info("Comment created on post ID {}.", post.getId());
 

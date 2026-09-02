@@ -9,7 +9,9 @@ import tancredidangelo.capstone.entities.feedActions.comment.CommentService;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.request.LikeCommentRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.request.LikePostRequestDTO;
 import tancredidangelo.capstone.entities.feedActions.like.likeDTO.response.LikeResponseDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.Notification;
 import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationRequestDTO;
+import tancredidangelo.capstone.entities.feedActions.notification.NotificationDTO.NotificationResponseDTO;
 import tancredidangelo.capstone.entities.feedActions.notification.NotificationService;
 import tancredidangelo.capstone.entities.feedActions.notification.NotificationType;
 import tancredidangelo.capstone.entities.person.account.stack.Account;
@@ -54,17 +56,19 @@ public class LikeService {
         Post post = this.postService.findById(postId);
         Like like = new Like(author, post);
 
-        this.notificationService.createNotification(new NotificationRequestDTO(
-                NotificationType.LIKE_TO_POST,
-                author.getId(),
-                post.getAuthor().getId(),
-                post.getId(),
-                null
-        ));
+        if (author.getId().equals(post.getAuthor().getId())) {
 
+            NotificationRequestDTO newNotification = new NotificationRequestDTO(
+                    NotificationType.LIKE_TO_POST,
+                    author.getId(),
+                    post.getAuthor().getId(),
+                    post.getId(),
+                    null);
+
+            this.notificationService.createNotification(newNotification);
+        }
 
         log.info("Post ID {} liked by Account ID {}.", postId, author.getId());
-        log.info("Notification sent to Account ID {}.", post.getAuthor().getId());
         Like saved = this.likeRepository.save(like);
 
         return LikeResponseDTO.fromEntity(saved);

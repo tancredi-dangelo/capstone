@@ -56,13 +56,13 @@ public class FollowController {
     }
 
     /// GET FOLLOW STATUS
-    @GetMapping("/status/{targetAccountId}")
+    @GetMapping("/status")
     @PreAuthorize("isAuthenticated()")
     public String getFollowStatus(
-            @PathVariable Long targetAccountId,
-            Authentication authentication
+            @RequestParam Long followerId,
+            @RequestParam Long targetAccountId
     ) {
-        return this.followService.getFollowStatus(targetAccountId, authentication);
+        return this.followService.getFollowStatus(followerId, targetAccountId);
     }
 
     /// RESPOND FOLLOW REQUEST

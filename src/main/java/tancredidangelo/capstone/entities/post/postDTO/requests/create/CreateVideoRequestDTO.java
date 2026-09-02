@@ -11,7 +11,7 @@ public record CreateVideoRequestDTO(
 
         @Size(max = 2200) String caption,
         @NotNull MultipartFile file,
-        @Positive int durationSeconds
+        @NotBlank @Positive int durationSeconds
 
 ) {
 }

@@ -88,10 +88,9 @@ public class FollowService {
 
     /// GET FOLLOW STATUS
     @Transactional(readOnly = true)
-    public String getFollowStatus(Long targetAccountId, Authentication authentication) {
-        Account follower = (Account) authentication.getPrincipal();
+    public String getFollowStatus(Long followerId, Long targetAccountId) {
 
-        return followRepository.findByFollowerIdAndFollowedId(follower.getId(), targetAccountId)
+        return followRepository.findByFollowerIdAndFollowedId(followerId, targetAccountId)
                 .map(follow -> follow.getFollowStatus().name())
                 .orElse("NONE");
     }
