@@ -1,0 +1,33 @@
+package tancredidangelo.heliosspaces.entities.person.account.accountDTOs.responses;
+
+import tancredidangelo.heliosspaces.entities.person.account.stack.Account;
+import tancredidangelo.heliosspaces.entities.tag.Tag;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record AdminAccountResponseDTO(
+        Long id,
+        String username,
+        LocalDateTime dateOfRegistration,
+        List<Tag> tags,
+        Boolean isPrivate,
+        boolean isBanned,
+        int followersCount,
+        int followingCount,
+        int postsCount
+) {
+    public static AdminAccountResponseDTO fromEntity(Account account) {
+        return new AdminAccountResponseDTO(
+                account.getId(),
+                account.getUsername(),
+                account.getDateOfRegistration(),
+                account.getTags() != null ? account.getTags() : List.of(),
+                account.isPrivate(),
+                account.isBanned(),
+                account.getFollowers() != null ? account.getFollowers().size() : 0,
+                account.getFollowing() != null ? account.getFollowing().size() : 0,
+                account.getPosts() != null ? account.getPosts().size() : 0
+        );
+    }
+}

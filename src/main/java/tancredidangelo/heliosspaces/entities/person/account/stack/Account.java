@@ -1,0 +1,169 @@
+package tancredidangelo.heliosspaces.entities.person.account.stack;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.SQLRestriction;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import tancredidangelo.heliosspaces.entities.feedActions.follow.Follow;
+import tancredidangelo.heliosspaces.entities.person.account.AccountRoles;
+import tancredidangelo.heliosspaces.entities.person.user.stack.User;
+import tancredidangelo.heliosspaces.entities.post.Post;
+import tancredidangelo.heliosspaces.entities.savedPost.SavedPost;
+import tancredidangelo.heliosspaces.entities.tag.Tag;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+
+@Entity
+@Table(name = "accounts")
+public class Account implements UserDetails {
+
+    /// attributes
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Setter(AccessLevel.NONE)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false)
+    @JsonIgnore
+    private String password;
+
+    @Column(name = "profile_picture_url")
+    private String profilePicUrl;
+
+    @Column(name = "bio")
+    private String bio;
+
+    @Column(name = "is_private", nullable = false)
+    private boolean isPrivate;
+
+    @Column(name = "is_banned", nullable = false)
+    private boolean isBanned;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AccountRoles role = AccountRoles.USER;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "account_id")
+    private List<Tag> tags = new ArrayList<>();
+
+    @Column(name = "date_of_registration")
+    private LocalDateTime dateOfRegistration;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("follow_status = 'ACCEPTED'")
+    @Setter(AccessLevel.NONE)
+    private List<Follow> followers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("follow_status = 'ACCEPTED'")
+    @Setter(AccessLevel.NONE)
+    private List<Follow> following = new ArrayList<>();
+
+    @Setter(AccessLevel.NONE)
+    @Formula("(SELECT COUNT(*) FROM follows f WHERE f.followed_id = id AND f.follow_status = 'ACCEPTED')")
+    private long followersCount;
+
+    @Setter(AccessLevel.NONE)
+    @Formula("(SELECT COUNT(*) FROM follows f WHERE f.follower_id = id AND f.follow_status = 'ACCEPTED')")
+    private long followingCount;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter(AccessLevel.NONE)
+    private List<SavedPost> savedPosts = new ArrayList<>();
+
+
+
+    /// constructor
+
+    public Account(User user, String username, String password, String profilePicUrl, String bio, boolean isPrivate, List<Tag> tags) {
+        this.user = user;
+        this.username = username;
+        this.password = password;
+        this.profilePicUrl = profilePicUrl == null ? "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" : profilePicUrl;
+        this.bio = bio;
+        this.isPrivate = isPrivate;
+        this.isBanned = false;
+        this.tags = (tags == null) ? new ArrayList<>() : tags;
+        this.dateOfRegistration = LocalDateTime.now();
+    }
+
+
+    /// admin constructor
+
+    public Account(User user, String username, String password) {
+        this.user = user;
+        this.username = username;
+        this.password = password;
+        this.isBanned = false;
+        this.role = AccountRoles.ADMIN;
+        this.dateOfRegistration = LocalDateTime.now();
+        // ----------------------------------------------
+        this.profilePicUrl = null;
+        this.bio = null;
+        this.tags = new ArrayList<>();
+        this.posts = new ArrayList<>();
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+        this.savedPosts = new ArrayList<>();
+    }
+
+
+
+    /// authorities and details
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+    }
+
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !this.isBanned;
+    }
+
+
+
+    /// to string
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "username='" + username + '\'' +
+                ", profilePicUrl='" + profilePicUrl + '\'' +
+                ", isBanned=" + isBanned +
+                ", tags=" + tags +
+                ", id=" + id +
+                ", dateOfRegistration=" + dateOfRegistration +
+                '}';
+    }
+
+
+
+}
