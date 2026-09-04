@@ -73,8 +73,6 @@ public class AccountService {
         );
 
         Account saved = this.accountRepository.save(newAccount);
-        log.info("Account successfully created with ID {}", saved.getId());
-
         return OwnAccountResponseDTO.fromEntity(saved);
     }
 
@@ -138,8 +136,6 @@ public class AccountService {
         }
 
         found.setPassword(passwordEncoder.encode(payload.newPassword()));
-        log.info("Password successfully updated for Account ID {}", id);
-
         return OwnAccountResponseDTO.fromEntity(found);
     }
 

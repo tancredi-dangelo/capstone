@@ -55,7 +55,6 @@ public class CommentService {
             this.notificationService.createNotification(newNotification);
         }
 
-        log.info("Comment created on post ID {}.", post.getId());
 
         return CommentResponseDTO.fromEntity(savedComment);
     }
@@ -92,7 +91,6 @@ public class CommentService {
         comment.setText(payload.text());
         Comment updated = this.commentRepository.save(comment);
 
-        log.info("Comment updated");
 
         return CommentResponseDTO.fromEntity(updated);
     }
@@ -114,7 +112,6 @@ public class CommentService {
         }
 
         this.commentRepository.delete(comment);
-        log.info("Comment deleted");
     }
 }
 

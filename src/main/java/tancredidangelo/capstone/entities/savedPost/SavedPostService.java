@@ -47,8 +47,6 @@ public class SavedPostService {
         SavedPost newSavedPost = new SavedPost(authenticatedAccount, post);
         SavedPost saved = this.savedPostRepository.save(newSavedPost);
 
-        log.info("Post with ID {} saved for account ID {}.", post.getId(), authenticatedAccount.getId());
-
         return SavedPostResponseDTO.fromEntity(saved);
     }
 

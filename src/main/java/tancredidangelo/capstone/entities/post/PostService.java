@@ -102,7 +102,6 @@ public class PostService {
     public void deleteById(Long id) {
         Post found = findById(id);
         this.postRepository.delete(found);
-        log.info("Post with ID {} successfully deleted.", id);
     }
 
 }

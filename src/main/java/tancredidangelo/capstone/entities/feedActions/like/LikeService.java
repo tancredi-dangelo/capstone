@@ -68,7 +68,6 @@ public class LikeService {
             this.notificationService.createNotification(newNotification);
         }
 
-        log.info("Post ID {} liked by Account ID {}.", postId, author.getId());
         Like saved = this.likeRepository.save(like);
 
         return LikeResponseDTO.fromEntity(saved);
@@ -87,8 +86,6 @@ public class LikeService {
                 .orElseThrow(() -> new NotFoundException("Like not found on this post."));
 
         this.likeRepository.delete(like);
-
-        log.info("Post ID {} unliked by Account ID {}.", postId, author.getId());
 
     }
 
