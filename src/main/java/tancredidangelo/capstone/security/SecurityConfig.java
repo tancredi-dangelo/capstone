@@ -1,8 +1,8 @@
-
 package tancredidangelo.capstone.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,7 +20,6 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    /// dependcy injection
     private final TokenFilter tokenFilter;
 
     public SecurityConfig(TokenFilter tokenFilter) {
@@ -28,45 +27,48 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
-        // remove Spring default Login Form
-        httpSecurity.formLogin(formLogin -> formLogin.disable());
+        // Remove Spring default Login Form & CSRF
+        httpSecurity.formLogin(formLogin -> formLogin.disable())
+                .csrf(csrf -> csrf.disable());
 
-        // remove CSRF filter
-        httpSecurity.csrf(csrf -> csrf.disable());
-
-        // set session management to STATELESS
-        httpSecurity.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        // disable Spring default filter on every endpoint
-        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers("/**").permitAll());
-
-        // set CORS policy
+        // Enable CORS
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-        // add custom filter from TokenFilter
+        // Set session management to STATELESS
+        httpSecurity.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // Explicitly permit CORS preflight OPTIONS requests & public endpoints
+        httpSecurity.authorizeHttpRequests(request -> request
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                .anyRequest().authenticated()
+        );
+
+        // Add custom JWT filter
         httpSecurity.addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // build
         return httpSecurity.build();
-
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // set allowed Origins
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3001"));
+        // Allow localhost and any wildcard origins (or add your specific deployed frontend domain)
+        config.setAllowedOriginPatterns(List.of("http://localhost:*", "https://*.vercel.app", "https://*.onrender.com", "https://*.netlify.app"));
 
-        // set allowed methods
+        // Set allowed HTTP methods
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // set allowed headers
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+        // Allow all headers during preflight checks
+        config.setAllowedHeaders(List.of("*"));
 
-        // set the headers that frontend needs to read from the requests
+        // Allow credentials (cookies/auth headers)
+        config.setAllowCredentials(true);
+
+        // Expose Authorization header to client JavaScript
         config.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -74,5 +76,4 @@ public class SecurityConfig {
 
         return source;
     }
-
 }
